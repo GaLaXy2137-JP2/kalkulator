@@ -1,0 +1,325 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<script>
+
+const profileList = {{ profile | tojson }}
+
+// =========================
+// POKAZ LISTĘ PROFILI
+// =========================
+
+function pokazListe(inputId, listaId){
+
+let lista = document.getElementById(listaId)
+lista.innerHTML=""
+
+profileList.forEach(function(p){
+
+let div = document.createElement("div")
+div.innerText = p
+
+div.onclick=function(){
+
+document.getElementById(inputId).value = p
+lista.innerHTML=""
+
+}
+
+lista.appendChild(div)
+
+})
+
+}
+
+
+// =========================
+// FILTRUJ
+// =========================
+
+function filtruj(event,inputId, listaId){
+
+let input = document.getElementById(inputId)
+let lista = document.getElementById(listaId)
+let text = input.value.toLowerCase()
+
+lista.innerHTML=""
+
+profileList.forEach(function(p){
+
+if(p.toLowerCase().includes(text)){
+
+let div = document.createElement("div")
+div.innerText = p
+
+div.onclick=function(){
+
+document.getElementById(inputId).value = p
+lista.innerHTML=""
+
+}
+
+lista.appendChild(div)
+
+}
+
+})
+
+}
+
+
+// =========================
+// PROFIL 2
+// =========================
+
+function pokazProfil2(){
+
+document.getElementById("profil2_box").style.display="block"
+document.getElementById("btn_profil2").style.display="none"
+
+}
+
+function usunProfil2(){
+
+document.getElementById("profil2_input").value=""
+document.getElementById("profil2_box").style.display="none"
+document.getElementById("btn_profil2").style.display="block"
+
+}
+
+
+// =========================
+// ZAMKNIJ LISTĘ
+// =========================
+
+document.addEventListener("click", function(e){
+
+if(!e.target.closest(".lista") && !e.target.closest("input")){
+
+document.getElementById("lista1").innerHTML=""
+document.getElementById("lista2").innerHTML=""
+
+}
+
+})
+
+</script>
+
+
+<div class="container">
+
+<h2>Rozcieńczenia</h2>
+
+<form method="post">
+
+<label>Objętość próbki (µl)</label>
+
+<input type="number"
+name="objetosc"
+value="{{ objetosc or '' }}"
+required
+autocomplete="off">
+
+
+<label>Profil 1</label>
+
+<input
+type="text"
+name="profil1"
+id="profil1_input"
+value="{{ profil1 or '' }}"
+placeholder="Wpisz nazwę profilu..."
+autocomplete="off"
+onclick="pokazListe('profil1_input','lista1')"
+onkeyup="filtruj(event,'profil1_input','lista1')">
+
+<div id="lista1" class="lista"></div>
+
+
+
+<button 
+type="button"
+id="btn_profil2"
+class="btn_add_profile"
+onclick="pokazProfil2()"
+style="{% if profil2 %}display:none;{% endif %}">
++ Dodaj drugi profil
+</button>
+
+
+
+<div id="profil2_box" style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
+
+<label>Profil 2</label>
+
+<input
+type="text"
+name="profil2"
+id="profil2_input"
+value="{{ profil2 or '' }}"
+placeholder="Wpisz nazwę profilu..."
+autocomplete="off"
+onclick="pokazListe('profil2_input','lista2')"
+onkeyup="filtruj(event,'profil2_input','lista2')">
+
+<div id="lista2" class="lista"></div>
+
+<button type="button" class="btn_remove" onclick="usunProfil2()">
+Usuń drugi profil
+</button>
+
+</div>
+
+
+{% if not wynik %}
+<button type="submit">
+Oblicz rozcieńczenia
+</button>
+{% endif %}
+
+</form>
+
+
+
+{% if wynik %}
+
+{% set krok = 1 %}
+
+<!-- ========================= -->
+<!-- KROK 1 NIERozcieńczalne -->
+<!-- ========================= -->
+
+{% if wynik.tryb_nieroz != "brak" %}
+
+<div class="panel">
+
+{% if wynik.tryb_nieroz == "zadne" %}
+
+<h3>KROK {{ krok }} — Parametry nierozcieńczalne</h3>
+
+Nie można wykonać żadnego z parametrów nierozcieńczalnych:
+
+<ul>
+{% for p in wynik.nierozcienczalne %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+
+{% elif wynik.tryb_nieroz == "wybor" %}
+
+<h3>KROK {{ krok }} — Wybierz jedno z</h3>
+
+<ul>
+{% for p in wynik.nieroz_mieszczace %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+
+{% elif wynik.tryb_nieroz == "wszystkie" %}
+
+<h3>KROK {{ krok }} — Wykonaj</h3>
+
+<ul>
+{% for p in wynik.nieroz_mieszczace %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+</div>
+
+{% set krok = krok + 1 %}
+
+{% endif %}
+
+
+
+<!-- ========================= -->
+<!-- KROK 2 BEZ ROZCIEŃCZENIA -->
+<!-- ========================= -->
+
+{% if wynik.bez_rozcienczenia %}
+
+<div class="panel">
+
+<h3>KROK {{ krok }} — Wykonaj bez rozcieńczenia</h3>
+
+<ul>
+{% for p in wynik.bez_rozcienczenia %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
+{% set krok = krok + 1 %}
+
+{% endif %}
+
+
+
+<!-- ========================= -->
+<!-- KROK 3 ROZCIEŃCZENIE -->
+<!-- ========================= -->
+
+<div class="panel">
+
+<h3>KROK {{ krok }} — Rozcieńczenie</h3>
+
+{% if wynik.df > 0 %}
+
+Rozcieńcz próbkę:
+
+<b>1:{{ wynik.df }} ({{ wynik.df }}x)</b>
+
+<br><br>
+
+50 µl próbki  
++ {{ (wynik.df - 1) * 50 }} µl rozcieńczalnika
+
+{% else %}
+
+Rozcieńczenie nie jest potrzebne
+
+{% endif %}
+
+</div>
+
+{% set krok = krok + 1 %}
+
+
+
+<!-- ========================= -->
+<!-- KROK 4 Z ROZCIEŃCZENIA -->
+<!-- ========================= -->
+
+{% if wynik.do_rozcienczenia %}
+
+<div class="panel">
+
+<h3>KROK {{ krok }} — Wykonaj z rozcieńczenia</h3>
+
+<ul>
+{% for p in wynik.do_rozcienczenia %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
+{% endif %}
+
+<br><br>
+
+<a href="/rozcienczenia">
+    <button type="button">
+        Nowe obliczenie
+    </button>
+</a>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

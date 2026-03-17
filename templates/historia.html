@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+<div class="historia_header">
+
+<h2>Historia obliczeń (<span id="historia_count">{{ historia|length }}</span>)</h2>
+
+<div class="historia_filtry">
+
+<span class="filtr_label">Filtr modułu:</span>
+
+<button class="filtr_btn aktywny" onclick="filtrModul('all',this)">
+Wszystko
+</button>
+
+<button class="filtr_btn" onclick="filtrModul('kalkulator',this)">
+Kalkulator
+</button>
+
+<button class="filtr_btn" onclick="filtrModul('rozcienczenia',this)">
+Rozcieńczenia
+</button>
+
+</div>
+
+</div>
+
+<input
+type="text"
+id="historia_search"
+placeholder="Szukaj profil / µl / moduł..."
+class="historia_search">
+
+<table class="table historia_table">
+
+<thead>
+<tr>
+<th onclick="sortTable(0,this)">Data <span class="arrow"></span></th>
+<th onclick="sortTable(1,this)">Moduł <span class="arrow"></span></th>
+<th onclick="sortTable(2,this)">µl <span class="arrow"></span></th>
+<th onclick="sortTable(3,this)">Profil 1 <span class="arrow"></span></th>
+<th onclick="sortTable(4,this)">Profil 2 <span class="arrow"></span></th>
+<th></th>
+</tr>
+</thead>
+
+
+<tbody>
+
+{% for r in historia %}
+
+<tr data-modul="{{ r.modul }}">
+
+<td class="data">
+
+<div class="data_dzien">
+{{ r.data.split(" ")[0] }}
+</div>
+
+<div class="data_godzina">
+{{ r.data.split(" ")[1] }}
+</div>
+
+</td>
+
+<td>
+<span class="modul {{ r.modul }}">
+{{ r.modul }}
+</span>
+</td>
+
+<td>{{ r.objetosc }}</td>
+
+<td>{{ r.profil1 }}</td>
+
+<td>{{ r.profil2 }}</td>
+
+<td>
+
+{% if r.modul == "kalkulator" %}
+
+<a class="btn_przywroc"
+href="/?objetosc={{ r.objetosc }}&profil1={{ r.profil1 }}&profil2={{ r.profil2 }}">
+Przywróć
+</a>
+
+{% elif r.modul == "rozcienczenia" %}
+
+<a class="btn_przywroc"
+href="/rozcienczenia?objetosc={{ r.objetosc }}&profil1={{ r.profil1 }}&profil2={{ r.profil2 }}">
+Przywróć
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+
+<script>
+
+let sortState = {}
+
+// ======================
+// SORTOWANIE
+// ======================
+
+function sortTable(column, header){
+
+let table = document.querySelector(".historia_table tbody")
+let rows = Array.from(table.querySelectorAll("tr"))
+
+let asc = !sortState[column]
+sortState[column] = asc
+
+document.querySelectorAll(".arrow").forEach(a=>a.innerHTML="")
+
+header.querySelector(".arrow").innerHTML = asc ? "▲" : "▼"
+
+rows.sort((a,b)=>{
+
+let A = a.children[column].innerText.trim()
+let B = b.children[column].innerText.trim()
+
+if(column == 2){
+A = Number(A)
+B = Number(B)
+}
+
+return asc ? A > B ? 1 : -1 : A < B ? 1 : -1
+
+})
+
+rows.forEach(r => table.appendChild(r))
+
+}
+
+
+// ======================
+// FILTR MODUŁU
+// ======================
+
+function filtrModul(modul,btn){
+
+document.querySelectorAll(".filtr_btn").forEach(b=>{
+b.classList.remove("aktywny")
+})
+
+btn.classList.add("aktywny")
+
+let rows = document.querySelectorAll(".historia_table tbody tr")
+
+let visible = 0
+
+rows.forEach(row=>{
+
+let m = row.dataset.modul
+
+if(modul == "all" || m == modul){
+row.style.display = ""
+visible++
+}else{
+row.style.display = "none"
+}
+
+})
+
+document.getElementById("historia_count").innerText = visible
+
+}
+
+// ======================
+// WYSZUKIWARKA HISTORII
+// ======================
+
+const searchInput = document.getElementById("historia_search")
+
+searchInput.addEventListener("keyup", function(){
+
+let value = this.value.toLowerCase()
+
+let rows = document.querySelectorAll(".historia_table tbody tr")
+
+let visible = 0
+
+rows.forEach(row => {
+
+let text = row.innerText.toLowerCase()
+
+if(text.includes(value)){
+row.style.display = ""
+visible++
+}else{
+row.style.display = "none"
+}
+
+})
+
+document.getElementById("historia_count").innerText = visible
+
+})
+
+</script>
+
+{% endblock %}

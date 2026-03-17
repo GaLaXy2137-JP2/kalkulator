@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+
+<h2>Liczenie ceny profilu</h2>
+
+<form method="get" action="/ceny">
+
+<label>Profil</label>
+
+<select name="profil" onchange="this.form.submit()">
+
+<option value="">-- wybierz profil --</option>
+
+{% for p in profile %}
+<option value="{{p}}" {% if p == wybrany_profil %}selected{% endif %}>
+{{p}}
+</option>
+{% endfor %}
+
+</select>
+
+
+{% if wybrany_profil and ma_morfologie %}
+
+<br><br>
+
+<label>Morfologia</label>
+
+<select name="morfologia" onchange="this.form.submit()">
+
+<option value="brak" {% if morfologia == "brak" %}selected{% endif %}>Brak</option>
+<option value="podstawowa" {% if morfologia == "podstawowa" %}selected{% endif %}>Podstawowa</option>
+<option value="rozszerzona" {% if morfologia == "rozszerzona" %}selected{% endif %}>Rozszerzona</option>
+
+</select>
+
+{% endif %}
+
+
+{% if wybrany_profil and sekcje and not wynik %}
+
+<h3>Badania w profilu</h3>
+
+<p id="profil_counter" style="margin-bottom:15px;font-weight:600">
+Profil wykonany: 0/0 (0%)
+</p>
+
+<!-- BIOCHEMIA -->
+
+<h4 class="sekcja_naglowek">Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})</h4>
+
+<div class="parametry">
+
+{% for p in sekcje.biochemia %}
+
+<label>
+<input type="checkbox" class="bio_box" name="wykonane" value="{{p}}">
+{{p}}
+</label>
+
+{% endfor %}
+
+</div>
+
+
+
+<!-- MOCZ -->
+
+{% if sekcje.mocz %}
+
+<h4 class="sekcja_naglowek">Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})</h4>
+
+<div class="parametry">
+
+{% for p in sekcje.mocz %}
+
+<label>
+<input type="checkbox" class="mocz_box" name="wykonane" value="{{p}}">
+{{p}}
+</label>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+
+
+<!-- MORFOLOGIA -->
+
+{% if ma_morfologie %}
+
+<h4 class="sekcja_naglowek">Morfologia (<span id="morfo_count">0</span>/1)</h4>
+
+<div class="parametry">
+
+{% if morfologia == "podstawowa" %}
+
+<label>
+<input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia">
+Morfologia
+</label>
+
+{% endif %}
+
+{% if morfologia == "rozszerzona" %}
+
+<label>
+<input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia rozszerzona">
+Morfologia rozszerzona
+</label>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+
+
+<br>
+
+<button type="submit" name="oblicz">
+Oblicz cenę
+</button>
+
+{% endif %}
+
+</form>
+
+
+
+{% if wynik %}
+
+<hr>
+
+<h3>Wynik</h3>
+
+<p>Cena z cennika: {{ wynik.cena_profilu }} zł</p>
+<p>Ilość badań w profilu: {{ wynik.ilosc_parametrow }}</p>
+<p>Wykonano badań: {{ wynik.wykonane }}</p>
+<p>Procent wykonania: {{ wynik.procent }} %</p>
+
+<h2>Cena końcowa: {{ wynik.cena_koncowa }} zł</h2>
+
+<br>
+
+<a href="/ceny">
+<button>Nowe liczenie</button>
+</a>
+
+{% endif %}
+
+</div>
+
+<script>
+
+function updateCounters(){
+
+    const bioBoxes = document.querySelectorAll(".bio_box")
+    const moczBoxes = document.querySelectorAll(".mocz_box")
+    const morfoBoxes = document.querySelectorAll(".morfo_box")
+
+    const bioChecked = document.querySelectorAll(".bio_box:checked").length
+    const moczChecked = document.querySelectorAll(".mocz_box:checked").length
+    const morfoChecked = document.querySelectorAll(".morfo_box:checked").length
+
+    const bioTotal = bioBoxes.length
+    const moczTotal = moczBoxes.length
+    const morfoTotal = morfoBoxes.length
+
+    const bioCounter = document.getElementById("bio_count")
+    const moczCounter = document.getElementById("mocz_count")
+    const morfoCounter = document.getElementById("morfo_count")
+
+    if(bioCounter) bioCounter.textContent = bioChecked
+    if(moczCounter) moczCounter.textContent = moczChecked
+    if(morfoCounter) morfoCounter.textContent = morfoChecked
+
+    const totalChecked = bioChecked + moczChecked + morfoChecked
+    const totalAll = bioTotal + moczTotal + morfoTotal
+
+    let percent = 0
+    if(totalAll > 0){
+        percent = Math.round((totalChecked / totalAll) * 100)
+    }
+
+    const profilCounter = document.getElementById("profil_counter")
+
+    if(profilCounter){
+        profilCounter.textContent =
+        "Profil wykonany: " + totalChecked + "/" + totalAll + " (" + percent + "%)"
+    }
+
+}
+
+document.querySelectorAll("input[type=checkbox]").forEach(box=>{
+    box.addEventListener("change", updateCounters)
+})
+
+updateCounters()
+
+</script>
+
+{% endblock %}

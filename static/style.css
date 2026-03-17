@@ -1,0 +1,224 @@
+v/* =========================
+HISTORIA
+========================= */
+
+.historia{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+.historia th{
+text-align:left;
+padding:12px;
+background:#f4f6f8;
+font-weight:600;
+}
+
+.historia td{
+padding:12px;
+border-top:1px solid #e5e7eb;
+}
+
+.historia tr:hover{
+background:#f9fafb;
+}
+
+.btn_przywroc{
+background:#2563eb;
+color:white;
+padding:6px 12px;
+border-radius:6px;
+text-decoration:none;
+font-size:14px;
+}
+
+.btn_przywroc:hover{
+background:#1e4ed8;
+}
+
+.modul{
+padding:4px 8px;
+border-radius:6px;
+font-size:13px;
+}
+
+.modul.kalkulator{
+background:#e0f2fe;
+color:#0369a1;
+}
+
+.modul.rozcienczenia{
+background:#dcfce7;
+color:#166534;
+}
+
+.data_dzien{
+font-weight:600;
+white-space:nowrap;
+}
+
+.data_godzina{
+font-size:13px;
+color:#6b7280;
+}
+
+.historia_table{
+width:100%;
+border-collapse:collapse;
+}
+
+.historia_table th{
+text-align:left;
+padding:12px 18px;
+}
+
+.historia_table td{
+padding:14px 18px;
+vertical-align:middle;
+}
+
+.historia_table th:nth-child(1){
+width:160px;
+}
+
+.historia_table th:nth-child(2){
+width:130px;
+}
+
+.historia_table th:nth-child(3){
+width:70px;
+}
+
+.historia_table th:nth-child(6){
+width:130px;
+text-align:right;
+}
+
+.historia_table td:last-child{
+text-align:right;
+}
+
+.historia_table tbody tr:hover{
+background:#f3f6fb;
+}
+
+.historia_table td:nth-child(5){
+color:#555;
+}
+
+.historia_filtry{
+display:flex;
+align-items:center;
+gap:10px;
+position:relative;
+z-index:6;
+}
+
+.filtr_btn{
+background:#eef2f7;
+border:none;
+padding:6px 14px;
+border-radius:8px;
+font-size:14px;
+cursor:pointer;
+color:#333;
+}
+
+.filtr_btn:hover{
+background:#dce6f3;
+}
+
+.filtr_btn.aktywny{
+background:#4f7df3;
+color:white;
+}
+
+.historia_header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+position:relative;
+z-index:5;
+}
+
+th{
+white-space:nowrap;
+}
+
+.arrow{
+margin-left:6px;
+font-size:12px;
+display:inline;
+}
+
+.historia_search{
+width:230px;
+margin:0px 0 20px 0;
+padding:8px 12px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:14px;
+}
+
+.highlight{
+background:#fff3a3;
+padding:1px 2px;
+border-radius:3px;
+}
+
+.parametry {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 60px;
+    row-gap: 6px;
+}
+
+.parametry label {
+    display: grid;
+    grid-template-columns: 20px auto;
+    align-items: center;
+    gap: 6px;
+}
+
+.parametry input {
+    margin: 0;
+}
+
+.sekcja_naglowek label{
+display:flex;
+align-items:center;
+gap:8px;
+font-weight:600;
+margin-top:20px;
+}
+
+/* =========================
+PARAMETRY BADAŃ
+========================= */
+
+.parametry{
+display:grid;
+grid-template-columns:1fr 1fr;
+column-gap:40px;
+row-gap:6px;
+max-width:700px;
+margin-top:10px;
+}
+
+.parametry label{
+display:grid;
+grid-template-columns:20px auto;
+align-items:center;
+gap:6px;
+}
+
+.parametry input{
+margin:0;
+}
+
+.sekcja_naglowek{
+margin-top:25px;
+font-weight:600;
+}

@@ -1,0 +1,296 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<script>
+
+const profileList = {{ profile | tojson }}
+
+
+// =========================
+// POKAZ LISTĘ
+// =========================
+
+function pokazListe(inputId, listaId){
+
+let lista = document.getElementById(listaId)
+lista.innerHTML=""
+
+profileList.forEach(function(p){
+
+let div = document.createElement("div")
+div.innerText = p
+
+div.onclick=function(){
+
+document.getElementById(inputId).value = p
+lista.innerHTML=""
+
+}
+
+lista.appendChild(div)
+
+})
+
+}
+
+
+// =========================
+// FILTRUJ
+// =========================
+
+function filtruj(event,inputId, listaId){
+
+let input = document.getElementById(inputId)
+let lista = document.getElementById(listaId)
+let text = input.value.toLowerCase()
+
+lista.innerHTML=""
+
+profileList.forEach(function(p){
+
+if(p.toLowerCase().includes(text)){
+
+let div = document.createElement("div")
+div.innerText = p
+
+div.onclick=function(){
+
+document.getElementById(inputId).value = p
+lista.innerHTML=""
+
+}
+
+lista.appendChild(div)
+
+}
+
+})
+
+}
+
+
+// =========================
+// POKAZ PROFIL 2
+// =========================
+
+function pokazProfil2(){
+
+document.getElementById("profil2_box").style.display="block"
+document.getElementById("btn_profil2").style.display="none"
+
+}
+
+
+// =========================
+// USUŃ PROFIL 2
+// =========================
+
+function usunProfil2(){
+
+document.getElementById("profil2_input").value=""
+document.getElementById("profil2_box").style.display="none"
+document.getElementById("btn_profil2").style.display="block"
+
+}
+
+
+// =========================
+// ZAMKNIJ LISTY PO KLIKNIĘCIU POZA
+// =========================
+
+document.addEventListener("click", function(e){
+
+if(!e.target.closest(".lista") && !e.target.closest("input")){
+
+document.getElementById("lista1").innerHTML=""
+document.getElementById("lista2").innerHTML=""
+
+}
+
+})
+
+
+// =========================
+// KOPIUJ CRM
+// =========================
+
+function kopiujCRM(){
+
+const tekst = document.getElementById("crm_text").innerText.trim()
+const btn = document.getElementById("crm_btn")
+
+navigator.clipboard.writeText(tekst)
+
+btn.innerText = "✓ Skopiowano"
+
+setTimeout(function(){
+btn.innerText = "Kopiuj komunikat do CRM"
+},2000)
+
+}
+
+</script>
+
+
+
+<div class="container">
+
+<h2>Kalkulator badań</h2>
+
+<form method="post">
+
+<label>Objętość próbki (µl)</label>
+
+<input type="number"
+name="objetosc"
+value="{{ objetosc or '' }}"
+required
+autocomplete="off">
+
+
+
+<label>Profil 1</label>
+
+<input
+type="text"
+name="profil1"
+id="profil1_input"
+value="{{ profil1 or '' }}"
+placeholder="Wpisz nazwę profilu..."
+autocomplete="off"
+onclick="pokazListe('profil1_input','lista1')"
+onkeyup="filtruj(event,'profil1_input','lista1')">
+
+<div id="lista1" class="lista"></div>
+
+
+
+<button 
+type="button"
+id="btn_profil2"
+class="btn_add_profile"
+onclick="pokazProfil2()"
+style="{% if profil2 %}display:none;{% endif %}">
++ Dodaj drugi profil
+</button>
+
+
+
+<div id="profil2_box" style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
+
+<label>Profil 2</label>
+
+<input
+type="text"
+name="profil2"
+id="profil2_input"
+value="{{ profil2 or '' }}"
+placeholder="Wpisz nazwę profilu..."
+autocomplete="off"
+onclick="pokazListe('profil2_input','lista2')"
+onkeyup="filtruj(event,'profil2_input','lista2')">
+
+<div id="lista2" class="lista"></div>
+
+<button type="button" class="btn_remove" onclick="usunProfil2()">
+Usuń drugi profil
+</button>
+
+</div>
+
+
+
+{% if not wynik %}
+<button type="submit" name="oblicz">
+Oblicz
+</button>
+{% endif %}
+
+</form>
+
+
+
+{% if wynik %}
+
+<div class="panel">
+
+{% if wynik.komunikat %}
+
+<h3>{{ wynik.komunikat }}</h3>
+
+{% else %}
+
+<h3>Rekomendacja</h3>
+
+{% if wynik.sr_z_gldh %}
+
+<div class="rekomendacja">
+Z GLDH: {{ wynik.sr_z_gldh }}
+</div>
+
+<div class="rekomendacja">
+Bez GLDH: {{ wynik.sr_bez_gldh }}
+</div>
+
+{% else %}
+
+<div class="rekomendacja">
+{{ wynik.sr_bez_gldh }}
+</div>
+
+{% endif %}
+
+<h3>Zakres badań</h3>
+
+<div class="zakres">
+
+{% if wynik.z_gldh %}
+
+Z GLDH: {{ wynik.z_gldh }} <br>
+Bez GLDH: {{ wynik.bez_gldh }}
+
+{% else %}
+
+{{ wynik.bez_gldh }}
+
+{% endif %}
+
+</div>
+
+<div class="crm">
+
+<h3>Komunikat do CRM</h3>
+
+<div id="crm_text">Hej
+Za mało materiału na pełny profil.
+{% if wynik.sr_z_gldh %}
+Można wykonać:
+* {{ wynik.sr_z_gldh }} z GLDH
+* {{ wynik.sr_bez_gldh }} bez GLDH
+{% else %}
+Można wykonać {{ wynik.sr_bez_gldh }}.
+{% endif %}
+Proszę o informację które badania lekarz wybiera oraz o ich kolejność.</div>
+
+<button id="crm_btn" type="button" onclick="kopiujCRM()" class="copy">
+Kopiuj komunikat do CRM
+</button>
+
+</div>
+<br><br>
+
+<a href="/">
+    <button type="button">
+        Nowe obliczenie
+    </button>
+</a>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}
