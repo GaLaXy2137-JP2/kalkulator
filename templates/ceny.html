@@ -123,9 +123,17 @@ Profil wykonany: 0/0 (0%)
 
 <br>
 
-<button type="submit" name="oblicz">
-Oblicz cenę
-</button>
+<div class="sticky_panel">
+
+    <div class="sticky_info">
+        <span id="sticky_text">0/0 (0%)</span>
+    </div>
+
+    <button type="submit" name="oblicz">
+        Oblicz cenę
+    </button>
+
+</div>
 
 {% endif %}
 
@@ -194,6 +202,14 @@ function updateCounters(){
         profilCounter.textContent =
         "Profil wykonany: " + totalChecked + "/" + totalAll + " (" + percent + "%)"
     }
+    const stickyText = document.getElementById("sticky_text")
+
+    if(stickyText){
+        stickyText.textContent =
+            totalChecked + "/" + totalAll + " (" + percent + "%)"
+}
+
+updateCounters()
 
 }
 
@@ -201,7 +217,6 @@ document.querySelectorAll("input[type=checkbox]").forEach(box=>{
     box.addEventListener("change", updateCounters)
 })
 
-updateCounters()
 
 </script>
 
