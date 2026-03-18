@@ -2,6 +2,11 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from silnik.liczenie_ceny import (
+    oblicz_cene,
+    wczytaj_profile_parametry,
+    wczytaj_profile_morfologia
+)
 import csv
 
 # =========================
@@ -286,5 +291,59 @@ def historia(request: Request):
         {
             "request": request,
             "historia": dane
+        }
+    )
+
+# =========================
+# STRONA CEN
+# =========================
+
+@app.get("/ceny", response_class=HTMLResponse)
+def ceny(request: Request):
+
+    profil = request.query_params.get("profil")
+    morfologia = request.query_params.get("morfologia", "brak")
+    wykonane = request.query_params.getlist("wykonane")
+
+    wynik = None
+    sekcje = None
+    ma_morfologie = False
+
+    if profil:
+
+        profile_param = wczytaj_profile_parametry()
+        profile_morf = wczytaj_profile_morfologia()
+
+        lista = profile_param.get(profil, [])
+
+        # czy profil ma morfologię
+        ma_morfologie = profile_morf.get(profil, 0) == 1
+
+        # PODZIAŁ NA SEKCJE
+        sekcje = {
+            "biochemia": [],
+            "mocz": []
+        }
+
+        for p in lista:
+            if "mocz" in p.lower():
+                sekcje["mocz"].append(p)
+            else:
+                sekcje["biochemia"].append(p)
+
+        # LICZENIE
+        if "oblicz" in request.query_params:
+            wynik = oblicz_cene(profil, wykonane, morfologia)
+
+    return templates.TemplateResponse(
+        "ceny.html",
+        {
+            "request": request,
+            "profile": lista_profili(),  # 👈 używamy istniejących profili
+            "wybrany_profil": profil,
+            "sekcje": sekcje,
+            "wynik": wynik,
+            "morfologia": morfologia,
+            "ma_morfologie": ma_morfologie
         }
     )
