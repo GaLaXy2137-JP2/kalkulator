@@ -278,3 +278,27 @@ STICKY PANEL
 .container {
     padding-bottom: 80px;
 }
+
+.wynik_box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.copy_btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.copy_btn:hover {
+    background: #059669;
+}
+
+.copy_btn {
+    transition: all 0.2s ease;
+}

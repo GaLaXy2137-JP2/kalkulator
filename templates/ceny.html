@@ -152,7 +152,17 @@ Profil wykonany: 0/0 (0%)
 <p>Wykonano badań: {{ wynik.wykonane }}</p>
 <p>Procent wykonania: {{ wynik.procent }} %</p>
 
-<h2>Cena końcowa: {{ wynik.cena_koncowa }} zł</h2>
+<div class="wynik_box">
+
+    <h2 id="cena_koncowa">
+        Cena końcowa: {{ wynik.cena_koncowa }} zł
+    </h2>
+
+    <button type="button" onclick="kopiujCene()" class="copy_btn" id="copy_btn">
+        📋 Kopiuj cenę
+    </button>
+
+</div>
 
 <br>
 
@@ -217,7 +227,22 @@ document.querySelectorAll("input[type=checkbox]").forEach(box=>{
     box.addEventListener("change", updateCounters)
 })
 
+function kopiujCene(){
 
+    const tekst = "{{ wynik.cena_koncowa }}"
+
+    navigator.clipboard.writeText(tekst)
+
+    const btn = document.getElementById("copy_btn")
+
+    const original = btn.textContent
+
+    btn.textContent = "✔ Skopiowano"
+
+    setTimeout(()=>{
+        btn.textContent = original
+    }, 2000)
+}
 </script>
 
 {% endblock %}
