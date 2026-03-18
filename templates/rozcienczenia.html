@@ -5,30 +5,34 @@
 
 const profileList = {{ profile | tojson }}
 
+
 // =========================
 // POKAZ LISTĘ PROFILI
 // =========================
 
 function pokazListe(inputId, listaId){
 
-let lista = document.getElementById(listaId)
-lista.innerHTML=""
+    let lista = document.getElementById(listaId)
 
-profileList.forEach(function(p){
+    lista.innerHTML = ""
 
-let div = document.createElement("div")
-div.innerText = p
+    profileList.forEach(function(p){
 
-div.onclick=function(){
+        let div = document.createElement("div")
 
-document.getElementById(inputId).value = p
-lista.innerHTML=""
+        div.innerText = p
 
-}
+        div.onclick = function(){
 
-lista.appendChild(div)
+            document.getElementById(inputId).value = p
 
-})
+            lista.innerHTML = ""
+
+        }
+
+        lista.appendChild(div)
+
+    })
 
 }
 
@@ -37,33 +41,37 @@ lista.appendChild(div)
 // FILTRUJ
 // =========================
 
-function filtruj(event,inputId, listaId){
+function filtruj(event, inputId, listaId){
 
-let input = document.getElementById(inputId)
-let lista = document.getElementById(listaId)
-let text = input.value.toLowerCase()
+    let input = document.getElementById(inputId)
 
-lista.innerHTML=""
+    let lista = document.getElementById(listaId)
 
-profileList.forEach(function(p){
+    let text = input.value.toLowerCase()
 
-if(p.toLowerCase().includes(text)){
+    lista.innerHTML = ""
 
-let div = document.createElement("div")
-div.innerText = p
+    profileList.forEach(function(p){
 
-div.onclick=function(){
+        if(p.toLowerCase().includes(text)){
 
-document.getElementById(inputId).value = p
-lista.innerHTML=""
+            let div = document.createElement("div")
 
-}
+            div.innerText = p
 
-lista.appendChild(div)
+            div.onclick = function(){
 
-}
+                document.getElementById(inputId).value = p
 
-})
+                lista.innerHTML = ""
+
+            }
+
+            lista.appendChild(div)
+
+        }
+
+    })
 
 }
 
@@ -74,16 +82,20 @@ lista.appendChild(div)
 
 function pokazProfil2(){
 
-document.getElementById("profil2_box").style.display="block"
-document.getElementById("btn_profil2").style.display="none"
+    document.getElementById("profil2_box").style.display = "block"
+
+    document.getElementById("btn_profil2").style.display = "none"
 
 }
 
+
 function usunProfil2(){
 
-document.getElementById("profil2_input").value=""
-document.getElementById("profil2_box").style.display="none"
-document.getElementById("btn_profil2").style.display="block"
+    document.getElementById("profil2_input").value = ""
+
+    document.getElementById("profil2_box").style.display = "none"
+
+    document.getElementById("btn_profil2").style.display = "block"
 
 }
 
@@ -94,12 +106,13 @@ document.getElementById("btn_profil2").style.display="block"
 
 document.addEventListener("click", function(e){
 
-if(!e.target.closest(".lista") && !e.target.closest("input")){
+    if(!e.target.closest(".lista") && !e.target.closest("input")){
 
-document.getElementById("lista1").innerHTML=""
-document.getElementById("lista2").innerHTML=""
+        document.getElementById("lista1").innerHTML = ""
 
-}
+        document.getElementById("lista2").innerHTML = ""
+
+    }
 
 })
 
@@ -110,11 +123,14 @@ document.getElementById("lista2").innerHTML=""
 
 <h2>Rozcieńczenia</h2>
 
+
 <form method="post">
+
 
 <label>Objętość próbki (µl)</label>
 
-<input type="number"
+<input
+type="number"
 name="objetosc"
 value="{{ objetosc or '' }}"
 required
@@ -136,19 +152,22 @@ onkeyup="filtruj(event,'profil1_input','lista1')">
 <div id="lista1" class="lista"></div>
 
 
-
-<button 
+<button
 type="button"
 id="btn_profil2"
 class="btn_add_profile"
 onclick="pokazProfil2()"
 style="{% if profil2 %}display:none;{% endif %}">
+
 + Dodaj drugi profil
+
 </button>
 
 
+<div
+id="profil2_box"
+style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
 
-<div id="profil2_box" style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
 
 <label>Profil 2</label>
 
@@ -164,29 +183,53 @@ onkeyup="filtruj(event,'profil2_input','lista2')">
 
 <div id="lista2" class="lista"></div>
 
-<button type="button" class="btn_remove" onclick="usunProfil2()">
+
+<button
+type="button"
+class="btn_remove"
+onclick="usunProfil2()">
+
 Usuń drugi profil
+
 </button>
 
 </div>
 
 
 {% if not wynik %}
+
 <button type="submit">
 Oblicz rozcieńczenia
 </button>
+
 {% endif %}
 
 </form>
 
 
-
 {% if wynik %}
+
+    {% if wynik.pelny_profil %}
+
+        <div class="panel">
+            <h3>✔ Starczy na cały profil</h3>
+        </div>
+
+        <a href="/rozcienczenia">
+            <button type="button" style="margin-top: 15px;">
+                Oblicz ponownie
+        </button>
+
+        </a>
+        </div>
+
+    {% else %}
 
 {% set krok = 1 %}
 
+
 <!-- ========================= -->
-<!-- KROK 1 NIERozcieńczalne -->
+<!-- KROK 1 -->
 <!-- ========================= -->
 
 {% if wynik.tryb_nieroz != "brak" %}
@@ -200,9 +243,11 @@ Oblicz rozcieńczenia
 Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 
 <ul>
+
 {% for p in wynik.nierozcienczalne %}
 <li>{{ p.nazwa }}</li>
 {% endfor %}
+
 </ul>
 
 {% elif wynik.tryb_nieroz == "wybor" %}
@@ -210,9 +255,11 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 <h3>KROK {{ krok }} — Wybierz jedno z</h3>
 
 <ul>
+
 {% for p in wynik.nieroz_mieszczace %}
 <li>{{ p.nazwa }}</li>
 {% endfor %}
+
 </ul>
 
 {% elif wynik.tryb_nieroz == "wszystkie" %}
@@ -220,9 +267,11 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 <h3>KROK {{ krok }} — Wykonaj</h3>
 
 <ul>
+
 {% for p in wynik.nieroz_mieszczace %}
 <li>{{ p.nazwa }}</li>
 {% endfor %}
+
 </ul>
 
 {% endif %}
@@ -234,9 +283,8 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 {% endif %}
 
 
-
 <!-- ========================= -->
-<!-- KROK 2 BEZ ROZCIEŃCZENIA -->
+<!-- KROK 2 -->
 <!-- ========================= -->
 
 {% if wynik.bez_rozcienczenia %}
@@ -246,9 +294,11 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 <h3>KROK {{ krok }} — Wykonaj bez rozcieńczenia</h3>
 
 <ul>
+
 {% for p in wynik.bez_rozcienczenia %}
 <li>{{ p.nazwa }}</li>
 {% endfor %}
+
 </ul>
 
 </div>
@@ -258,9 +308,8 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 {% endif %}
 
 
-
 <!-- ========================= -->
-<!-- KROK 3 ROZCIEŃCZENIE -->
+<!-- KROK 3 -->
 <!-- ========================= -->
 
 <div class="panel">
@@ -269,13 +318,24 @@ Nie można wykonać żadnego z parametrów nierozcieńczalnych:
 
 {% if wynik.df > 0 %}
 
-Rozcieńcz próbkę:
+{% if wynik.baza == 50 %}
+
+Rozcieńczenie z pozostałych 50 µl próbki:
+
+{% else %}
+
+Rozcieńczenie z całej próbki:
+
+{% endif %}
+
+<br><br>
 
 <b>1:{{ wynik.df }} ({{ wynik.df }}x)</b>
 
 <br><br>
 
-{{ objetosc }} µl próbki + {{ (wynik.df * objetosc) - objetosc }} µl rozcieńczalnika
+{{ wynik.baza }} µl próbki + {{ (wynik.df * wynik.baza) - wynik.baza }} µl rozcieńczalnika
+
 {% else %}
 
 Rozcieńczenie nie jest potrzebne
@@ -287,9 +347,8 @@ Rozcieńczenie nie jest potrzebne
 {% set krok = krok + 1 %}
 
 
-
 <!-- ========================= -->
-<!-- KROK 4 Z ROZCIEŃCZENIA -->
+<!-- KROK 4 -->
 <!-- ========================= -->
 
 {% if wynik.do_rozcienczenia %}
@@ -299,22 +358,31 @@ Rozcieńczenie nie jest potrzebne
 <h3>KROK {{ krok }} — Wykonaj z rozcieńczenia</h3>
 
 <ul>
+
 {% for p in wynik.do_rozcienczenia %}
 <li>{{ p.nazwa }}</li>
 {% endfor %}
+
 </ul>
 
 </div>
 
 {% endif %}
 
+
 <br><br>
 
+
 <a href="/rozcienczenia">
-    <button type="button">
-        Nowe obliczenie
-    </button>
+
+<button type="button">
+Nowe obliczenie
+</button>
+
 </a>
+
+
+    {% endif %}
 
 {% endif %}
 
