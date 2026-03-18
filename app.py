@@ -298,6 +298,10 @@ def historia(request: Request):
 # STRONA CEN
 # =========================
 
+def lista_profili_ceny():
+    profile_param = wczytaj_profile_parametry()
+    return sorted(profile_param.keys())
+
 @app.get("/ceny", response_class=HTMLResponse)
 def ceny(request: Request):
 
@@ -326,16 +330,16 @@ def ceny(request: Request):
         }
 
         BADANIA_MOCZU = [
-        "Stosunek: białko / kreatynina w moczu",
-        "Badanie osadu moczu",
-        "Badanie moczu podstawowe"
-]
+            "Stosunek; białko / kreatynina w moczu",
+            "Badanie osadu moczu",
+            "Badanie moczu podstawowe"
+        ]
 
-    for p in lista:
-        if p in BADANIA_MOCZU:
-            sekcje["mocz"].append(p)
-        else:
-            sekcje["biochemia"].append(p)
+        for p in lista:
+            if p in BADANIA_MOCZU:
+                sekcje["mocz"].append(p)
+            else:
+                sekcje["biochemia"].append(p)
 
         # LICZENIE
         if "oblicz" in request.query_params:
@@ -345,7 +349,7 @@ def ceny(request: Request):
         "ceny.html",
         {
             "request": request,
-            "profile": lista_profili(),  # 👈 używamy istniejących profili
+            "profile": lista_profili_ceny(),  # 🔥 TU ZMIANA
             "wybrany_profil": profil,
             "sekcje": sekcje,
             "wynik": wynik,
