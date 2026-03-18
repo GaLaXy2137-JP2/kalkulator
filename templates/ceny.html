@@ -51,13 +51,13 @@ Profil wykonany: 0/0 (0%)
 
 <h4 class="sekcja_naglowek">Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})</h4>
 
-<div class="parametry">
+<div class="parametry_ceny">
 
 {% for p in sekcje.biochemia %}
 
-<label>
-<input type="checkbox" class="bio_box" name="wykonane" value="{{p}}">
-{{p}}
+<label class="parametr_ceny">
+    <input type="checkbox" class="bio_box" name="wykonane" value="{{p}}">
+    <span>{{p}}</span>
 </label>
 
 {% endfor %}
@@ -72,13 +72,13 @@ Profil wykonany: 0/0 (0%)
 
 <h4 class="sekcja_naglowek">Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})</h4>
 
-<div class="parametry">
+<div class="parametry_ceny">
 
 {% for p in sekcje.mocz %}
 
-<label>
-<input type="checkbox" class="mocz_box" name="wykonane" value="{{p}}">
-{{p}}
+<label class="parametr_ceny">
+    <input type="checkbox" class="mocz_box" name="wykonane" value="{{p}}">
+    <span>{{p}}</span>
 </label>
 
 {% endfor %}
@@ -91,26 +91,26 @@ Profil wykonany: 0/0 (0%)
 
 <!-- MORFOLOGIA -->
 
-{% if ma_morfologie %}
+{% if ma_morfologie and morfologia != "brak" %}
 
 <h4 class="sekcja_naglowek">Morfologia (<span id="morfo_count">0</span>/1)</h4>
 
-<div class="parametry">
+<div class="parametry_ceny">
 
 {% if morfologia == "podstawowa" %}
 
-<label>
-<input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia">
-Morfologia
+<label class="parametr_ceny">
+    <input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia">
+    <span>Morfologia</span>
 </label>
 
 {% endif %}
 
 {% if morfologia == "rozszerzona" %}
 
-<label>
-<input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia rozszerzona">
-Morfologia rozszerzona
+<label class="parametr_ceny">
+    <input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia rozszerzona">
+    <span>Morfologia rozszerzona</span>
 </label>
 
 {% endif %}
