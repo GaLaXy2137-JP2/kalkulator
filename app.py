@@ -325,11 +325,17 @@ def ceny(request: Request):
             "mocz": []
         }
 
-        for p in lista:
-            if "mocz" in p.lower():
-                sekcje["mocz"].append(p)
-            else:
-                sekcje["biochemia"].append(p)
+        BADANIA_MOCZU = [
+        "Stosunek: białko / kreatynina w moczu",
+        "Badanie osadu moczu",
+        "Badanie moczu podstawowe"
+]
+
+    for p in lista:
+        if p in BADANIA_MOCZU:
+            sekcje["mocz"].append(p)
+        else:
+            sekcje["biochemia"].append(p)
 
         # LICZENIE
         if "oblicz" in request.query_params:
