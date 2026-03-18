@@ -302,3 +302,22 @@ STICKY PANEL
 .copy_btn {
     transition: all 0.2s ease;
 }
+
+.reset_box {
+    margin-top: 20px;
+}
+
+.reset_box button {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.reset_box button:hover {
+    background: #1e4ed8;
+}

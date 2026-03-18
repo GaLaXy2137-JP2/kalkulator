@@ -275,9 +275,7 @@ Rozcieńcz próbkę:
 
 <br><br>
 
-50 µl próbki  
-+ {{ (wynik.df - 1) * 50 }} µl rozcieńczalnika
-
+{{ objetosc }} µl próbki + {{ (wynik.df * objetosc) - objetosc }} µl rozcieńczalnika
 {% else %}
 
 Rozcieńczenie nie jest potrzebne
