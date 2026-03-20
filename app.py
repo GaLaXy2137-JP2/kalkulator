@@ -74,6 +74,8 @@ with open("profile.csv", newline="", encoding="utf-8-sig") as f:
 
 def lista_profili():
     return sorted(profile.keys())
+def lista_parametrow():
+    return sorted(parametry.keys())
 
 # =========================
 # PARAMETRY Z PROFILI (zostaje dla kompatybilności)
@@ -175,6 +177,7 @@ def strona(request: Request):
         {
             "request": request,
             "profile": lista_profili(),
+            "parametry_lista": lista_parametrow(),
             "wynik": wynik,
             "objetosc": objetosc,
             "profil1": profil1,
@@ -209,6 +212,7 @@ def oblicz(
         {
             "request": request,
             "profile": lista_profili(),
+            "parametry_lista": lista_parametrow(),
             "wynik": wynik,
             "objetosc": objetosc,
             "profil1": profil1,

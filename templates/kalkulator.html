@@ -4,10 +4,11 @@
 <script>
 
 const profileList = {{ profile | tojson }}
+const parametryList = {{ parametry_lista | tojson | safe }}
 
 
 // =========================
-// POKAZ LISTĘ
+// LISTA PROFILI
 // =========================
 
 function pokazListe(inputId, listaId){
@@ -21,22 +22,14 @@ let div = document.createElement("div")
 div.innerText = p
 
 div.onclick=function(){
-
 document.getElementById(inputId).value = p
 lista.innerHTML=""
-
 }
 
 lista.appendChild(div)
 
 })
-
 }
-
-
-// =========================
-// FILTRUJ
-// =========================
 
 function filtruj(event,inputId, listaId){
 
@@ -54,10 +47,8 @@ let div = document.createElement("div")
 div.innerText = p
 
 div.onclick=function(){
-
 document.getElementById(inputId).value = p
 lista.innerHTML=""
-
 }
 
 lista.appendChild(div)
@@ -65,7 +56,6 @@ lista.appendChild(div)
 }
 
 })
-
 }
 
 
@@ -74,34 +64,90 @@ lista.appendChild(div)
 // =========================
 
 function pokazProfil2(){
-
 document.getElementById("profil2_box").style.display="block"
 document.getElementById("btn_profil2").style.display="none"
-
 }
 
 function usunProfil2(){
-
 document.getElementById("profil2_input").value=""
 document.getElementById("profil2_box").style.display="none"
 document.getElementById("btn_profil2").style.display="block"
+}
+
+
+// =========================
+// PARAMETRY TOGGLE 🔥
+// =========================
+
+function toggleParametryBox(){
+
+let box = document.getElementById("parametry_box")
+let btn = document.getElementById("btn_parametry")
+
+if(box.style.display === "none"){
+    box.style.display = "block"
+    btn.innerText = "− Ukryj dodatkowe parametry"
+} else {
+    box.style.display = "none"
+    btn.innerText = "+ Dodaj dodatkowe parametry"
+}
 
 }
 
 
 // =========================
-// ZAMKNIJ LISTY
+// PARAMETRY CLICK
 // =========================
 
-document.addEventListener("click", function(e){
+function toggleParametr(p){
 
-if(!e.target.closest(".lista") && !e.target.closest("input")){
+    let input = document.getElementById("parametry_input")
 
-document.getElementById("lista1").innerHTML=""
-document.getElementById("lista2").innerHTML=""
+    let current = input.value
+        ? input.value.split(",").map(x => x.trim())
+        : []
 
+    let btns = document.querySelectorAll(".param_btn")
+    let clickedBtn = Array.from(btns).find(b => b.innerText === p)
+
+    if(current.includes(p)){
+        current = current.filter(x => x !== p)
+        if(clickedBtn) clickedBtn.classList.remove("active")
+    } else {
+        current.push(p)
+        if(clickedBtn) clickedBtn.classList.add("active")
+    }
+
+    input.value = current.join(", ")
 }
 
+
+// =========================
+// RENDER PARAMETRÓW
+// =========================
+
+function renderParametry(){
+
+    let container = document.getElementById("parametry_box")
+    container.innerHTML = ""
+
+    parametryList.forEach(p => {
+
+        let btn = document.createElement("button")
+        btn.type = "button"
+        btn.innerText = p
+        btn.className = "param_btn"
+
+        btn.onclick = () => toggleParametr(p)
+
+        container.appendChild(btn)
+    })
+}
+
+
+// START
+document.addEventListener("DOMContentLoaded", function(){
+    renderParametry()
 })
 
 
@@ -143,16 +189,7 @@ required
 autocomplete="off">
 
 
-<!-- 🔥 NOWA SEKCJA -->
-<label>Dodatkowe parametry</label>
-
-<input
-type="text"
-name="parametry_input"
-placeholder="Np. ALT, AST, CRP"
-autocomplete="off">
-
-
+<!-- 🔥 PROFIL 1 -->
 <label>Profil 1</label>
 
 <input
@@ -168,7 +205,7 @@ onkeyup="filtruj(event,'profil1_input','lista1')">
 <div id="lista1" class="lista"></div>
 
 
-
+<!-- 🔥 DODAJ PROFIL 2 -->
 <button 
 type="button"
 id="btn_profil2"
@@ -179,7 +216,7 @@ style="{% if profil2 %}display:none;{% endif %}">
 </button>
 
 
-
+<!-- 🔥 PROFIL 2 -->
 <div id="profil2_box" style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
 
 <label>Profil 2</label>
@@ -203,6 +240,19 @@ Usuń drugi profil
 </div>
 
 
+<!-- 🔥 PARAMETRY -->
+<button 
+type="button"
+id="btn_parametry"
+class="btn_add_profile"
+onclick="toggleParametryBox()">
++ Dodaj dodatkowe parametry
+</button>
+
+<input type="hidden" id="parametry_input" name="parametry_input">
+
+<div id="parametry_box" style="display:none;"></div>
+
 
 {% if not wynik %}
 <button type="submit" name="oblicz">
@@ -219,7 +269,6 @@ Oblicz
 <div class="panel">
 
 {% if wynik.komunikat %}
-
 <h3>{{ wynik.komunikat }}</h3>
 
 {% else %}
@@ -227,45 +276,29 @@ Oblicz
 <h3>Rekomendacja</h3>
 
 {% if wynik.sr_z_gldh %}
-
-<div class="rekomendacja">
-Z GLDH: {{ wynik.sr_z_gldh }}
-</div>
-
-<div class="rekomendacja">
-Bez GLDH: {{ wynik.sr_bez_gldh }}
-</div>
-
+<div class="rekomendacja">Z GLDH: {{ wynik.sr_z_gldh }}</div>
+<div class="rekomendacja">Bez GLDH: {{ wynik.sr_bez_gldh }}</div>
 {% else %}
-
-<div class="rekomendacja">
-{{ wynik.sr_bez_gldh }}
-</div>
-
+<div class="rekomendacja">{{ wynik.sr_bez_gldh }}</div>
 {% endif %}
 
 <h3>Zakres badań</h3>
 
 <div class="zakres">
-
 {% if wynik.z_gldh %}
-
 Z GLDH: {{ wynik.z_gldh }} <br>
 Bez GLDH: {{ wynik.bez_gldh }}
-
 {% else %}
-
 {{ wynik.bez_gldh }}
-
 {% endif %}
-
 </div>
 
 <div class="crm">
 
 <h3>Komunikat do CRM</h3>
 
-<div id="crm_text">Hej
+<div id="crm_text">
+Hej
 Za mało materiału na pełny profil.
 {% if wynik.sr_z_gldh %}
 Można wykonać:
@@ -274,7 +307,8 @@ Można wykonać:
 {% else %}
 Można wykonać {{ wynik.sr_bez_gldh }}.
 {% endif %}
-Proszę o informację które badania lekarz wybiera oraz o ich kolejność.</div>
+Proszę o informację które badania lekarz wybiera oraz o ich kolejność.
+</div>
 
 <button id="crm_btn" type="button" onclick="kopiujCRM()" class="copy">
 Kopiuj komunikat do CRM
@@ -288,9 +322,7 @@ Kopiuj komunikat do CRM
 <br><br>
 
 <a href="/">
-    <button type="button">
-        Nowe obliczenie
-    </button>
+<button type="button">Nowe obliczenie</button>
 </a>
 
 </div>
