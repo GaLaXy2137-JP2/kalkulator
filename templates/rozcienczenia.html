@@ -4,7 +4,9 @@
 <script>
 
 const profileList = {{ profile | tojson }}
+const parametryList = {{ parametry_lista | tojson | safe }}
 
+console.log("PARAMETRY:", parametryList)
 
 // =========================
 // POKAZ LISTĘ PROFILI
@@ -13,27 +15,20 @@ const profileList = {{ profile | tojson }}
 function pokazListe(inputId, listaId){
 
     let lista = document.getElementById(listaId)
-
     lista.innerHTML = ""
 
     profileList.forEach(function(p){
 
         let div = document.createElement("div")
-
         div.innerText = p
 
         div.onclick = function(){
-
             document.getElementById(inputId).value = p
-
             lista.innerHTML = ""
-
         }
 
         lista.appendChild(div)
-
     })
-
 }
 
 
@@ -44,9 +39,7 @@ function pokazListe(inputId, listaId){
 function filtruj(event, inputId, listaId){
 
     let input = document.getElementById(inputId)
-
     let lista = document.getElementById(listaId)
-
     let text = input.value.toLowerCase()
 
     lista.innerHTML = ""
@@ -56,23 +49,17 @@ function filtruj(event, inputId, listaId){
         if(p.toLowerCase().includes(text)){
 
             let div = document.createElement("div")
-
             div.innerText = p
 
             div.onclick = function(){
-
                 document.getElementById(inputId).value = p
-
                 lista.innerHTML = ""
-
             }
 
             lista.appendChild(div)
-
         }
 
     })
-
 }
 
 
@@ -81,22 +68,14 @@ function filtruj(event, inputId, listaId){
 // =========================
 
 function pokazProfil2(){
-
     document.getElementById("profil2_box").style.display = "block"
-
     document.getElementById("btn_profil2").style.display = "none"
-
 }
 
-
 function usunProfil2(){
-
     document.getElementById("profil2_input").value = ""
-
     document.getElementById("profil2_box").style.display = "none"
-
     document.getElementById("btn_profil2").style.display = "block"
-
 }
 
 
@@ -107,14 +86,88 @@ function usunProfil2(){
 document.addEventListener("click", function(e){
 
     if(!e.target.closest(".lista") && !e.target.closest("input")){
-
         document.getElementById("lista1").innerHTML = ""
-
         document.getElementById("lista2").innerHTML = ""
-
     }
 
 })
+
+
+// =========================
+// PARAMETRY TOGGLE
+// =========================
+
+function toggleParametryBox(){
+
+    let box = document.getElementById("parametry_box")
+    let btn = document.getElementById("btn_parametry")
+
+    let isHidden = box.style.display === "none" || box.style.display === ""
+
+    if(isHidden){
+        box.style.display = "block"
+        btn.innerText = "− Ukryj dodatkowe parametry"
+        btn.classList.add("hide")   // 🔥 TO DODAJ
+
+        renderParametry()
+    } else {
+        box.style.display = "none"
+        btn.innerText = "+ Dodaj dodatkowe parametry"
+        btn.classList.remove("hide") // 🔥 TO DODAJ
+    }
+
+}
+
+// =========================
+// RENDER PARAMETRÓW
+// =========================
+
+function renderParametry(){
+
+    let container = document.getElementById("parametry_box")
+    container.innerHTML = ""
+
+    parametryList
+        .filter(p => p !== "ACTH")
+        .forEach(p => {
+
+        let btn = document.createElement("button")
+        btn.type = "button"
+        btn.innerText = p
+        btn.className = "param_btn"
+
+        btn.onclick = () => toggleParametr(p)
+
+        container.appendChild(btn)
+    })
+}
+
+
+// =========================
+// KLIK PARAMETRU
+// =========================
+
+function toggleParametr(p){
+
+    let input = document.getElementById("parametry_input")
+
+    let current = input.value
+        ? input.value.split(",").map(x => x.trim())
+        : []
+
+    let btns = document.querySelectorAll(".param_btn")
+    let clickedBtn = Array.from(btns).find(b => b.innerText === p)
+
+    if(current.includes(p)){
+        current = current.filter(x => x !== p)
+        if(clickedBtn) clickedBtn.classList.remove("active")
+    } else {
+        current.push(p)
+        if(clickedBtn) clickedBtn.classList.add("active")
+    }
+
+    input.value = current.join(", ")
+}
 
 </script>
 
@@ -195,6 +248,17 @@ Usuń drugi profil
 
 </div>
 
+<button 
+type="button"
+id="btn_parametry"
+class="btn_add_profile"
+onclick="toggleParametryBox()">
++ Dodaj dodatkowe parametry
+</button>
+
+<input type="hidden" id="parametry_input" name="parametry_input">
+
+<div id="parametry_box" style="display:none;"></div>
 
 {% if not wynik %}
 
