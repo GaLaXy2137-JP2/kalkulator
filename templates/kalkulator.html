@@ -70,7 +70,7 @@ lista.appendChild(div)
 
 
 // =========================
-// POKAZ PROFIL 2
+// PROFIL 2
 // =========================
 
 function pokazProfil2(){
@@ -79,11 +79,6 @@ document.getElementById("profil2_box").style.display="block"
 document.getElementById("btn_profil2").style.display="none"
 
 }
-
-
-// =========================
-// USUŃ PROFIL 2
-// =========================
 
 function usunProfil2(){
 
@@ -95,7 +90,7 @@ document.getElementById("btn_profil2").style.display="block"
 
 
 // =========================
-// ZAMKNIJ LISTY PO KLIKNIĘCIU POZA
+// ZAMKNIJ LISTY
 // =========================
 
 document.addEventListener("click", function(e){
@@ -147,6 +142,15 @@ value="{{ objetosc or '' }}"
 required
 autocomplete="off">
 
+
+<!-- 🔥 NOWA SEKCJA -->
+<label>Dodatkowe parametry</label>
+
+<input
+type="text"
+name="parametry_input"
+placeholder="Np. ALT, AST, CRP"
+autocomplete="off">
 
 
 <label>Profil 1</label>
@@ -281,7 +285,6 @@ Kopiuj komunikat do CRM
 {% endif %}
 </div>
 
-<!-- 🔥 TO MUSI BYĆ ZAWSZE -->
 <br><br>
 
 <a href="/">

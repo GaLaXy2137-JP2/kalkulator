@@ -17,6 +17,38 @@ def odmien_badanie(n):
 
 
 # =========================
+# BUDOWANIE LISTY PARAMETRÓW
+# =========================
+
+def zbuduj_liste_parametrow(profil1, profil2, parametry_wybrane, profile_map):
+
+    lista = []
+
+    # profil 1
+    if profil1 and profil1 in profile_map:
+        lista += profile_map[profil1]
+
+    # profil 2
+    if profil2 and profil2 in profile_map:
+        lista += profile_map[profil2]
+
+    # parametry ręczne
+    if parametry_wybrane:
+        lista += parametry_wybrane
+
+    # usuwanie duplikatów (z zachowaniem kolejności)
+    seen = set()
+    wynik = []
+
+    for p in lista:
+        if p not in seen:
+            seen.add(p)
+            wynik.append(p)
+
+    return wynik
+
+
+# =========================
 # OBJĘTOŚĆ PEŁNEGO PROFILU
 # =========================
 

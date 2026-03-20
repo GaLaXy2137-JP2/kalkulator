@@ -13,7 +13,13 @@ import csv
 # SILNIKI
 # =========================
 
-from silnik.kalkulator import odmien_badanie, objetosc_pelnego_profilu, licz_zakres_excel
+from silnik.kalkulator import (
+    odmien_badanie,
+    objetosc_pelnego_profilu,
+    licz_zakres_excel,
+    zbuduj_liste_parametrow
+)
+
 from silnik.rozcienczenia import policz_rozcienczenia
 from silnik.historia import zapisz_historia
 
@@ -70,7 +76,7 @@ def lista_profili():
     return sorted(profile.keys())
 
 # =========================
-# PARAMETRY Z PROFILI
+# PARAMETRY Z PROFILI (zostaje dla kompatybilności)
 # =========================
 
 def parametry_z_profili(profil1, profil2):
@@ -89,9 +95,19 @@ def parametry_z_profili(profil1, profil2):
 # LOGIKA KALKULATORA
 # =========================
 
-def policz(objetosc, profil1, profil2):
+def policz(objetosc, profil1, profil2, parametry_wybrane):
 
-    lista = parametry_z_profili(profil1, profil2)
+    lista = zbuduj_liste_parametrow(
+        profil1,
+        profil2,
+        parametry_wybrane,
+        profile
+    )
+
+    if not lista:
+        return {
+            "komunikat": "Brak wybranych parametrów"
+        }
 
     potrzebne = objetosc_pelnego_profilu(lista, parametry)
 
@@ -150,7 +166,7 @@ def strona(request: Request):
     if objetosc:
         try:
             objetosc_int = int(objetosc)
-            wynik = policz(objetosc_int, profil1, profil2)
+            wynik = policz(objetosc_int, profil1, profil2, [])
         except:
             wynik = None
 
@@ -175,10 +191,16 @@ def oblicz(
     request: Request,
     objetosc: int = Form(...),
     profil1: str = Form(""),
-    profil2: str = Form("")
+    profil2: str = Form(""),
+    parametry_input: str = Form("")
 ):
 
-    wynik = policz(objetosc, profil1, profil2)
+    if parametry_input:
+        parametry_wybrane = [p.strip() for p in parametry_input.split(",")]
+    else:
+        parametry_wybrane = []
+
+    wynik = policz(objetosc, profil1, profil2, parametry_wybrane)
 
     zapisz_historia("kalkulator", objetosc, profil1, profil2)
 

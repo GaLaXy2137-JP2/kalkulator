@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<script>
+
+// =========================
+// PARAMETRY LISTA
+// =========================
+
+const parametryList = [
+"ALT","AST","GLU","KREA","MOCZ","CRP",
+"BIL","ALP","GGTP","Na","K","Cl"
+]
+
+// =========================
+// DODAJ / USUŃ PARAMETR
+// =========================
+
+function dodajParametr(p){
+
+    let input = document.getElementById("parametry_input")
+
+    let current = input.value
+        ? input.value.split(",").map(x => x.trim())
+        : []
+
+    if(current.includes(p)){
+        current = current.filter(x => x !== p)
+    } else {
+        current.push(p)
+    }
+
+    input.value = current.join(", ")
+
+    odswiezPrzyciski()
+}
+
+
+// =========================
+// ODSWIEŻ STAN PRZYCISKÓW
+// =========================
+
+function odswiezPrzyciski(){
+
+    let input = document.getElementById("parametry_input")
+
+    let current = input.value
+        ? input.value.split(",").map(x => x.trim())
+        : []
+
+    document.querySelectorAll(".param_btn").forEach(btn => {
+
+        let nazwa = btn.innerText.trim()
+
+        if(current.includes(nazwa)){
+            btn.style.background = "#4CAF50"
+            btn.style.color = "white"
+        } else {
+            btn.style.background = "#f5f5f5"
+            btn.style.color = "black"
+        }
+
+    })
+
+}
+
+// =========================
+// WYCZYŚĆ
+// =========================
+
+function wyczyscParametry(){
+
+    document.getElementById("parametry_input").value = ""
+
+    odswiezPrzyciski()
+
+}
+
+</script>
+
+
+<div class="container">
+
+<h2>Kalkulator parametrów</h2>
+
+<a href="/">
+    <button type="button" class="btn_back">← Powrót</button>
+</a>
+
+<form method="post">
+
+<label>Objętość próbki (µl)</label>
+<input type="number" name="objetosc_parametry" required>
+
+<label>Wybrane parametry</label>
+<input type="text" id="parametry_input" name="parametry" readonly>
+
+<button type="button" onclick="wyczyscParametry()">
+Wyczyść
+</button>
+
+<br><br>
+
+<!-- LISTA PARAMETRÓW -->
+<div id="parametry_list"></div>
+
+<br>
+
+<button type="submit">Oblicz</button>
+
+</form>
+
+
+<script>
+
+// =========================
+// GENEROWANIE PRZYCISKÓW
+// =========================
+
+const container = document.getElementById("parametry_list")
+
+parametryList.forEach(function(p){
+
+    let btn = document.createElement("button")
+    btn.type = "button"
+    btn.innerText = p
+    btn.className = "param_btn"
+
+    btn.onclick = function(){
+        dodajParametr(p)
+    }
+
+    container.appendChild(btn)
+
+})
+
+// 🔥 KLUCZOWE — odśwież stan
+odswiezPrzyciski()
+
+</script>
+
+
+<!-- ✅ WYNIK -->
+{% if wynik %}
+
+<div class="panel">
+
+<h3>Wynik</h3>
+
+<div class="rekomendacja">
+{{ wynik }}
+</div>
+
+</div>
+
+<br><br>
+
+<a href="/kalkulator_parametry">
+    <button type="button">
+        Nowe obliczenie
+    </button>
+</a>
+
+{% endif %}
+
+</div>
+
+{% endblock %}
