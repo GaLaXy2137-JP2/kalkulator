@@ -87,13 +87,14 @@ let btn = document.getElementById("btn_parametry")
 if(box.style.display === "none"){
     box.style.display = "block"
     btn.innerText = "− Ukryj dodatkowe parametry"
+    btn.classList.add("hide")
 } else {
     box.style.display = "none"
     btn.innerText = "+ Dodaj dodatkowe parametry"
+    btn.classList.remove("hide")
 }
 
 }
-
 
 // =========================
 // PARAMETRY CLICK
@@ -131,7 +132,10 @@ function renderParametry(){
     let container = document.getElementById("parametry_box")
     container.innerHTML = ""
 
-    parametryList.forEach(p => {
+    const wykluczone = ["ACTH"]
+    parametryList
+        .filter(p => !wykluczone.includes(p))
+        .forEach(p => {
 
         let btn = document.createElement("button")
         btn.type = "button"

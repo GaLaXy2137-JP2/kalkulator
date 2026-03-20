@@ -349,3 +349,12 @@ STICKY PANEL
     background:#4CAF50 !important;
     color:white !important;
 }
+
+#btn_parametry.hide {
+    background:#e74c3c !important;
+    color:white !important;
+}
+
+#btn_parametry.hide:hover {
+    background:#c0392b !important;
+}
