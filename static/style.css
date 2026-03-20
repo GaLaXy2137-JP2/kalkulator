@@ -195,51 +195,51 @@ margin-top:20px;
 }
 
 /* =========================
-PARAMETRY BADAŃ
+PARAMETRY CEN (BUTTON STYLE)
 ========================= */
 
 .parametry_ceny {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 10px;
 }
 
 .parametr_ceny {
-    display: grid;
-    grid-template-columns: 24px 1fr;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: 0.2s;
-    cursor: pointer;
+    display: inline-block;
 }
 
-.parametr_ceny:hover {
-    background-color: #f5f7fa;
-}
-
-.parametr_ceny input[type="checkbox"] {
-    transform: scale(1.2);
-}
-
-/* highlight */
-.parametr_ceny input:checked + span {
-    background-color: #e6f2ff;
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-weight: 600;
+.parametr_ceny input {
+    display: none; /* 🔥 ukrywamy checkbox */
 }
 
 .parametr_ceny span {
-    display: block;
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
 }
 
-.parametr_ceny input[type="checkbox"] {
-    transform: scale(1.2);
-    position: relative;
-    top: 4px;
+/* hover */
+.parametr_ceny span:hover {
+    background: #e2e8f0;
+}
+
+/* 🔥 WYBRANE */
+.parametr_ceny input:checked + span {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    font-weight: 600;
+}
+
+/* klik efekt */
+.parametr_ceny span:active {
+    transform: scale(0.97);
 }
 
 /* =========================

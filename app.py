@@ -5,7 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from silnik.liczenie_ceny import (  
     oblicz_cene,  
     wczytaj_profile_parametry,  
-    wczytaj_profile_morfologia  
+    wczytaj_profile_morfologia,
+    wczytaj_parametry,
+    wczytaj_ceny_profili,
+    wczytaj_ceny_morfologii  
 )  
 import csv  
   
@@ -67,6 +70,24 @@ with open("profile.csv", newline="", encoding="utf-8-sig") as f:
             profile[profil] = []  
   
         profile[profil].append(parametr)  
+
+# =========================
+# WCZYTANIE CEN
+# =========================
+
+ceny_parametrow = {}
+
+with open("parametry_ceny.csv", newline="", encoding="utf-8-sig") as f:
+    reader = csv.DictReader(f)
+
+    for r in reader:
+        nazwa = r["parametr"].strip()
+
+        try:
+            cena = float(r["dodaj"])
+            ceny_parametrow[nazwa] = cena
+        except:
+            continue
   
 # =========================  
 # LISTA PROFILI  
@@ -350,6 +371,8 @@ def ceny(request: Request):
     wynik = None
     sekcje = None
     ma_morfologie = False
+    parametry_ceny = wczytaj_parametry()
+    cena_profilu = 0
 
     if profil:
 
@@ -357,6 +380,14 @@ def ceny(request: Request):
         profile_morf = wczytaj_profile_morfologia()
 
         lista = profile_param.get(profil, [])
+
+        cena_profilu = wczytaj_ceny_profili().get(profil, 0)
+
+        if morfologia == "podstawowa":
+            cena_profilu += wczytaj_ceny_morfologii().get("podstawowa", 0)
+
+        if morfologia == "rozszerzona":
+            cena_profilu += wczytaj_ceny_morfologii().get("rozszerzona", 0)
 
         # czy profil ma morfologię
         ma_morfologie = profile_morf.get(profil, 0) == 1
@@ -392,6 +423,9 @@ def ceny(request: Request):
             "sekcje": sekcje,
             "wynik": wynik,
             "morfologia": morfologia,
-            "ma_morfologie": ma_morfologie
+            "ma_morfologie": ma_morfologie,
+            "ceny_parametrow": ceny_parametrow,
+	    "parametry_ceny": parametry_ceny,
+            "cena_profilu": cena_profilu,
         }
     )
