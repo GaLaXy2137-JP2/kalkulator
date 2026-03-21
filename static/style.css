@@ -358,3 +358,135 @@ STICKY PANEL
 #btn_parametry.hide:hover {
     background:#c0392b !important;
 }
+
+.profil_lista {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 6px;
+    background: white;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.profil_option {
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.profil_option:hover {
+    background: #f3f6fb;
+}
+
+/* =========================
+PROFIL SELECT (jak kalkulator)
+========================= */
+
+#profil_box{
+    position: relative;
+    width: 100%;
+}
+
+#profil_input{
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* 🔥 LISTA */
+
+.profil_lista{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
+    z-index: 50;
+}
+
+/* 🔥 OPCJA */
+
+.profil_option{
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.profil_option:hover{
+    background: #f3f6fb;
+}
+
+/* =========================
+TOP CONTROLS (profil + morfologia)
+========================= */
+
+.top_controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.profil_wrapper {
+    margin-bottom: 5px;
+}
+
+.morfologia_wrapper {
+    margin-top: 4px;
+}
+
+
+/* =========================
+SWITCH MORFOLOGIA (NOWY)
+========================= */
+
+.switch_morfologia {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: -10px;
+    background: #f5f7fb;
+    padding: 4px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.switch_morfologia button {
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+/* hover */
+.switch_morfologia button:hover {
+    background: #e9eefc;
+}
+
+/* active */
+.switch_morfologia button.active {
+    background: #2563eb;
+    color: white;
+}
+
+
+/* =========================
+SEKCJA BADANIA
+========================= */
+
+.sekcja_badania {
+    margin-top: 20px;
+}

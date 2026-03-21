@@ -361,6 +361,7 @@ def lista_profili_ceny():
     profile_param = wczytaj_profile_parametry()
     return sorted(profile_param.keys())
 
+
 @app.get("/ceny", response_class=HTMLResponse)
 def ceny(request: Request):
 
@@ -371,28 +372,39 @@ def ceny(request: Request):
     wynik = None
     sekcje = None
     ma_morfologie = False
+
+    # 🔥 JEDYNE ŹRÓDŁO PARAMETRÓW (backend + frontend)
     parametry_ceny = wczytaj_parametry()
+
+    # 🔥 cena profilu (do live JS)
     cena_profilu = 0
 
     if profil:
 
         profile_param = wczytaj_profile_parametry()
         profile_morf = wczytaj_profile_morfologia()
+        ceny_profili = wczytaj_ceny_profili()
+        ceny_morf = wczytaj_ceny_morfologii()
 
         lista = profile_param.get(profil, [])
 
-        cena_profilu = wczytaj_ceny_profili().get(profil, 0)
+        # 🔥 cena bazowa profilu
+        cena_profilu = ceny_profili.get(profil, 0)
 
+        # 🔥 dodanie morfologii do ceny
         if morfologia == "podstawowa":
-            cena_profilu += wczytaj_ceny_morfologii().get("podstawowa", 0)
+            cena_profilu += ceny_morf.get("podstawowa", 0)
 
         if morfologia == "rozszerzona":
-            cena_profilu += wczytaj_ceny_morfologii().get("rozszerzona", 0)
+            cena_profilu += ceny_morf.get("rozszerzona", 0)
 
         # czy profil ma morfologię
         ma_morfologie = profile_morf.get(profil, 0) == 1
 
+        # =========================
         # PODZIAŁ NA SEKCJE
+        # =========================
+
         sekcje = {
             "biochemia": [],
             "mocz": []
@@ -410,22 +422,26 @@ def ceny(request: Request):
             else:
                 sekcje["biochemia"].append(p)
 
-        # LICZENIE
+        # =========================
+        # LICZENIE (backend)
+        # =========================
+
         if "oblicz" in request.query_params:
             wynik = oblicz_cene(profil, wykonane, morfologia)
-
+            zapisz_historia("ceny", 0, profil, "", wykonane)
     return templates.TemplateResponse(
         "ceny.html",
         {
             "request": request,
-            "profile": lista_profili_ceny(),  # 🔥 TU ZMIANA
+            "profile": lista_profili_ceny(),
             "wybrany_profil": profil,
             "sekcje": sekcje,
             "wynik": wynik,
             "morfologia": morfologia,
             "ma_morfologie": ma_morfologie,
-            "ceny_parametrow": ceny_parametrow,
-	    "parametry_ceny": parametry_ceny,
+
+            # 🔥 KLUCZOWE
+            "parametry_ceny": parametry_ceny,
             "cena_profilu": cena_profilu,
         }
     )
