@@ -5,17 +5,19 @@ import os
 PLIK = "historia.json"
 
 
-def zapisz_historia(modul, objetosc, profil1, profil2, parametry):
+def zapisz_historia(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None):
 
     wpis = {
-        "data": datetime.now().strftime("%Y-%m-%d"),
-        "godzina": datetime.now().strftime("%H:%M"),
-        "modul": modul,
-        "objetosc": objetosc,
-        "profil1": profil1,
-        "profil2": profil2,
-        "parametry": parametry
-    }
+    "data": datetime.now().strftime("%Y-%m-%d"),
+    "godzina": datetime.now().strftime("%H:%M"),
+    "modul": modul,
+    "objetosc": objetosc,
+    "profil1": profil1,
+    "profil2": profil2,
+    "parametry": parametry,
+    "wynik": wynik,
+    "morfologia": morfologia
+}
 
     # 🔥 wczytaj stare
     if os.path.exists(PLIK):

@@ -457,9 +457,10 @@ def ceny(request: Request):
         # LICZENIE (backend)
         # =========================
 
-        if "oblicz" in request.query_params:
+        if "oblicz" in request.query_params or request.query_params.get("parametry"):
             wynik = oblicz_cene(profil, wykonane, morfologia)
-            zapisz_historia("ceny", 0, profil, "", wykonane)
+            if "oblicz" in request.query_params:
+                zapisz_historia("ceny", 0, profil, "", wykonane, wynik, morfologia)
     return templates.TemplateResponse(
         "ceny.html",
         {

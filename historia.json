@@ -1,147 +1,57 @@
 [
   {
-    "id": "89c64b4d-86ad-484a-8612-f48da8f530ea",
-    "data": "2026-03-22",
-    "godzina": "19:26",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "wykonane": [],
-    "morfologia": ""
-  },
-  {
-    "id": "03c5bde6-34e1-46b0-b163-998c5cd45743",
-    "data": "2026-03-22",
-    "godzina": "19:26",
+    "data": "2026-03-23",
+    "godzina": "00:02",
     "modul": "rozcienczenia",
     "objetosc": 120,
     "profil1": "Geriatria podstawowa",
     "profil2": "",
-    "wykonane": [],
-    "morfologia": ""
+    "parametry": [],
+    "wynik": null
   },
   {
-    "id": "fcc2ac99-4961-4ee1-bad9-6ee22c1a6d70",
-    "data": "2026-03-22",
-    "godzina": "19:27",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
+    "data": "2026-03-23",
+    "godzina": "00:02",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
     "profil2": "",
-    "wykonane": [
+    "parametry": [],
+    "wynik": null
+  },
+  {
+    "data": "2026-03-23",
+    "godzina": "00:02",
+    "modul": "kalkulator",
+    "objetosc": 100,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "AST",
       "Albuminy",
-      "ALT",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Fenobarbital",
+      "Cholesterol",
+      "Chlorki",
+      "CRP",
       "CK",
-      "Fosfor nieorganiczny",
-      "Fruktozamina",
-      "GLDH",
-      "Kreatynina",
-      "LDH",
-      "Lipaza (DGGR)",
-      "Magnez",
-      "Mocznik",
-      "Stosunek; albuminy / globuliny",
-      "T4 całkowita",
-      "Trójglicerydy",
-      "Badanie moczu podstawowe",
-      "Badanie osadu moczu",
-      "Morfologia rozszerzona"
-    ],
-    "morfologia": ""
-  },
-  {
-    "id": "ede75bab-9ebf-4ada-b775-598c1f6c2582",
-    "data": "2026-03-22",
-    "godzina": "19:32",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "",
-    "profil2": "",
-    "wykonane": [],
-    "morfologia": ""
-  },
-  {
-    "id": "fb9b9dda-3f0b-4dc7-950a-c80088c1beb5",
-    "data": "2026-03-22",
-    "godzina": "19:35",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "",
-    "profil2": "",
-    "wykonane": [
-      "T4 wolna",
-      "TLI (pies)",
-      "T4 całkowita",
-      "Magnez",
-      "Mocznik",
-      "Kwas moczowy",
-      "Kwas foliowy",
-      "Fosfor nieorganiczny",
       "Bilirubina całkowita",
-      "ALP",
-      "ALT",
-      "AST",
-      "Albuminy"
+      "ALP"
     ],
-    "morfologia": ""
+    "wynik": null
   },
   {
-    "id": "2c1b4e44-8393-48b2-95a4-9e0790cb50fd",
-    "data": "2026-03-22",
-    "godzina": "19:54",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "wykonane": [
-      "ALP",
-      "ALT",
-      "AST",
-      "Albuminy"
-    ],
-    "morfologia": ""
-  },
-  {
-    "id": "c4a81256-42a7-44bb-add8-fde7c4afc98b",
-    "data": "2026-03-22",
-    "godzina": "19:54",
+    "data": "2026-03-23",
+    "godzina": "00:03",
     "modul": "rozcienczenia",
-    "objetosc": 120,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "wykonane": [
-      "Witamina B12"
-    ],
-    "morfologia": ""
-  },
-  {
-    "id": "0074b260-995d-4574-a35e-6d4768ec83c4",
-    "data": "2026-03-22",
-    "godzina": "20:09",
-    "modul": "rozcienczenia",
-    "objetosc": 120,
+    "objetosc": 65,
     "profil1": "",
     "profil2": "",
-    "wykonane": [
+    "parametry": [
       "ALP",
       "ALT",
-      "AST",
-      "Albuminy"
-    ],
-    "morfologia": ""
-  },
-  {
-    "id": "cfde5c0e-f390-4eb0-af1c-c3131e3524c6",
-    "data": "2026-03-22",
-    "godzina": "20:11",
-    "modul": "rozcienczenia",
-    "objetosc": 50,
-    "profil1": "",
-    "profil2": "",
-    "wykonane": [
-      "ALT",
-      "ALP",
       "AST",
       "Albuminy",
       "Białko całkowite",
@@ -151,585 +61,140 @@
       "CRP",
       "Chlorki",
       "Cholesterol",
-      "Fenobarbital"
+      "Fenobarbital",
+      "Fosfor nieorganiczny",
+      "Fruktozamina",
+      "GLDH"
     ],
-    "morfologia": ""
+    "wynik": null
   },
   {
-    "data": "2026-03-22",
-    "godzina": "20:22",
-    "modul": "kalkulator",
-    "objetosc": 120,
+    "data": "2026-03-23",
+    "godzina": "00:13",
+    "modul": "ceny",
+    "objetosc": 0,
     "profil1": "Badanie podstawowe",
     "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:22",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "ALT",
-      "AST",
-      "Albuminy",
-      "CRP",
-      "CK"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:30",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:33",
-    "modul": "kalkulator",
-    "objetosc": 100,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:34",
-    "modul": "kalkulator",
-    "objetosc": 100,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "SAA",
-      "SDMA",
-      "Witamina B12"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:40",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "Witamina B12"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:40",
-    "modul": "rozcienczenia",
-    "objetosc": 60,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "Witamina B12",
-      "Kwas foliowy",
-      "Fruktozamina",
-      "GLDH",
-      "Glukoza",
-      "Kortyzol"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:41",
-    "modul": "rozcienczenia",
-    "objetosc": 80,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "Witamina B12",
-      "Kwas foliowy"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:44",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "TLI (pies)",
-      "T4 wolna",
-      "T4 całkowita"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:46",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "T4 wolna",
-      "TLI (pies)",
-      "T4 całkowita"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:46",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "ALP",
-      "ALT",
-      "AST",
-      "Albuminy",
-      "Białko całkowite",
-      "Bilirubina bezpośrednia",
-      "Bilirubina całkowita",
-      "CK",
-      "CRP",
-      "Chlorki",
-      "Cholesterol",
-      "Fenobarbital"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:49",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
     "parametry": [
       "Albuminy",
-      "Białko całkowite",
-      "Bilirubina bezpośrednia",
-      "Cholesterol",
-      "Chlorki",
-      "CRP"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "20:52",
-    "modul": "kalkulator",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "Albuminy",
-      "Białko całkowite",
-      "Bilirubina bezpośrednia",
-      "Cholesterol",
-      "Chlorki",
-      "CRP"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "21:05",
-    "modul": "kalkulator",
-    "objetosc": 60,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
+      "AP",
       "ALT",
-      "AST",
-      "CK",
-      "CRP",
-      "Chlorki",
-      "Cholesterol",
-      "Fenobarbital"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "21:06",
-    "modul": "kalkulator",
-    "objetosc": 60,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "ALT",
-      "AST",
-      "CK",
-      "CRP",
-      "Chlorki",
-      "Cholesterol",
-      "Fenobarbital"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "21:06",
-    "modul": "kalkulator",
-    "objetosc": 60,
-    "profil1": "",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "21:10",
-    "modul": "kalkulator",
-    "objetosc": 120,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "γ-GT",
-      "α-amylaza",
-      "Żelazo",
-      "Witamina B12",
-      "T4 całkowita",
-      "T4 wolna",
-      "TLI (pies)",
-      "TSH",
-      "Trójglicerydy",
-      "UIBC",
-      "Wapń",
-      "Sód",
-      "SDMA",
-      "SAA",
-      "Progesteron",
-      "Potas",
       "Mocznik",
-      "Magnez"
-    ]
+      "Kreatynina"
+    ],
+    "wynik": null
   },
   {
-    "data": "2026-03-22",
-    "godzina": "21:14",
-    "modul": "rozcienczenia",
-    "objetosc": 65,
-    "profil1": "",
-    "profil2": "",
-    "parametry": [
-      "ALP",
-      "ALT",
-      "AST",
-      "Albuminy",
-      "Białko całkowite",
-      "Bilirubina bezpośrednia",
-      "Bilirubina całkowita",
-      "CK",
-      "CRP",
-      "Chlorki",
-      "Cholesterol",
-      "Fenobarbital"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "22:04",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": [
-      "Fosfor nieorganiczny",
-      "Fruktozamina",
-      "Kreatynina",
-      "LDH",
-      "Lipaza (DGGR)",
-      "Stosunek; albuminy / globuliny",
-      "T4 całkowita",
-      "Badanie moczu podstawowe",
-      "Morfologia rozszerzona"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "22:42",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "22:44",
-    "modul": "ceny",
-    "objetosc": 0,
+    "data": "2026-03-23",
+    "godzina": "00:13",
+    "modul": "kalkulator",
+    "objetosc": 200,
     "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": []
+    "profil2": "Profil trzustkowojelitowy pies",
+    "parametry": [],
+    "wynik": null
   },
   {
-    "data": "2026-03-22",
-    "godzina": "22:49",
+    "data": "2026-03-23",
+    "godzina": "00:14",
     "modul": "ceny",
     "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "22:53",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:06",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": []
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:10",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
+    "profil1": "Profil fretka",
     "profil2": "",
     "parametry": [
-      "ALT",
       "Albuminy",
-      "Chlorki",
-      "Cholesterol",
-      "CK",
+      "ALT",
+      "AP"
+    ],
+    "wynik": {
+      "profil": "Profil fretka",
+      "morfologia": "brak",
+      "parametry_wykonane": [
+        "Albuminy",
+        "ALT",
+        "AP"
+      ],
+      "cena_profilu": 44.0,
+      "ilosc_parametrow": 7,
+      "wykonane": 3,
+      "procent": 42.9,
+      "cena_koncowa": 12.0
+    }
+  },
+  {
+    "data": "2026-03-23",
+    "godzina": "00:15",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Profil fretka",
+    "profil2": "",
+    "parametry": [
+      "[\"Albuminy\"",
+      "\"ALT\"",
+      "\"AP\"]"
+    ],
+    "wynik": {
+      "profil": "Profil fretka",
+      "morfologia": "brak",
+      "parametry_wykonane": [],
+      "cena_profilu": 44.0,
+      "ilosc_parametrow": 7,
+      "wykonane": 0,
+      "procent": 0.0,
+      "cena_koncowa": 0
+    }
+  },
+  {
+    "data": "2026-03-23",
+    "godzina": "00:15",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Profil fretka",
+    "profil2": "",
+    "parametry": [
+      "[]"
+    ],
+    "wynik": {
+      "profil": "Profil fretka",
+      "morfologia": "brak",
+      "parametry_wykonane": [],
+      "cena_profilu": 44.0,
+      "ilosc_parametrow": 7,
+      "wykonane": 0,
+      "procent": 0.0,
+      "cena_koncowa": 0
+    }
+  },
+  {
+    "data": "2026-03-23",
+    "godzina": "00:21",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Badanie podstawowe",
+    "profil2": "",
+    "parametry": [
+      "Morfologia",
+      "Albuminy",
+      "ALT",
+      "AP",
       "AST"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:11",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Albuminy",
-      "ALT",
-      "AP",
-      "AST",
-      "Białko całkowite",
-      "Bilirubina całkowita",
-      "Chlorki",
-      "GLDH",
-      "Globuliny",
-      "Glukoza",
-      "Kreatynina",
-      "Lipaza (DGGR)",
-      "Potas",
-      "Sód",
-      "Stosunek; albuminy / globuliny",
-      "Wapń",
-      "α-amylaza"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:12",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Albuminy",
-      "ALT",
-      "AP",
-      "AST",
-      "Białko całkowite",
-      "Bilirubina całkowita",
-      "Chlorki",
-      "GLDH",
-      "Globuliny",
-      "Glukoza",
-      "Kreatynina",
-      "Lipaza (DGGR)",
-      "Potas"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:13",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Morfologia rozszerzona"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:15",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Badanie przesiewowe papugi",
-    "profil2": "",
-    "parametry": [
-      "Albuminy",
-      "AST"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:23",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria rozszerzona",
-    "profil2": "",
-    "parametry": [
-      "Albuminy",
-      "ALT",
-      "AP",
-      "AST",
-      "Białko całkowite",
-      "Fosfor nieorganiczny",
-      "CK",
-      "Glukoza",
-      "Badanie moczu podstawowe",
-      "Badanie osadu moczu",
-      "Stosunek; białko / kreatynina w moczu",
-      "Morfologia rozszerzona"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:33",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "ALT",
-      "AP",
-      "CK"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:34",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "AP",
-      "AST",
-      "Białko całkowite"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:36",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "AP",
-      "AST",
-      "Białko całkowite"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:36",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "AP",
-      "AST",
-      "Białko całkowite"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:36",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "AP",
-      "AST",
-      "Białko całkowite"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:36",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "AP",
-      "AST",
-      "Białko całkowite"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:38",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Kreatynina",
-      "Glukoza",
-      "Sód",
-      "Potas"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:38",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Kreatynina",
-      "Glukoza",
-      "Sód",
-      "Potas"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:38",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Kreatynina",
-      "Glukoza",
-      "Sód",
-      "Potas"
-    ]
-  },
-  {
-    "data": "2026-03-22",
-    "godzina": "23:44",
-    "modul": "ceny",
-    "objetosc": 0,
-    "profil1": "Geriatria podstawowa",
-    "profil2": "",
-    "parametry": [
-      "Morfologia rozszerzona",
-      "Trójglicerydy",
-      "Wapń",
-      "Potas",
-      "Sód"
-    ]
+    ],
+    "wynik": {
+      "profil": "Badanie podstawowe",
+      "morfologia": "podstawowa",
+      "parametry_wykonane": [
+        "Morfologia",
+        "Albuminy",
+        "ALT",
+        "AP",
+        "AST"
+      ],
+      "cena_profilu": 56.0,
+      "ilosc_parametrow": 11,
+      "wykonane": 5,
+      "procent": 45.5,
+      "cena_koncowa": 39.0
+    },
+    "morfologia": "podstawowa"
   }
 ]

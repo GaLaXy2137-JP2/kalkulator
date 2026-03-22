@@ -73,48 +73,80 @@ LISTA
     <!-- PRAWA -->
     <div class="historia_action">
 
-        {% if h.modul == "kalkulator" %}
-        <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or[]) | tojson | urlencode }}">
-            <button class="btn_przywroc">Przywróć</button>
-        </a>
-        {% endif %}
+    {% if h.modul == "kalkulator" %}
+    <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or[]) | tojson | urlencode }}">
+        <button class="btn_przywroc">Przywróć</button>
+    </a>
+    {% endif %}
 
-        {% if h.modul == "rozcienczenia" %}
-<a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or []) | tojson | urlencode }}">
-            <button class="btn_przywroc">Przywróć</button>
-        </a>
-        {% endif %}
+    {% if h.modul == "rozcienczenia" %}
+    <a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or []) | tojson | urlencode }}">
+        <button class="btn_przywroc">Przywróć</button>
+    </a>
+    {% endif %}
 
-        {% if h.modul == "ceny" %}
-        <a href="/ceny?profil={{ h.profil1 }}">
-            <button class="btn_przywroc">Przywróć</button>
-        </a>
-        {% endif %}
+    {% if h.modul == "ceny" %}
+<a href="/ceny?profil={{ h.profil1 }}
+&parametry={{ (h.parametry or []) | join(',') }}
+&morfologia={{ h.morfologia }}">
+        <button class="btn_przywroc">Przywróć</button>
+    </a>
+    {% endif %}
 
-    </div>
+</div>
 
     <!-- SZCZEGÓŁY -->
     <div class="historia_details">
 
-        {% if h.modul == "kalkulator" %}
-            <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+    {% if h.modul == "kalkulator" %}
+        <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+
+        {% if h.profil1 %}
             <div><b>Profil 1:</b> {{ h.profil1 }}</div>
-            {% if h.profil2 %}
+        {% endif %}
+
+        {% if h.profil2 %}
             <div><b>Profil 2:</b> {{ h.profil2 }}</div>
-            {% endif %}
         {% endif %}
 
-        {% if h.modul == "rozcienczenia" %}
-            <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+        {% if h.parametry %}
+            <div><b>Parametry:</b> {{ h.parametry | length }}</div>
+        {% endif %}
+    {% endif %}
+
+    {% if h.modul == "rozcienczenia" %}
+        <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+
+        {% if h.profil1 %}
             <div><b>Profil:</b> {{ h.profil1 }}</div>
         {% endif %}
 
-        {% if h.modul == "ceny" %}
-            <div><b>Profil:</b> {{ h.profil1 }}</div>
-            <div><b>Wykonane:</b> {{ h.wykonane or "-" }}</div>
+        {% if h.parametry %}
+            <div><b>Parametry:</b> {{ h.parametry | length }}</div>
         {% endif %}
+    {% endif %}
 
-    </div>
+    {% if h.modul == "ceny" and h.wynik %}
+
+        <div><b>Profil:</b> {{ h.wynik.profil }}</div>
+        <div><b>Morfologia:</b> {{ h.wynik.morfologia }}</div>
+
+        <div><b>Wykonane parametry:</b></div>
+        <ul style="margin:5px 0 10px 15px;">
+            {% for p in h.wynik.parametry_wykonane %}
+            <li>{{ p }}</li>
+            {% endfor %}
+        </ul>
+
+        <div><b>Ilość badań:</b> {{ h.wynik.ilosc_parametrow }}</div>
+        <div><b>Wykonano:</b> {{ h.wynik.wykonane }}</div>
+        <div><b>Procent:</b> {{ h.wynik.procent }} %</div>
+
+        <div><b>Cena:</b> {{ h.wynik.cena_koncowa }} zł</div>
+
+    {% endif %}
+
+</div>
 
 </div>
 
