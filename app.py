@@ -392,7 +392,12 @@ def ceny(request: Request):
 
     profil = request.query_params.get("profil")
     morfologia = request.query_params.get("morfologia", "brak")
-    wykonane = request.query_params.getlist("wykonane")
+    parametry_input = request.query_params.get("parametry")
+
+    if parametry_input:
+        wykonane = [p.strip() for p in parametry_input.split(",")]
+    else:
+        wykonane = []
 
     wynik = None
     sekcje = None
@@ -425,7 +430,8 @@ def ceny(request: Request):
 
         # czy profil ma morfologię
         ma_morfologie = profile_morf.get(profil, 0) == 1
-
+        print("PARAMETRY CENY:", parametry_ceny)
+        print("WYKONANE:", wykonane)
         # =========================
         # PODZIAŁ NA SEKCJE
         # =========================

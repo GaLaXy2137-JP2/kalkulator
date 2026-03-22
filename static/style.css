@@ -212,46 +212,6 @@ SZCZEGÓŁY
 }
 
 /* =========================
-PARAMETRY CEN (BUTTON STYLE)
-========================= */
-.parametry_ceny {
-display: flex;
-flex-wrap: wrap;
-gap: 8px;
-margin-top: 10px;
-}
-.parametr_ceny {
-display: inline-block;
-}
-.parametr_ceny input {
-display: none; /* 🔥 ukrywamy checkbox */
-}
-.parametr_ceny span {
-display: inline-block;
-padding: 8px 14px;
-border-radius: 8px;
-background: #f1f5f9;
-border: 1px solid #d1d5db;
-cursor: pointer;
-transition: 0.2s;
-font-size: 14px;
-}
-/* hover */
-.parametr_ceny span:hover {
-background: #e2e8f0;
-}
-/* 🔥 WYBRANE */
-.parametr_ceny input:checked + span {
-background: #2563eb;
-color: white;
-border-color: #2563eb;
-font-weight: 600;
-}
-/* klik efekt */
-.parametr_ceny span:active {
-transform: scale(0.97);
-}
-/* =========================
 STICKY PANEL
 ========================= */
 .sticky_panel {
@@ -461,4 +421,34 @@ FIX DATA/GODZINA
 .historia_data .data_dzien,
 .historia_data .data_godzina{
     display:block;
+}
+
+/* =========================
+PARAMETRY BUTTONY
+========================= */
+
+.param_btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    margin: 4px;
+}
+
+/* hover */
+.param_btn:hover {
+    background: #e8f0ff;
+    border-color: #7aa7ff;
+}
+
+/* aktywny */
+.param_btn.active {
+    background: #2ecc71;
+    color: white;
+    border-color: #27ae60;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }

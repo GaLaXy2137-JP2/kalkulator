@@ -421,5 +421,180 @@
       "Cholesterol",
       "Fenobarbital"
     ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "22:04",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": [
+      "Fosfor nieorganiczny",
+      "Fruktozamina",
+      "Kreatynina",
+      "LDH",
+      "Lipaza (DGGR)",
+      "Stosunek; albuminy / globuliny",
+      "T4 całkowita",
+      "Badanie moczu podstawowe",
+      "Morfologia rozszerzona"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "22:42",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "22:44",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "22:49",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "22:53",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:06",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:10",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "Albuminy",
+      "Chlorki",
+      "Cholesterol",
+      "CK",
+      "AST"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:11",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "ALT",
+      "AP",
+      "AST",
+      "Białko całkowite",
+      "Bilirubina całkowita",
+      "Chlorki",
+      "GLDH",
+      "Globuliny",
+      "Glukoza",
+      "Kreatynina",
+      "Lipaza (DGGR)",
+      "Potas",
+      "Sód",
+      "Stosunek; albuminy / globuliny",
+      "Wapń",
+      "α-amylaza"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:12",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "ALT",
+      "AP",
+      "AST",
+      "Białko całkowite",
+      "Bilirubina całkowita",
+      "Chlorki",
+      "GLDH",
+      "Globuliny",
+      "Glukoza",
+      "Kreatynina",
+      "Lipaza (DGGR)",
+      "Potas"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:13",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Morfologia rozszerzona"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:15",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Badanie przesiewowe papugi",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "AST"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:23",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "ALT",
+      "AP",
+      "AST",
+      "Białko całkowite",
+      "Fosfor nieorganiczny",
+      "CK",
+      "Glukoza",
+      "Badanie moczu podstawowe",
+      "Badanie osadu moczu",
+      "Stosunek; białko / kreatynina w moczu",
+      "Morfologia rozszerzona"
+    ]
   }
 ]

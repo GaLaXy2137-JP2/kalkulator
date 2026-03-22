@@ -8,13 +8,10 @@
 <form method="get" action="/ceny">
 
 <input type="hidden" name="morfologia" id="morfologia_hidden" value="{{ morfologia }}">
-<!-- =========================
-PROFIL (NOWY INPUT)
-========================= -->
+<input type="hidden" id="parametry_input" name="parametry">
 
 <div class="top_controls">
 
-    <!-- PROFIL -->
     <div class="profil_wrapper">
         <label>Profil</label>
 
@@ -28,36 +25,34 @@ PROFIL (NOWY INPUT)
                 value="{{ wybrany_profil or '' }}"
                 autocomplete="off"
             >
-
             <div id="profil_lista" class="profil_lista"></div>
         </div>
     </div>
 
-    <!-- MORFOLOGIA -->
     {% if wybrany_profil and ma_morfologie %}
 
     <div class="morfologia_wrapper">
 
         <label>Morfologia</label>
 
-            <div class="switch_morfologia">
+        <div class="switch_morfologia">
 
-                <button type="button" data-value="brak"
-                    class="{% if morfologia == 'brak' %}active{% endif %}">
-                    Brak
-        	</button>
+            <button type="button" data-value="brak"
+                class="{% if morfologia == 'brak' %}active{% endif %}">
+                Brak
+            </button>
 
-    	        <button type="button" data-value="podstawowa"
-        	    class="{% if morfologia == 'podstawowa' %}active{% endif %}">
-        	    Podstawowa
-    	        </button>
+            <button type="button" data-value="podstawowa"
+                class="{% if morfologia == 'podstawowa' %}active{% endif %}">
+                Podstawowa
+            </button>
 
-                <button type="button" data-value="rozszerzona"
-                    class="{% if morfologia == 'rozszerzona' %}active{% endif %}">
-                    Rozszerzona
-                </button>
+            <button type="button" data-value="rozszerzona"
+                class="{% if morfologia == 'rozszerzona' %}active{% endif %}">
+                Rozszerzona
+            </button>
 
-            </div>
+        </div>
 
     </div>
 
@@ -65,83 +60,63 @@ PROFIL (NOWY INPUT)
 
 </div>
 
-<!-- =========================
-PARAMETRY
-========================= -->
-
 {% if wybrany_profil and sekcje and not wynik %}
 
 <h3>Wykonane badania</h3>
 
 <p id="profil_counter" style="margin-bottom:15px;font-weight:600">
-Profil wykonany: 0/0 (0%)
+Profil wykonany: 
+<span id="total_count">0</span>/<span id="total_all">0</span> 
+(<span id="total_percent">0</span>%)
 </p>
 
 <h4 class="sekcja_naglowek">
 Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})
 </h4>
 
-<div class="parametry_ceny">
-
+<div id="parametry_box">
 {% for p in sekcje.biochemia %}
-<label class="parametr_ceny">
-    <input type="checkbox" class="bio_box" name="wykonane" value="{{p}}">
-    <span>{{p}}</span>
-</label>
+<button type="button" class="param_btn" onclick="toggleParametr('{{p}}')">
+    {{p}}
+</button>
 {% endfor %}
-
 </div>
 
 {% if sekcje.mocz %}
-
 <h4 class="sekcja_naglowek">
 Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})
 </h4>
 
-<div class="parametry_ceny">
-
+<div id="parametry_box">
 {% for p in sekcje.mocz %}
-<label class="parametr_ceny">
-    <input type="checkbox" class="mocz_box" name="wykonane" value="{{p}}">
-    <span>{{p}}</span>
-</label>
+<button type="button" class="param_btn" onclick="toggleParametr('{{p}}')">
+    {{p}}
+</button>
 {% endfor %}
-
 </div>
-
 {% endif %}
 
 {% if ma_morfologie and morfologia != "brak" %}
-
 <h4 class="sekcja_naglowek">
 Morfologia (<span id="morfo_count">0</span>/1)
 </h4>
 
-<div class="parametry_ceny">
-
+<div id="parametry_box">
 {% if morfologia == "podstawowa" %}
-<label class="parametr_ceny">
-    <input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia">
-    <span>Morfologia</span>
-</label>
+<button type="button" class="param_btn" onclick="toggleParametr('Morfologia')">
+    Morfologia
+</button>
 {% endif %}
 
 {% if morfologia == "rozszerzona" %}
-<label class="parametr_ceny">
-    <input type="checkbox" class="morfo_box" name="wykonane" value="Morfologia rozszerzona">
-    <span>Morfologia rozszerzona</span>
-</label>
+<button type="button" class="param_btn" onclick="toggleParametr('Morfologia rozszerzona')">
+    Morfologia rozszerzona
+</button>
 {% endif %}
-
 </div>
-
 {% endif %}
 
 <br>
-
-<!-- =========================
-STICKY PANEL
-========================= -->
 
 <div class="sticky_panel">
 
@@ -162,10 +137,6 @@ STICKY PANEL
 {% endif %}
 
 </form>
-
-<!-- =========================
-WYNIK
-========================= -->
 
 {% if wynik %}
 
@@ -200,48 +171,98 @@ Cena końcowa: {{ wynik.cena_koncowa }} zł
 
 </div>
 
-<!-- =========================
-JS
-========================= -->
-
 <script>
 
-const profileList = {{ profile | tojson }};
 const parametry = {{ parametry_ceny | tojson | safe }}
 const cenaProfilu = {{ cena_profilu | default(0) }}
+const profileList = {{ profile | tojson }};
+// =========================
+// TOGGLE
+// =========================
+
+function toggleParametr(p){
+
+    let input = document.getElementById("parametry_input")
+
+    let current = input.value
+        ? input.value.split(",").map(x => x.trim())
+        : []
+
+    let btns = document.querySelectorAll(".param_btn")
+    let clickedBtn = Array.from(btns).find(b => b.innerText === p)
+
+    if(current.includes(p)){
+        current = current.filter(x => x !== p)
+        if(clickedBtn) clickedBtn.classList.remove("active")
+    } else {
+        current.push(p)
+        if(clickedBtn) clickedBtn.classList.add("active")
+    }
+
+    input.value = current.join(", ")
+
+    updateCounters()
+    policzCeneLive()
+}
+
+// =========================
+// LICZNIKI
+// =========================
 
 function updateCounters(){
 
-    const all = document.querySelectorAll("input[name='wykonane']")
-    const checked = document.querySelectorAll("input[name='wykonane']:checked")
+    const all = document.querySelectorAll(".param_btn")
+    const active = document.querySelectorAll(".param_btn.active")
 
     const totalAll = all.length
-    const totalChecked = checked.length
+    const totalChecked = active.length
 
     let percent = totalAll > 0 ? Math.round((totalChecked / totalAll) * 100) : 0
 
+    // sticky (już masz)
     document.getElementById("sticky_text").textContent =
         totalChecked + "/" + totalAll + " (" + percent + "%)"
 
-    const profilCounter = document.getElementById("profil_counter")
-    if(profilCounter){
-        profilCounter.textContent =
-            "Profil wykonany: " + totalChecked + "/" + totalAll + " (" + percent + "%)"
+    // 🔥 GÓRNY LICZNIK
+    document.getElementById("total_count").textContent = totalChecked
+    document.getElementById("total_all").textContent = totalAll
+    document.getElementById("total_percent").textContent = percent
+
+    // 🔥 BIOCHEMIA
+    const bioAll = document.querySelectorAll(".param_btn")
+    const bioActive = document.querySelectorAll(".param_btn.active")
+
+    if(document.getElementById("bio_count")){
+        document.getElementById("bio_count").textContent = bioActive.length
+    }
+
+    // 🔥 MOCZ (tylko jeśli istnieje)
+    if(document.getElementById("mocz_count")){
+        const moczActive = Array.from(document.querySelectorAll(".param_btn.active"))
+            .filter(btn => btn.closest("div").previousElementSibling?.innerText.includes("Mocz"))
+        document.getElementById("mocz_count").textContent = moczActive.length
+    }
+
+    // 🔥 MORFOLOGIA
+    if(document.getElementById("morfo_count")){
+        const morfoActive = Array.from(document.querySelectorAll(".param_btn.active"))
+            .filter(btn => btn.innerText.toLowerCase().includes("morfologia"))
+        document.getElementById("morfo_count").textContent = morfoActive.length
     }
 }
+// =========================
+// LIVE CENA
+// =========================
 
 function policzCeneLive(){
 
-    let all = document.querySelectorAll("input[name='wykonane']")
-    let checked = document.querySelectorAll("input[name='wykonane']:checked")
+    let all = Array.from(document.querySelectorAll(".param_btn"))
+        .map(b => b.innerText.trim())
 
-    let lista = []
-    let wykonane = []
+    let wykonane = Array.from(document.querySelectorAll(".param_btn.active"))
+        .map(b => b.innerText.trim())
 
-    all.forEach(c => lista.push(c.value.trim()))
-    checked.forEach(c => wykonane.push(c.value.trim()))
-
-    let procent = lista.length > 0 ? wykonane.length / lista.length : 0
+    let procent = all.length > 0 ? wykonane.length / all.length : 0
 
     let cena = 0
 
@@ -258,7 +279,7 @@ function policzCeneLive(){
 
         cena = cenaProfilu
 
-        lista.forEach(p => {
+        all.forEach(p => {
             if(!wykonane.includes(p)){
                 let d = parametry[p]
                 if(d && d.odejmij !== "???"){
@@ -271,32 +292,14 @@ function policzCeneLive(){
     document.getElementById("live_cena").textContent =
         cena.toFixed(2) + " zł"
 }
-
-document.addEventListener("change", () => {
-    updateCounters()
-    policzCeneLive()
-})
+// =========================
+// INIT
+// =========================
 
 document.addEventListener("DOMContentLoaded", () => {
     updateCounters()
     policzCeneLive()
 })
-
-function kopiujCene(){
-
-    const tekst = "{{ wynik.cena_koncowa }}"
-    navigator.clipboard.writeText(tekst)
-
-    const btn = document.getElementById("copy_btn")
-    const original = btn.textContent
-
-    btn.textContent = "✔ Skopiowano"
-
-    setTimeout(()=> btn.textContent = original, 2000)
-}
-
-/* AUTOCOMPLETE */
-
 const inputProfil = document.getElementById("profil_input")
 const listaProfil = document.getElementById("profil_lista")
 
@@ -322,12 +325,12 @@ function pokazListe(filtrowane){
     })
 }
 
-// 🔥 klik = pokaż wszystko
+// klik → pokaż wszystko
 inputProfil.addEventListener("focus", () => {
     pokazListe(profileList)
 })
 
-// 🔥 wpisywanie = filtr
+// wpisywanie → filtr
 inputProfil.addEventListener("input", function(){
 
     const value = this.value.toLowerCase()
@@ -339,7 +342,7 @@ inputProfil.addEventListener("input", function(){
     pokazListe(filtered)
 })
 
-// 🔥 klik poza = zamknij
+// klik poza → zamknij
 document.addEventListener("click", (e) => {
     if(!document.getElementById("profil_box").contains(e.target)){
         listaProfil.innerHTML = ""
@@ -355,19 +358,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btn.addEventListener("click", function(){
 
-            // 🔥 usuń active
+            // usuń active
             buttons.forEach(b => b.classList.remove("active"))
 
-            // 🔥 dodaj active
+            // dodaj active
             this.classList.add("active")
 
-            // 🔥 ustaw hidden input
+            // ustaw hidden
             const hidden = document.getElementById("morfologia_hidden")
             if(hidden){
                 hidden.value = this.dataset.value
             }
 
-            // 🔥 submit formularza
+            // 🔥 KLUCZ – przeładuj stronę
             this.closest("form").submit()
 
         })
