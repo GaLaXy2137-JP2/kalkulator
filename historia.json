@@ -596,5 +596,140 @@
       "Stosunek; białko / kreatynina w moczu",
       "Morfologia rozszerzona"
     ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:33",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "AP",
+      "CK"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:34",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "AP",
+      "AST",
+      "Białko całkowite"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:36",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "AP",
+      "AST",
+      "Białko całkowite"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:36",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "AP",
+      "AST",
+      "Białko całkowite"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:36",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "AP",
+      "AST",
+      "Białko całkowite"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:36",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "AP",
+      "AST",
+      "Białko całkowite"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:38",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Kreatynina",
+      "Glukoza",
+      "Sód",
+      "Potas"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:38",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Kreatynina",
+      "Glukoza",
+      "Sód",
+      "Potas"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:38",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Kreatynina",
+      "Glukoza",
+      "Sód",
+      "Potas"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "23:44",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "Morfologia rozszerzona",
+      "Trójglicerydy",
+      "Wapń",
+      "Potas",
+      "Sód"
+    ]
   }
 ]

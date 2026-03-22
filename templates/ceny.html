@@ -11,7 +11,7 @@
 <input type="hidden" id="parametry_input" name="parametry">
 
 <div class="top_controls">
-
+{% if not wynik %}
     <div class="profil_wrapper">
         <label>Profil</label>
 
@@ -28,8 +28,8 @@
             <div id="profil_lista" class="profil_lista"></div>
         </div>
     </div>
-
-    {% if wybrany_profil and ma_morfologie %}
+    {% endif %}
+    {% if wybrany_profil and ma_morfologie and not wynik %}
 
     <div class="morfologia_wrapper">
 
@@ -144,8 +144,18 @@ Morfologia (<span id="morfo_count">0</span>/1)
 
 <h3>Wynik</h3>
 
+<p><b>Profil:</b> {{ wynik.profil }}</p>
+<p><b>Morfologia:</b> {{ wynik.morfologia }}</p>
+
+<p><b>Wykonane parametry:</b></p>
+<ul>
+{% for p in wynik.parametry_wykonane %}
+    <li>{{ p }}</li>
+{% endfor %}
+</ul>
+
 <p>Cena z cennika: {{ wynik.cena_profilu }} zł</p>
-<p>Ilość badań: {{ wynik.ilosc_parametrow }}</p>
+<p>Ilość badań (profil): {{ wynik.ilosc_parametrow }}</p>
 <p>Wykonano: {{ wynik.wykonane }}</p>
 <p>Procent: {{ wynik.procent }} %</p>
 

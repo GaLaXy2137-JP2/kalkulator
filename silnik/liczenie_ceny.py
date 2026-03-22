@@ -186,11 +186,12 @@ def oblicz_cene(profil, wykonane, morfologia):
                     cena -= float(dane["odejmij"])
 
     return {
-
-        "cena_profilu": cena_profilu,
-        "ilosc_parametrow": liczba_parametrow,
-        "wykonane": liczba_wykonanych,
-        "procent": round(procent * 100, 1),
-        "cena_koncowa": round(cena, 2)
-
-    }
+    "profil": profil,
+    "morfologia": morfologia,
+    "parametry_wykonane": wykonane,
+    "cena_profilu": cena_profilu,
+    "ilosc_parametrow": liczba_parametrow,
+    "wykonane": liczba_wykonanych,
+    "procent": round(procent * 100, 1),
+    "cena_koncowa": round(cena, 2)
+}
