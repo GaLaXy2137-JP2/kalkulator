@@ -209,5 +209,44 @@
       "SDMA",
       "Witamina B12"
     ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:40",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "Witamina B12"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:40",
+    "modul": "rozcienczenia",
+    "objetosc": 60,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "Witamina B12",
+      "Kwas foliowy",
+      "Fruktozamina",
+      "GLDH",
+      "Glukoza",
+      "Kortyzol"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:41",
+    "modul": "rozcienczenia",
+    "objetosc": 80,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "Witamina B12",
+      "Kwas foliowy"
+    ]
   }
 ]
