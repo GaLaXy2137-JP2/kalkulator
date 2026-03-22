@@ -5,6 +5,7 @@
 
 const profileList = {{ profile | tojson }}
 const parametryList = {{ parametry_lista | tojson | safe }}
+const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 
 
 // =========================
@@ -81,18 +82,22 @@ document.getElementById("btn_profil2").style.display="block"
 
 function toggleParametryBox(){
 
-let box = document.getElementById("parametry_box")
-let btn = document.getElementById("btn_parametry")
+    let box = document.getElementById("parametry_box")
+    let btn = document.getElementById("btn_parametry")
 
-if(box.style.display === "none"){
-    box.style.display = "block"
-    btn.innerText = "− Ukryj dodatkowe parametry"
-    btn.classList.add("hide")
-} else {
-    box.style.display = "none"
-    btn.innerText = "+ Dodaj dodatkowe parametry"
-    btn.classList.remove("hide")
-}
+    let isVisible = box.style.display === "block"
+
+    if(isVisible){
+        box.style.display = "none"
+        btn.innerText = "+ Dodaj dodatkowe parametry"
+        btn.classList.remove("hide")
+    } else {
+        box.style.display = "block"
+        btn.innerText = "− Ukryj dodatkowe parametry"
+        btn.classList.add("hide")
+
+        renderParametry()
+    }
 
 }
 
@@ -141,7 +146,9 @@ function renderParametry(){
         btn.type = "button"
         btn.innerText = p
         btn.className = "param_btn"
-
+if(parametryWybrane.includes(p)){
+    btn.classList.add("active")
+}
         btn.onclick = () => toggleParametr(p)
 
         container.appendChild(btn)
@@ -174,6 +181,26 @@ btn.innerText = "Kopiuj komunikat do CRM"
 
 }
 
+document.addEventListener("DOMContentLoaded", function(){
+
+    if(parametryWybrane.length > 0){
+
+        const input = document.getElementById("parametry_input")
+        input.value = parametryWybrane.join(", ")
+
+        const box = document.getElementById("parametry_box")
+        const btn = document.getElementById("btn_parametry")
+
+        box.style.display = "block"
+
+        // 🔥 TO DODAJ
+        btn.innerText = "− Ukryj dodatkowe parametry"
+        btn.classList.add("hide")
+
+        renderParametry()
+    }
+
+})
 </script>
 
 

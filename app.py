@@ -206,6 +206,7 @@ def strona(request: Request):
         except:
             wynik = None
 
+    # ✅ TO MUSI BYĆ W ŚRODKU FUNKCJI
     return templates.TemplateResponse(
         "kalkulator.html",
         {
@@ -216,9 +217,9 @@ def strona(request: Request):
             "objetosc": objetosc,
             "profil1": profil1,
             "profil2": profil2,
-            "parametry_wybrane": parametry_wybrane  # 🔥 KLUCZ
+            "parametry_wybrane": parametry_wybrane,
         }
-    )  
+    ) 
   
 # =========================  
 # OBLICZENIE KALKULATORA  

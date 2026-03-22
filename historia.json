@@ -248,5 +248,178 @@
       "Witamina B12",
       "Kwas foliowy"
     ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:44",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "TLI (pies)",
+      "T4 wolna",
+      "T4 całkowita"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:46",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "T4 wolna",
+      "TLI (pies)",
+      "T4 całkowita"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:46",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Bilirubina całkowita",
+      "CK",
+      "CRP",
+      "Chlorki",
+      "Cholesterol",
+      "Fenobarbital"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:49",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Cholesterol",
+      "Chlorki",
+      "CRP"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:52",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Cholesterol",
+      "Chlorki",
+      "CRP"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "21:05",
+    "modul": "kalkulator",
+    "objetosc": 60,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "AST",
+      "CK",
+      "CRP",
+      "Chlorki",
+      "Cholesterol",
+      "Fenobarbital"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "21:06",
+    "modul": "kalkulator",
+    "objetosc": 60,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "AST",
+      "CK",
+      "CRP",
+      "Chlorki",
+      "Cholesterol",
+      "Fenobarbital"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "21:06",
+    "modul": "kalkulator",
+    "objetosc": 60,
+    "profil1": "",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "21:10",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "γ-GT",
+      "α-amylaza",
+      "Żelazo",
+      "Witamina B12",
+      "T4 całkowita",
+      "T4 wolna",
+      "TLI (pies)",
+      "TSH",
+      "Trójglicerydy",
+      "UIBC",
+      "Wapń",
+      "Sód",
+      "SDMA",
+      "SAA",
+      "Progesteron",
+      "Potas",
+      "Mocznik",
+      "Magnez"
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "21:14",
+    "modul": "rozcienczenia",
+    "objetosc": 65,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Bilirubina całkowita",
+      "CK",
+      "CRP",
+      "Chlorki",
+      "Cholesterol",
+      "Fenobarbital"
+    ]
   }
 ]

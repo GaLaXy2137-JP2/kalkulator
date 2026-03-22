@@ -5,7 +5,7 @@
 
 const profileList = {{ profile | tojson }}
 const parametryList = {{ parametry_lista | tojson | safe }}
-
+const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 console.log("PARAMETRY:", parametryList)
 
 // =========================
@@ -135,7 +135,7 @@ function renderParametry(){
         btn.type = "button"
         btn.innerText = p
         btn.className = "param_btn"
-
+	if(parametryWybrane.includes(p)){ btn.classList.add("active") }
         btn.onclick = () => toggleParametr(p)
 
         container.appendChild(btn)
@@ -168,7 +168,28 @@ function toggleParametr(p){
 
     input.value = current.join(", ")
 }
+ document.addEventListener("DOMContentLoaded", function(){
 
+    if(parametryWybrane.length > 0){
+
+        // 🔥 wpisz do inputa
+        document.getElementById("parametry_input").value =
+            parametryWybrane.join(", ")
+
+        // 🔥 otwórz panel
+        const box = document.getElementById("parametry_box")
+        const btn = document.getElementById("btn_parametry")
+
+        box.style.display = "block"
+
+        btn.innerText = "− Ukryj dodatkowe parametry"
+        btn.classList.add("hide")
+
+        // 🔥 render
+        renderParametry()
+    }
+
+})
 </script>
 
 
