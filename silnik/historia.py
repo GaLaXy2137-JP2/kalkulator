@@ -1,24 +1,35 @@
-import csv
+import json
 from datetime import datetime
+import os
 
-PLIK = "historia.csv"
+PLIK = "historia.json"
 
-def zapisz_historia(modul, objetosc, profil1, profil2="", wykonane=""):
 
-    teraz = datetime.now()
+def zapisz_historia(modul, objetosc, profil1, profil2, parametry):
 
-    data = teraz.strftime("%Y-%m-%d")
-    godzina = teraz.strftime("%H:%M")
+    wpis = {
+        "data": datetime.now().strftime("%Y-%m-%d"),
+        "godzina": datetime.now().strftime("%H:%M"),
+        "modul": modul,
+        "objetosc": objetosc,
+        "profil1": profil1,
+        "profil2": profil2,
+        "parametry": parametry
+    }
 
-    with open(PLIK, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+    # 🔥 wczytaj stare
+    if os.path.exists(PLIK):
+        with open(PLIK, encoding="utf-8") as f:
+            try:
+                dane = json.load(f)
+            except:
+                dane = []
+    else:
+        dane = []
 
-        writer.writerow([
-            data,
-            godzina,
-            modul,
-            objetosc,
-            profil1,
-            profil2,
-            wykonane
-        ])
+    # 🔥 dodaj nowy wpis
+    dane.append(wpis)
+
+    # 🔥 zapisz
+    with open(PLIK, "w", encoding="utf-8") as f:
+        json.dump(dane, f, ensure_ascii=False, indent=2)

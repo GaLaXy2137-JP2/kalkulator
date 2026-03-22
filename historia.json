@@ -1,0 +1,182 @@
+[
+  {
+    "id": "89c64b4d-86ad-484a-8612-f48da8f530ea",
+    "data": "2026-03-22",
+    "godzina": "19:26",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "wykonane": [],
+    "morfologia": ""
+  },
+  {
+    "id": "03c5bde6-34e1-46b0-b163-998c5cd45743",
+    "data": "2026-03-22",
+    "godzina": "19:26",
+    "modul": "rozcienczenia",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "wykonane": [],
+    "morfologia": ""
+  },
+  {
+    "id": "fcc2ac99-4961-4ee1-bad9-6ee22c1a6d70",
+    "data": "2026-03-22",
+    "godzina": "19:27",
+    "modul": "ceny",
+    "objetosc": 0,
+    "profil1": "Geriatria rozszerzona",
+    "profil2": "",
+    "wykonane": [
+      "Albuminy",
+      "ALT",
+      "CK",
+      "Fosfor nieorganiczny",
+      "Fruktozamina",
+      "GLDH",
+      "Kreatynina",
+      "LDH",
+      "Lipaza (DGGR)",
+      "Magnez",
+      "Mocznik",
+      "Stosunek; albuminy / globuliny",
+      "T4 całkowita",
+      "Trójglicerydy",
+      "Badanie moczu podstawowe",
+      "Badanie osadu moczu",
+      "Morfologia rozszerzona"
+    ],
+    "morfologia": ""
+  },
+  {
+    "id": "ede75bab-9ebf-4ada-b775-598c1f6c2582",
+    "data": "2026-03-22",
+    "godzina": "19:32",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "",
+    "profil2": "",
+    "wykonane": [],
+    "morfologia": ""
+  },
+  {
+    "id": "fb9b9dda-3f0b-4dc7-950a-c80088c1beb5",
+    "data": "2026-03-22",
+    "godzina": "19:35",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "",
+    "profil2": "",
+    "wykonane": [
+      "T4 wolna",
+      "TLI (pies)",
+      "T4 całkowita",
+      "Magnez",
+      "Mocznik",
+      "Kwas moczowy",
+      "Kwas foliowy",
+      "Fosfor nieorganiczny",
+      "Bilirubina całkowita",
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy"
+    ],
+    "morfologia": ""
+  },
+  {
+    "id": "2c1b4e44-8393-48b2-95a4-9e0790cb50fd",
+    "data": "2026-03-22",
+    "godzina": "19:54",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "wykonane": [
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy"
+    ],
+    "morfologia": ""
+  },
+  {
+    "id": "c4a81256-42a7-44bb-add8-fde7c4afc98b",
+    "data": "2026-03-22",
+    "godzina": "19:54",
+    "modul": "rozcienczenia",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "wykonane": [
+      "Witamina B12"
+    ],
+    "morfologia": ""
+  },
+  {
+    "id": "0074b260-995d-4574-a35e-6d4768ec83c4",
+    "data": "2026-03-22",
+    "godzina": "20:09",
+    "modul": "rozcienczenia",
+    "objetosc": 120,
+    "profil1": "",
+    "profil2": "",
+    "wykonane": [
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy"
+    ],
+    "morfologia": ""
+  },
+  {
+    "id": "cfde5c0e-f390-4eb0-af1c-c3131e3524c6",
+    "data": "2026-03-22",
+    "godzina": "20:11",
+    "modul": "rozcienczenia",
+    "objetosc": 50,
+    "profil1": "",
+    "profil2": "",
+    "wykonane": [
+      "ALT",
+      "ALP",
+      "AST",
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Bilirubina całkowita",
+      "CK",
+      "CRP",
+      "Chlorki",
+      "Cholesterol",
+      "Fenobarbital"
+    ],
+    "morfologia": ""
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:22",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "Badanie podstawowe",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:22",
+    "modul": "kalkulator",
+    "objetosc": 65,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "ALT",
+      "AST",
+      "Albuminy",
+      "CRP",
+      "CK"
+    ]
+  }
+]

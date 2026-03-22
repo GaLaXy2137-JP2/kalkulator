@@ -227,7 +227,7 @@ def oblicz(
   
     wynik = policz(objetosc, profil1, profil2, parametry_wybrane)  
   
-    zapisz_historia("kalkulator", objetosc, profil1, profil2)  
+    zapisz_historia("kalkulator", objetosc, profil1, profil2, parametry_wybrane)  
   
     return templates.TemplateResponse(  
         "kalkulator.html",  
@@ -312,7 +312,7 @@ def oblicz_rozcienczenia(
         parametry
     )
 
-    zapisz_historia("rozcienczenia", objetosc, profil1, profil2)
+    zapisz_historia("rozcienczenia", objetosc, profil1, profil2, parametry_wybrane)
 
     return templates.TemplateResponse(
         "rozcienczenia.html",
@@ -330,16 +330,14 @@ def oblicz_rozcienczenia(
 # STRONA HISTORII
 # =========================
 
+import json
+
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
 
-    dane = []
-
     try:
-        with open("historia.csv", newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for r in reader:
-                dane.append(r)
+        with open("historia.json", encoding="utf-8") as f:
+            dane = json.load(f)
     except:
         dane = []
 
