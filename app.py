@@ -11,6 +11,7 @@ from silnik.liczenie_ceny import (
     wczytaj_ceny_morfologii  
 )  
 import csv  
+import json
   
 # =========================  
 # SILNIKI  
@@ -178,33 +179,45 @@ def policz(objetosc, profil1, profil2, parametry_wybrane):
 # STRONA KALKULATORA  
 # =========================  
   
-@app.get("/", response_class=HTMLResponse)  
-def strona(request: Request):  
-  
-    objetosc = request.query_params.get("objetosc")  
-    profil1 = request.query_params.get("profil1")  
-    profil2 = request.query_params.get("profil2")  
-  
-    wynik = None  
-  
-    if objetosc:  
-        try:  
-            objetosc_int = int(objetosc)  
-            wynik = policz(objetosc_int, profil1, profil2, [])  
-        except:  
-            wynik = None  
-  
-    return templates.TemplateResponse(  
-        "kalkulator.html",  
-        {  
-            "request": request,  
-            "profile": lista_profili(),  
-            "parametry_lista": lista_parametrow(),  
-            "wynik": wynik,  
-            "objetosc": objetosc,  
-            "profil1": profil1,  
-            "profil2": profil2  
-        }  
+@app.get("/", response_class=HTMLResponse)
+def strona(request: Request):
+
+    objetosc = request.query_params.get("objetosc")
+    profil1 = request.query_params.get("profil1")
+    profil2 = request.query_params.get("profil2")
+
+    # 🔥 PARAMETRY Z URL
+    parametry_qs = request.query_params.get("parametry")
+
+    if parametry_qs:
+        try:
+            parametry_wybrane = json.loads(parametry_qs)
+        except:
+            parametry_wybrane = []
+    else:
+        parametry_wybrane = []
+
+    wynik = None
+
+    if objetosc:
+        try:
+            objetosc_int = int(objetosc)
+            wynik = policz(objetosc_int, profil1, profil2, parametry_wybrane)
+        except:
+            wynik = None
+
+    return templates.TemplateResponse(
+        "kalkulator.html",
+        {
+            "request": request,
+            "profile": lista_profili(),
+            "parametry_lista": lista_parametrow(),
+            "wynik": wynik,
+            "objetosc": objetosc,
+            "profil1": profil1,
+            "profil2": profil2,
+            "parametry_wybrane": parametry_wybrane  # 🔥 KLUCZ
+        }
     )  
   
 # =========================  
@@ -238,7 +251,8 @@ def oblicz(
             "wynik": wynik,  
             "objetosc": objetosc,  
             "profil1": profil1,  
-            "profil2": profil2  
+            "profil2": profil2, 
+	    "parametry_wybrane": parametry_wybrane 
         }  
     )  
   
@@ -246,42 +260,55 @@ def oblicz(
 # STRONA ROZCIEŃCZEŃ  
 # =========================  
   
-@app.get("/rozcienczenia", response_class=HTMLResponse)  
-def rozcienczenia_strona(request: Request):  
-  
-    objetosc = request.query_params.get("objetosc")  
-    profil1 = request.query_params.get("profil1")  
-    profil2 = request.query_params.get("profil2")  
-  
-    wynik = None  
-  
-    if objetosc:  
-        try:  
-            objetosc_int = int(objetosc)  
-  
-            lista = parametry_z_profili(profil1, profil2)  
-  
-            wynik = policz_rozcienczenia(  
-                objetosc_int,  
-                lista,  
-                parametry  
-            )  
-        except:  
-            wynik = None  
-  
-    return templates.TemplateResponse(  
-        "rozcienczenia.html",  
-        {  
-            "request": request,  
-            "profile": lista_profili(),  
-            "parametry_lista": lista_parametrow(),  # ✅ POPRAWKA  
-            "wynik": wynik,  
-            "objetosc": objetosc,  
-            "profil1": profil1,  
-            "profil2": profil2  
-        }  
+@app.get("/rozcienczenia", response_class=HTMLResponse)
+def rozcienczenia_strona(request: Request):
+
+    objetosc = request.query_params.get("objetosc")
+    profil1 = request.query_params.get("profil1")
+    profil2 = request.query_params.get("profil2")
+
+    # 🔥 PARAMETRY Z URL
+    parametry_qs = request.query_params.get("parametry")
+
+    if parametry_qs:
+        try:
+            parametry_wybrane = json.loads(parametry_qs)
+        except:
+            parametry_wybrane = []
+    else:
+        parametry_wybrane = []
+
+    wynik = None
+
+    if objetosc:
+        try:
+            objetosc_int = int(objetosc)
+
+            lista = list(dict.fromkeys(
+                parametry_z_profili(profil1, profil2) + parametry_wybrane
+            ))
+
+            wynik = policz_rozcienczenia(
+                objetosc_int,
+                lista,
+                parametry
+            )
+        except:
+            wynik = None
+
+    return templates.TemplateResponse(
+        "rozcienczenia.html",
+        {
+            "request": request,
+            "profile": lista_profili(),
+            "parametry_lista": lista_parametrow(),
+            "wynik": wynik,
+            "objetosc": objetosc,
+            "profil1": profil1,
+            "profil2": profil2,
+            "parametry_wybrane": parametry_wybrane  # 🔥 KLUCZ
+        }
     )  
-  
 # =========================  
 # OBLICZENIE ROZCIEŃCZEŃ  
 # =========================  
@@ -323,14 +350,13 @@ def oblicz_rozcienczenia(
             "wynik": wynik,
             "objetosc": objetosc,
             "profil1": profil1,
-            "profil2": profil2
+            "profil2": profil2,
+	    "parametry_wybrane": parametry_wybrane
         }
     )
 # =========================
 # STRONA HISTORII
 # =========================
-
-import json
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):

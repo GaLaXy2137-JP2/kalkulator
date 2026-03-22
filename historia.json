@@ -178,5 +178,36 @@
       "CRP",
       "CK"
     ]
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:30",
+    "modul": "kalkulator",
+    "objetosc": 120,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:33",
+    "modul": "kalkulator",
+    "objetosc": 100,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": []
+  },
+  {
+    "data": "2026-03-22",
+    "godzina": "20:34",
+    "modul": "kalkulator",
+    "objetosc": 100,
+    "profil1": "Geriatria podstawowa",
+    "profil2": "",
+    "parametry": [
+      "SAA",
+      "SDMA",
+      "Witamina B12"
+    ]
   }
 ]
