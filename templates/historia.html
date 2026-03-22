@@ -3,210 +3,185 @@
 
 <div class="container">
 
+<h2>Historia obliczeń ({{ historia|length }})</h2>
+
+<!-- =========================
+FILTRY
+========================= -->
+
 <div class="historia_header">
-
-<h2>Historia obliczeń (<span id="historia_count">{{ historia|length }}</span>)</h2>
-
-<div class="historia_filtry">
-
-<span class="filtr_label">Filtr modułu:</span>
-
-<button class="filtr_btn aktywny" onclick="filtrModul('all',this)">
-Wszystko
-</button>
-
-<button class="filtr_btn" onclick="filtrModul('kalkulator',this)">
-Kalkulator
-</button>
-
-<button class="filtr_btn" onclick="filtrModul('rozcienczenia',this)">
-Rozcieńczenia
-</button>
-
+    <div class="historia_filtry">
+        <button class="filtr_btn aktywny" data-filtr="all">Wszystko</button>
+        <button class="filtr_btn" data-filtr="kalkulator">Kalkulator</button>
+        <button class="filtr_btn" data-filtr="rozcienczenia">Rozcieńczenia</button>
+        <button class="filtr_btn" data-filtr="ceny">Ceny</button>
+    </div>
 </div>
 
+<input type="text" class="historia_search" placeholder="Szukaj profilu / µl / modułu...">
+
+<!-- =========================
+LISTA
+========================= -->
+
+<div id="historia_lista">
+
+{% for h in historia %}
+
+<div class="historia_item" data-modul="{{ h.modul | lower }}">
+
+    <!-- LEWA -->
+    <div class="historia_left">
+
+        <!-- DATA -->
+        <div class="historia_data">
+            <div class="data_dzien">{{ h.data }}</div>
+            <div class="data_godzina">{{ h.godzina }}</div>
+        </div>
+
+        <!-- ŚRODEK -->
+        <div class="historia_main">
+
+            <!-- MODUŁ -->
+            <span class="modul {{ h.modul }}">
+                {{ h.modul }}
+            </span>
+
+            <!-- TYTUŁ -->
+            <div class="historia_tytul">
+                {{ h.profil1 or "Brak profilu" }}
+            </div>
+
+            <!-- OPIS -->
+            <div class="historia_opis">
+
+                {% if h.objetosc and h.objetosc != "0" %}
+                    {{ h.objetosc }} µl •
+                {% endif %}
+
+                {% if h.profil2 %}
+                    {{ h.profil2 }} •
+                {% endif %}
+
+                kliknij aby zobaczyć szczegóły
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PRAWA -->
+    <div class="historia_action">
+
+        {% if h.modul == "kalkulator" %}
+        <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}">
+            <button class="btn_przywroc">Przywróć</button>
+        </a>
+        {% endif %}
+
+        {% if h.modul == "rozcienczenia" %}
+        <a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}">
+            <button class="btn_przywroc">Przywróć</button>
+        </a>
+        {% endif %}
+
+        {% if h.modul == "ceny" %}
+        <a href="/ceny?profil={{ h.profil1 }}">
+            <button class="btn_przywroc">Przywróć</button>
+        </a>
+        {% endif %}
+
+    </div>
+
+    <!-- SZCZEGÓŁY -->
+    <div class="historia_details">
+
+        {% if h.modul == "kalkulator" %}
+            <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+            <div><b>Profil 1:</b> {{ h.profil1 }}</div>
+            {% if h.profil2 %}
+            <div><b>Profil 2:</b> {{ h.profil2 }}</div>
+            {% endif %}
+        {% endif %}
+
+        {% if h.modul == "rozcienczenia" %}
+            <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
+            <div><b>Profil:</b> {{ h.profil1 }}</div>
+        {% endif %}
+
+        {% if h.modul == "ceny" %}
+            <div><b>Profil:</b> {{ h.profil1 }}</div>
+            <div><b>Wykonane:</b> {{ h.wykonane or "-" }}</div>
+        {% endif %}
+
+    </div>
+
 </div>
-
-<input
-type="text"
-id="historia_search"
-placeholder="Szukaj profil / µl / moduł..."
-class="historia_search">
-
-<table class="table historia_table">
-
-<thead>
-<tr>
-<th onclick="sortTable(0,this)">Data <span class="arrow"></span></th>
-<th onclick="sortTable(1,this)">Moduł <span class="arrow"></span></th>
-<th onclick="sortTable(2,this)">µl <span class="arrow"></span></th>
-<th onclick="sortTable(3,this)">Profil 1 <span class="arrow"></span></th>
-<th onclick="sortTable(4,this)">Profil 2 <span class="arrow"></span></th>
-<th></th>
-</tr>
-</thead>
-
-
-<tbody>
-
-{% for r in historia %}
-
-<tr data-modul="{{ r.modul }}">
-
-<td class="data">
-
-<div class="data_dzien">
-{{ r.data.split(" ")[0] }}
-</div>
-
-<div class="data_godzina">
-{{ r.data.split(" ")[1] }}
-</div>
-
-</td>
-
-<td>
-<span class="modul {{ r.modul }}">
-{{ r.modul }}
-</span>
-</td>
-
-<td>{{ r.objetosc }}</td>
-
-<td>{{ r.profil1 }}</td>
-
-<td>{{ r.profil2 }}</td>
-
-<td>
-
-{% if r.modul == "kalkulator" %}
-
-<a class="btn_przywroc"
-href="/?objetosc={{ r.objetosc }}&profil1={{ r.profil1 }}&profil2={{ r.profil2 }}">
-Przywróć
-</a>
-
-{% elif r.modul == "rozcienczenia" %}
-
-<a class="btn_przywroc"
-href="/rozcienczenia?objetosc={{ r.objetosc }}&profil1={{ r.profil1 }}&profil2={{ r.profil2 }}">
-Przywróć
-</a>
-
-{% endif %}
-
-</td>
-
-</tr>
 
 {% endfor %}
 
-</tbody>
-</table>
+</div>
 
 </div>
 
+<!-- =========================
+JS
+========================= -->
 
 <script>
 
-let sortState = {}
+// 🔥 ROZWIJANIE
+document.querySelectorAll(".historia_item").forEach(item => {
 
-// ======================
-// SORTOWANIE
-// ======================
+    item.addEventListener("click", function(e){
 
-function sortTable(column, header){
+        if(e.target.closest("a") || e.target.closest("button")) return
 
-let table = document.querySelector(".historia_table tbody")
-let rows = Array.from(table.querySelectorAll("tr"))
-
-let asc = !sortState[column]
-sortState[column] = asc
-
-document.querySelectorAll(".arrow").forEach(a=>a.innerHTML="")
-
-header.querySelector(".arrow").innerHTML = asc ? "▲" : "▼"
-
-rows.sort((a,b)=>{
-
-let A = a.children[column].innerText.trim()
-let B = b.children[column].innerText.trim()
-
-if(column == 2){
-A = Number(A)
-B = Number(B)
-}
-
-return asc ? A > B ? 1 : -1 : A < B ? 1 : -1
+        this.classList.toggle("open")
+    })
 
 })
 
-rows.forEach(r => table.appendChild(r))
+// 🔥 FILTRY
+const buttons = document.querySelectorAll(".filtr_btn")
+const items = document.querySelectorAll(".historia_item")
 
-}
+buttons.forEach(btn => {
 
+    btn.addEventListener("click", function(){
 
-// ======================
-// FILTR MODUŁU
-// ======================
+        buttons.forEach(b => b.classList.remove("aktywny"))
+        this.classList.add("aktywny")
 
-function filtrModul(modul,btn){
+        const filtr = this.dataset.filtr
 
-document.querySelectorAll(".filtr_btn").forEach(b=>{
-b.classList.remove("aktywny")
-})
+        items.forEach(i => {
 
-btn.classList.add("aktywny")
+            const modul = i.dataset.modul
 
-let rows = document.querySelectorAll(".historia_table tbody tr")
+            if(filtr === "all" || modul === filtr){
+                i.style.display = "flex"
+            } else {
+                i.style.display = "none"
+            }
 
-let visible = 0
+        })
 
-rows.forEach(row=>{
-
-let m = row.dataset.modul
-
-if(modul == "all" || m == modul){
-row.style.display = ""
-visible++
-}else{
-row.style.display = "none"
-}
+    })
 
 })
 
-document.getElementById("historia_count").innerText = visible
+// 🔥 SEARCH
+document.querySelector(".historia_search").addEventListener("input", function(){
 
-}
+    const val = this.value.toLowerCase()
 
-// ======================
-// WYSZUKIWARKA HISTORII
-// ======================
+    items.forEach(item => {
 
-const searchInput = document.getElementById("historia_search")
+        const text = item.innerText.toLowerCase()
 
-searchInput.addEventListener("keyup", function(){
-
-let value = this.value.toLowerCase()
-
-let rows = document.querySelectorAll(".historia_table tbody tr")
-
-let visible = 0
-
-rows.forEach(row => {
-
-let text = row.innerText.toLowerCase()
-
-if(text.includes(value)){
-row.style.display = ""
-visible++
-}else{
-row.style.display = "none"
-}
-
-})
-
-document.getElementById("historia_count").innerText = visible
+        item.style.display = text.includes(val) ? "flex" : "none"
+    })
 
 })
 

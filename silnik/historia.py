@@ -1,26 +1,24 @@
 import csv
 from datetime import datetime
 
+PLIK = "historia.csv"
 
-def zapisz_historia(modul, objetosc, profil1, profil2, parametry=None):
+def zapisz_historia(modul, objetosc, profil1, profil2="", wykonane=""):
 
-    import csv
-    from datetime import datetime
+    teraz = datetime.now()
 
-    if parametry is None:
-        parametry = []
+    data = teraz.strftime("%Y-%m-%d")
+    godzina = teraz.strftime("%H:%M")
 
-    parametry_str = ", ".join(parametry)
-
-    with open("historia.csv", "a", newline="", encoding="utf-8") as f:
-
+    with open(PLIK, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
 
         writer.writerow([
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
+            data,
+            godzina,
             modul,
             objetosc,
             profil1,
             profil2,
-            parametry_str
+            wykonane
         ])

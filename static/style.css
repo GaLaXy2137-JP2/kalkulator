@@ -1,492 +1,464 @@
 /* =========================
-HISTORIA
+HISTORIA — STABILNA + CZYTELNA 🔥
 ========================= */
 
-.historia{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+.historia_item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:16px 18px;              /* 🔥 więcej powietrza */
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    margin-bottom:12px;
+
+    background:white;
+    transition:0.2s;
+
+    cursor:pointer;
 }
 
-.historia th{
-text-align:left;
-padding:12px;
-background:#f4f6f8;
-font-weight:600;
+.historia_item:hover{
+    background:#f8fafc;
+    border-color:#dbe1ea;
 }
 
-.historia td{
-padding:12px;
-border-top:1px solid #e5e7eb;
+/* LEWA */
+
+.historia_left{
+    display:flex;
+    gap:16px;                       /* 🔥 większy odstęp */
+    align-items:flex-start;
+    flex:1;
 }
 
-.historia tr:hover{
-background:#f9fafb;
+/* DATA */
+
+.historia_data{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start;
+    gap:3px;
+    min-width:100px;                /* 🔥 stabilniejsza kolumna */
 }
 
-.btn_przywroc{
-background:#2563eb;
-color:white;
-padding:6px 12px;
-border-radius:6px;
-text-decoration:none;
-font-size:14px;
+/* DATA (ważniejsza) */
+.data_dzien{
+    font-size:15px;                 /* 🔥 większa */
+    font-weight:600;
+    line-height:1.2;
 }
 
-.btn_przywroc:hover{
-background:#1e4ed8;
+/* GODZINA */
+.data_godzina{
+    font-size:13px;                 /* 🔥 większa */
+    color:#6b7280;
+    line-height:1;
 }
+
+/* ŚRODEK */
+
+.historia_main{
+    display:flex;
+    flex-direction:column;
+    gap:5px;                        /* 🔥 więcej przestrzeni */
+}
+
+/* TAG */
 
 .modul{
-padding:4px 8px;
-border-radius:6px;
-font-size:13px;
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:12px;                 /* 🔥 większy */
+    font-weight:600;
+    width:fit-content;
 }
-
 .modul.kalkulator{
-background:#e0f2fe;
-color:#0369a1;
+    background:#e0f2fe;
+    color:#0369a1;
 }
 
 .modul.rozcienczenia{
-background:#dcfce7;
-color:#166534;
+    background:#dcfce7;
+    color:#166534;
 }
 
-.data_dzien{
-font-weight:600;
-white-space:nowrap;
+.modul.ceny{
+    background:#fef3c7;
+    color:#92400e;
+}
+/* TYTUŁ */
+
+.historia_tytul{
+    font-size:16px;                 /* 🔥 KLUCZ */
+    font-weight:600;
 }
 
-.data_godzina{
-font-size:13px;
-color:#6b7280;
+/* OPIS */
+
+.historia_opis{
+    font-size:14px;                 /* 🔥 czytelne */
+    color:#6b7280;
 }
 
-.historia_table{
-width:100%;
-border-collapse:collapse;
+/* PRAWA */
+
+.historia_action{
+    flex-shrink:0;
 }
 
-.historia_table th{
-text-align:left;
-padding:12px 18px;
+/* BUTTON — NIE RUSZAMY WYGLĄDU */
+.historia_action button{
+    background:#2563eb;
+    color:white;
+    padding:6px 12px;
+    border-radius:6px;
+    border:none;
+    font-size:13px;
+    cursor:pointer;
 }
 
-.historia_table td{
-padding:14px 18px;
-vertical-align:middle;
+.historia_action button:hover{
+    background:#1e4ed8;
 }
 
-.historia_table th:nth-child(1){
-width:160px;
+/* =========================
+SZCZEGÓŁY
+========================= */
+
+.historia_details{
+    display:none;
+    width:100%;
+    margin-top:12px;
+
+    padding:12px;
+    border-radius:10px;
+    background:#f1f5f9;
+    font-size:14px;                 /* 🔥 większe */
+    line-height:1.5;
 }
 
-.historia_table th:nth-child(2){
-width:130px;
+.historia_item.open{
+    flex-wrap:wrap;
 }
 
-.historia_table th:nth-child(3){
-width:70px;
+.historia_item.open .historia_details{
+    display:block;
+}/* ANIMACJA */
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(-5px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 
-.historia_table th:nth-child(6){
-width:130px;
-text-align:right;
-}
-
-.historia_table td:last-child{
-text-align:right;
-}
-
-.historia_table tbody tr:hover{
-background:#f3f6fb;
-}
-
-.historia_table td:nth-child(5){
-color:#555;
-}
+/* FILTRY */
 
 .historia_filtry{
-display:flex;
-align-items:center;
-gap:10px;
-position:relative;
-z-index:6;
+    display:flex;
+    gap:8px;
 }
 
 .filtr_btn{
-background:#eef2f7;
-border:none;
-padding:6px 14px;
-border-radius:8px;
-font-size:14px;
-cursor:pointer;
-color:#333;
+    background:#eef2f7;
+    border:none;
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+    color:#333;
+    transition:0.2s;
 }
 
 .filtr_btn:hover{
-background:#dce6f3;
+    background:#dce6f3;
 }
 
 .filtr_btn.aktywny{
-background:#4f7df3;
-color:white;
+    background:#2563eb;
+    color:white;
 }
 
-.historia_header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-position:relative;
-z-index:5;
-}
-
-th{
-white-space:nowrap;
-}
-
-.arrow{
-margin-left:6px;
-font-size:12px;
-display:inline;
-}
+/* SEARCH */
 
 .historia_search{
-width:230px;
-margin:0px 0 20px 0;
-padding:8px 12px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:14px;
+    width:260px;
+    margin:10px 0 15px 0;
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    font-size:14px;
 }
 
-.highlight{
-background:#fff3a3;
-padding:1px 2px;
-border-radius:3px;
-}
+/* RESPONSIVE */
 
-.parametry {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 60px;
-    row-gap: 6px;
-}
+@media (max-width:700px){
 
-.parametry label {
-    display: grid;
-    grid-template-columns: 20px auto;
-    align-items: center;
-    gap: 6px;
-}
+    .historia_left{
+        flex-direction:column;
+        gap:6px;
+    }
 
-.parametry input {
-    margin: 0;
-}
+    .historia_action{
+        margin-top:10px;
+    }
 
-.sekcja_naglowek label{
-display:flex;
-align-items:center;
-gap:8px;
-font-weight:600;
-margin-top:20px;
 }
 
 /* =========================
 PARAMETRY CEN (BUTTON STYLE)
 ========================= */
-
 .parametry_ceny {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 10px;
 }
-
 .parametr_ceny {
-    display: inline-block;
+display: inline-block;
 }
-
 .parametr_ceny input {
-    display: none; /* 🔥 ukrywamy checkbox */
+display: none; /* 🔥 ukrywamy checkbox */
 }
-
 .parametr_ceny span {
-    display: inline-block;
-    padding: 8px 14px;
-    border-radius: 8px;
-    background: #f1f5f9;
-    border: 1px solid #d1d5db;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 14px;
+display: inline-block;
+padding: 8px 14px;
+border-radius: 8px;
+background: #f1f5f9;
+border: 1px solid #d1d5db;
+cursor: pointer;
+transition: 0.2s;
+font-size: 14px;
 }
-
 /* hover */
 .parametr_ceny span:hover {
-    background: #e2e8f0;
+background: #e2e8f0;
 }
-
 /* 🔥 WYBRANE */
 .parametr_ceny input:checked + span {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
-    font-weight: 600;
+background: #2563eb;
+color: white;
+border-color: #2563eb;
+font-weight: 600;
 }
-
 /* klik efekt */
 .parametr_ceny span:active {
-    transform: scale(0.97);
+transform: scale(0.97);
 }
-
 /* =========================
 STICKY PANEL
 ========================= */
-
 .sticky_panel {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 14px 20px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    z-index: 20;
+position: sticky;
+bottom: 0;
+background: white;
+padding: 14px 20px;
+border-top: 1px solid #e5e7eb;
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
+z-index: 20;
 }
-
 .sticky_panel button {
-    background: #2563eb;
-    color: white;
-    padding: 10px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
+background: #2563eb;
+color: white;
+padding: 10px 18px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+font-weight: 600;
 }
-
 .sticky_panel button:hover {
-    background: #1e4ed8;
+background: #1e4ed8;
 }
-
 .container {
-    padding-bottom: 80px;
+padding-bottom: 80px;
 }
-
 .wynik_box {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+display: flex;
+align-items: center;
+gap: 15px;
 }
-
 .copy_btn {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
+background: #10b981;
+color: white;
+border: none;
+padding: 8px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-weight: 600;
 }
-
 .copy_btn:hover {
-    background: #059669;
+background: #059669;
 }
-
 .copy_btn {
-    transition: all 0.2s ease;
+transition: all 0.2s ease;
 }
-
 .reset_box {
-    margin-top: 20px;
+margin-top: 20px;
 }
-
 .reset_box button {
-    width: 100%;
-    background: #2563eb;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
+width: 100%;
+background: #2563eb;
+color: white;
+padding: 12px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+font-weight: 600;
 }
-
 .reset_box button:hover {
-    background: #1e4ed8;
+background: #1e4ed8;
 }
-
 #parametry_box{
-    margin-top:10px;
+margin-top:10px;
 }
-
 .param_btn{
-    margin:5px;
-    padding:8px 12px;
-    border:1px solid #ccc;
-    background:#f5f5f5;
-    cursor:pointer;
-    width:auto;
+margin:5px;
+padding:8px 12px;
+border:1px solid #ccc;
+background:#f5f5f5;
+cursor:pointer;
+width:auto;
 }
-
 .param_btn.active{
-    background:#4CAF50 !important;
-    color:white !important;
-    border-color:#4CAF50;
+background:#4CAF50 !important;
+color:white !important;
+border-color:#4CAF50;
 }
-
 #parametry_box button{
-    width:auto !important;
-    background:#f5f5f5 !important;
-    color:#000 !important;
+width:auto !important;
+background:#f5f5f5 !important;
+color:#000 !important;
 }
-
 #parametry_box button.active{
-    background:#4CAF50 !important;
-    color:white !important;
+background:#4CAF50 !important;
+color:white !important;
 }
-
 #btn_parametry.hide {
-    background:#e74c3c !important;
-    color:white !important;
+background:#e74c3c !important;
+color:white !important;
 }
-
 #btn_parametry.hide:hover {
-    background:#c0392b !important;
+background:#c0392b !important;
 }
-
 .profil_lista {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-top: 6px;
-    background: white;
-    max-height: 150px;
-    overflow-y: auto;
+border: 1px solid #e5e7eb;
+border-radius: 8px;
+margin-top: 6px;
+background: white;
+max-height: 150px;
+overflow-y: auto;
 }
-
 .profil_option {
-    padding: 10px 12px;
-    cursor: pointer;
+padding: 10px 12px;
+cursor: pointer;
 }
-
 .profil_option:hover {
-    background: #f3f6fb;
+background: #f3f6fb;
 }
-
 /* =========================
 PROFIL SELECT (jak kalkulator)
 ========================= */
-
 #profil_box{
-    position: relative;
-    width: 100%;
+position: relative;
+width: 100%;
 }
-
 #profil_input{
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+width: 100%;
+padding: 10px 12px;
+border-radius: 8px;
+border: 1px solid #ccc;
+font-size: 14px;
 }
-
 /* 🔥 LISTA */
-
 .profil_lista{
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 180px;
-    overflow-y: auto;
-
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-top: none;
-
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-
-    z-index: 50;
+position: absolute;
+top: 100%;
+left: 0;
+width: 100%;
+max-height: 180px;
+overflow-y: auto;
+background: white; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 50; 
 }
-
 /* 🔥 OPCJA */
-
 .profil_option{
-    padding: 10px 12px;
-    cursor: pointer;
-    font-size: 14px;
+padding: 10px 12px;
+cursor: pointer;
+font-size: 14px;
 }
-
 .profil_option:hover{
-    background: #f3f6fb;
+background: #f3f6fb;
 }
-
 /* =========================
 TOP CONTROLS (profil + morfologia)
 ========================= */
-
 .top_controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+margin-bottom: 20px;
 }
-
 .profil_wrapper {
-    margin-bottom: 5px;
+margin-bottom: 5px;
 }
-
 .morfologia_wrapper {
-    margin-top: 4px;
+margin-top: 4px;
 }
-
-
 /* =========================
 SWITCH MORFOLOGIA (NOWY)
 ========================= */
-
 .switch_morfologia {
-    display: inline-flex;
-    gap: 6px;
-    margin-top: -10px;
-    background: #f5f7fb;
-    padding: 4px;
-    border-radius: 10px;
-    width: fit-content;
+display: inline-flex;
+gap: 6px;
+margin-top: -10px;
+background: #f5f7fb;
+padding: 4px;
+border-radius: 10px;
+width: fit-content;
 }
-
 .switch_morfologia button {
-    border: none;
-    padding: 6px 14px;
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    font-size: 13px;
-    color: #555;
-    transition: all 0.2s ease;
+border: none;
+padding: 6px 14px;
+border-radius: 8px;
+background: transparent;
+cursor: pointer;
+font-size: 13px;
+color: #555;
+transition: all 0.2s ease;
 }
-
 /* hover */
 .switch_morfologia button:hover {
-    background: #e9eefc;
+background: #e9eefc;
 }
-
 /* active */
 .switch_morfologia button.active {
-    background: #2563eb;
-    color: white;
+background: #2563eb;
+color: white;
 }
-
-
 /* =========================
 SEKCJA BADANIA
 ========================= */
-
 .sekcja_badania {
-    margin-top: 20px;
+margin-top: 20px;
+}
+
+/*=========================
+FIX DATA/GODZINA
+=========================*/
+
+.historia_data{
+    display:block !important;
+}
+
+.historia_data .data_dzien,
+.historia_data .data_godzina{
+    display:block;
 }
