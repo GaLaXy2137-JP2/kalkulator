@@ -18,19 +18,23 @@ FILTRY
     </div>
 </div>
 
-<div class="search_wrapper">
-    <input type="text" class="historia_search" placeholder="Szukaj profilu / daty...">
-    <span id="clear_search">✕</span>
-</div>
+<div class="historia_topbar">
 
-<select id="historia_data_filter" class="historia_search" style="margin-top:10px;">
-    <option value="">Wszystkie daty</option>
+    <div class="search_wrapper">
+        <input type="text" class="historia_search" placeholder="Szukaj profilu / daty...">
+        <span id="clear_search">✕</span>
+    </div>
 
-    {% set daty = historia | map(attribute='data') | list | unique %}
-    {% for d in daty %}
+    <select id="historia_data_filter">
+        <option value="">Wszystkie daty</option>
+
+        {% set daty = historia | map(attribute='data') | list | unique %}
+        {% for d in daty %}
         <option value="{{ d }}">{{ d }}</option>
-    {% endfor %}
-</select>
+        {% endfor %}
+    </select>
+
+</div>
 
 <!-- =========================
 LISTA

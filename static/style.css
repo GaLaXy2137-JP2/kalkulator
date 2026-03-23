@@ -7,7 +7,7 @@ HISTORIA — STABILNA + CZYTELNA 🔥
     justify-content:space-between;
     align-items:center;
 
-    padding:16px 18px;              /* 🔥 więcej powietrza */
+    padding:16px 18px;
     border:1px solid #e5e7eb;
     border-radius:12px;
     margin-bottom:12px;
@@ -27,31 +27,34 @@ HISTORIA — STABILNA + CZYTELNA 🔥
 
 .historia_left{
     display:flex;
-    gap:16px;                       /* 🔥 większy odstęp */
+    gap:16px;
     align-items:flex-start;
     flex:1;
 }
 
 /* DATA */
 
-.historia_data{
-    display:flex !important;
-    flex-direction:column !important;
-    align-items:flex-start;
-    gap:3px;
-    min-width:100px;                /* 🔥 stabilniejsza kolumna */
+#historia_data_filter{
+    flex-shrink:0;              /* 🔥 FIX */
+    width:160px;
+    height:32px;
+    padding:6px 10px;
+    border-radius:6px;
+    border:1px solid #d1d5db;
+    font-size:13px;
+    background:white;
 }
 
 /* DATA (ważniejsza) */
 .data_dzien{
-    font-size:15px;                 /* 🔥 większa */
+    font-size:15px;
     font-weight:600;
     line-height:1.2;
 }
 
 /* GODZINA */
 .data_godzina{
-    font-size:13px;                 /* 🔥 większa */
+    font-size:13px;
     color:#6b7280;
     line-height:1;
 }
@@ -61,7 +64,7 @@ HISTORIA — STABILNA + CZYTELNA 🔥
 .historia_main{
     display:flex;
     flex-direction:column;
-    gap:5px;                        /* 🔥 więcej przestrzeni */
+    gap:5px;
 }
 
 /* TAG */
@@ -70,10 +73,11 @@ HISTORIA — STABILNA + CZYTELNA 🔥
     display:inline-block;
     padding:4px 10px;
     border-radius:8px;
-    font-size:12px;                 /* 🔥 większy */
+    font-size:12px;
     font-weight:600;
     width:fit-content;
 }
+
 .modul.kalkulator{
     background:#e0f2fe;
     color:#0369a1;
@@ -88,17 +92,18 @@ HISTORIA — STABILNA + CZYTELNA 🔥
     background:#fef3c7;
     color:#92400e;
 }
+
 /* TYTUŁ */
 
 .historia_tytul{
-    font-size:16px;                 /* 🔥 KLUCZ */
+    font-size:16px;
     font-weight:600;
 }
 
 /* OPIS */
 
 .historia_opis{
-    font-size:14px;                 /* 🔥 czytelne */
+    font-size:14px;
     color:#6b7280;
 }
 
@@ -108,7 +113,6 @@ HISTORIA — STABILNA + CZYTELNA 🔥
     flex-shrink:0;
 }
 
-/* BUTTON — NIE RUSZAMY WYGLĄDU */
 .historia_action button{
     background:#2563eb;
     color:white;
@@ -135,7 +139,7 @@ SZCZEGÓŁY
     padding:12px;
     border-radius:10px;
     background:#f1f5f9;
-    font-size:14px;                 /* 🔥 większe */
+    font-size:14px;
     line-height:1.5;
 }
 
@@ -145,20 +149,11 @@ SZCZEGÓŁY
 
 .historia_item.open .historia_details{
     display:block;
-}/* ANIMACJA */
-
-@keyframes fadeIn{
-    from{
-        opacity:0;
-        transform:translateY(-5px);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0);
-    }
 }
 
-/* FILTRY */
+/* =========================
+FILTRY
+========================= */
 
 .historia_filtry{
     display:flex;
@@ -185,18 +180,52 @@ SZCZEGÓŁY
     color:white;
 }
 
-/* SEARCH */
+/* =========================
+TOPBAR (🔥 NOWE)
+========================= */
+
+.historia_topbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin:8px 0 10px 0;
+}
+
+.search_wrapper{
+    position:relative;
+    flex:1;
+    display:flex;
+}
+
+/* SEARCH FIX */
 
 .historia_search{
-    width:100%; /* 🔥 KLUCZ */
-    margin:10px 0 15px 0;
-    padding:10px 40px 10px 12px; /* 🔥 miejsce na X */
-    border-radius:8px;
+    width:100%;
+    margin:0;                      /* 🔥 FIX */
+    padding:6px 34px 6px 10px;
+    border-radius:6px;
     border:1px solid #d1d5db;
-    font-size:14px;
+    font-size:13px;
+    height:32px;                  /* 🔥 dopasowanie */
     box-sizing:border-box;
 }
-/* RESPONSIVE */
+
+/* X FIX */
+
+#clear_search {
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    font-size:13px;
+    display:none;
+    color:#888;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
 
 @media (max-width:700px){
 
@@ -212,8 +241,9 @@ SZCZEGÓŁY
 }
 
 /* =========================
-STICKY PANEL
+RESZTA — NIE RUSZANA
 ========================= */
+
 .sticky_panel {
 position: sticky;
 bottom: 0;
@@ -226,6 +256,7 @@ align-items: center;
 gap: 10px;
 z-index: 20;
 }
+
 .sticky_panel button {
 background: #2563eb;
 color: white;
@@ -235,17 +266,21 @@ border: none;
 cursor: pointer;
 font-weight: 600;
 }
+
 .sticky_panel button:hover {
 background: #1e4ed8;
 }
+
 .container {
 padding-bottom: 80px;
 }
+
 .wynik_box {
 display: flex;
 align-items: center;
 gap: 15px;
 }
+
 .copy_btn {
 background: #10b981;
 color: white;
@@ -255,10 +290,10 @@ border-radius: 6px;
 cursor: pointer;
 font-weight: 600;
 }
+
 .copy_btn:hover {
 background: #059669;
-}
-.copy_btn {
+}.copy_btn {
 transition: all 0.2s ease;
 }
 .reset_box {
@@ -453,20 +488,4 @@ PARAMETRY BUTTONY
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-/*x w search bar*/
-.search_wrapper {
-    position: relative !important;
-    width: 100%;
-}
 
-#clear_search {
-    position: absolute !important;
-    right: 12px !important;
-    top: 50% !important;
-    transform: translateY(-65%) !important;
-    cursor: pointer;
-    font-size: 16px;
-    display: none;
-    color: #888;
-    z-index: 10;
-}
