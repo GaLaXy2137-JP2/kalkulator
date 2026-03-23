@@ -196,5 +196,26 @@
       "cena_koncowa": 39.0
     },
     "morfologia": "podstawowa"
+  },
+  {
+    "data": "2026-03-23",
+    "godzina": "00:46",
+    "modul": "kalkulator",
+    "objetosc": 64,
+    "profil1": "",
+    "profil2": "",
+    "parametry": [
+      "ALP",
+      "ALT",
+      "AST",
+      "Albuminy",
+      "Białko całkowite",
+      "Bilirubina bezpośrednia",
+      "Bilirubina całkowita",
+      "CK",
+      "Chlorki"
+    ],
+    "wynik": null,
+    "morfologia": null
   }
 ]

@@ -18,7 +18,19 @@ FILTRY
     </div>
 </div>
 
-<input type="text" class="historia_search" placeholder="Szukaj profilu / µl / modułu...">
+<div class="search_wrapper">
+    <input type="text" class="historia_search" placeholder="Szukaj profilu / daty...">
+    <span id="clear_search">✕</span>
+</div>
+
+<select id="historia_data_filter" class="historia_search" style="margin-top:10px;">
+    <option value="">Wszystkie daty</option>
+
+    {% set daty = historia | map(attribute='data') | list | unique %}
+    {% for d in daty %}
+        <option value="{{ d }}">{{ d }}</option>
+    {% endfor %}
+</select>
 
 <!-- =========================
 LISTA
@@ -28,7 +40,10 @@ LISTA
 
 {% for h in historia %}
 
-<div class="historia_item" data-modul="{{ h.modul | lower }}">
+<div class="historia_item"
+     data-modul="{{ h.modul | lower }}"
+     data-data="{{ h.data }}"
+     data-profil="{{ (h.profil1 or 'parametry') | lower }}">
 
     <!-- LEWA -->
     <div class="historia_left">
@@ -49,7 +64,7 @@ LISTA
 
             <!-- TYTUŁ -->
             <div class="historia_tytul">
-                {{ h.profil1 or "Brak profilu" }}
+                {{ h.profil1 or "Parametry" }}
             </div>
 
             <!-- OPIS -->
@@ -185,38 +200,64 @@ buttons.forEach(btn => {
         buttons.forEach(b => b.classList.remove("aktywny"))
         this.classList.add("aktywny")
 
-        const filtr = this.dataset.filtr
-
-        items.forEach(i => {
-
-            const modul = i.dataset.modul
-
-            if(filtr === "all" || modul === filtr){
-                i.style.display = "flex"
-            } else {
-                i.style.display = "none"
-            }
-
-        })
+        filtruj() // 🔥 zamiast starej logiki
 
     })
 
 })
 
 // 🔥 SEARCH
-document.querySelector(".historia_search").addEventListener("input", function(){
+const searchInput = document.querySelector(".historia_search")
+const dateFilter = document.getElementById("historia_data_filter")
 
-    const val = this.value.toLowerCase()
+function filtruj(){
+
+    const searchVal = searchInput.value.toLowerCase()
+    const selectedDate = dateFilter.value
 
     items.forEach(item => {
 
-        const text = item.innerText.toLowerCase()
+        const modul = item.dataset.modul
+        const data = item.dataset.data
+        const profil = item.dataset.profil || ""
 
-        item.style.display = text.includes(val) ? "flex" : "none"
+        const activeFilter = document.querySelector(".filtr_btn.aktywny").dataset.filtr
+
+        // filtr modułu
+        let modulOK = (activeFilter === "all" || modul === activeFilter)
+
+        // search tylko profil + data
+        let searchOK =
+            data.toLowerCase().includes(searchVal) ||
+            profil.includes(searchVal)
+
+        // filtr daty
+        let dateOK = (!selectedDate || data === selectedDate)
+
+        if(modulOK && searchOK && dateOK){
+            item.style.display = "flex"
+        } else {
+            item.style.display = "none"
+        }
+
     })
+}
 
+// eventy
+searchInput.addEventListener("input", filtruj)
+dateFilter.addEventListener("change", filtruj)
+
+const clearBtn = document.getElementById("clear_search")
+
+searchInput.addEventListener("input", () => {
+    clearBtn.style.display = searchInput.value ? "block" : "none"
 })
 
+clearBtn.addEventListener("click", () => {
+    searchInput.value = ""
+    clearBtn.style.display = "none"
+    filtruj()
+})
 </script>
 
 {% endblock %}

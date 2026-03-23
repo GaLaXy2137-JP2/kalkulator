@@ -188,14 +188,14 @@ SZCZEGÓŁY
 /* SEARCH */
 
 .historia_search{
-    width:260px;
+    width:100%; /* 🔥 KLUCZ */
     margin:10px 0 15px 0;
-    padding:8px 12px;
+    padding:10px 40px 10px 12px; /* 🔥 miejsce na X */
     border-radius:8px;
     border:1px solid #d1d5db;
     font-size:14px;
+    box-sizing:border-box;
 }
-
 /* RESPONSIVE */
 
 @media (max-width:700px){
@@ -451,4 +451,22 @@ PARAMETRY BUTTONY
     border-color: #27ae60;
     font-weight: 600;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/*x w search bar*/
+.search_wrapper {
+    position: relative !important;
+    width: 100%;
+}
+
+#clear_search {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-65%) !important;
+    cursor: pointer;
+    font-size: 16px;
+    display: none;
+    color: #888;
+    z-index: 10;
 }
