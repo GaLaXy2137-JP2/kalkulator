@@ -212,6 +212,7 @@ def strona(request: Request):
         {
             "request": request,
             "profile": lista_profili(),
+            "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),
             "wynik": wynik,
             "objetosc": objetosc,
@@ -248,6 +249,7 @@ def oblicz(
         {  
             "request": request,  
             "profile": lista_profili(),  
+            "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),  
             "wynik": wynik,  
             "objetosc": objetosc,  
@@ -302,6 +304,7 @@ def rozcienczenia_strona(request: Request):
         {
             "request": request,
             "profile": lista_profili(),
+            "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),
             "wynik": wynik,
             "objetosc": objetosc,
@@ -347,6 +350,7 @@ def oblicz_rozcienczenia(
         {
             "request": request,
             "profile": lista_profili(),
+            "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),  # 🔥 popraw też to
             "wynik": wynik,
             "objetosc": objetosc,

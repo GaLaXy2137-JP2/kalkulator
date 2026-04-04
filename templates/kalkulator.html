@@ -4,6 +4,7 @@
 <script>
 
 const profileList = {{ profile | tojson }}
+const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 
@@ -25,6 +26,7 @@ div.innerText = p
 div.onclick=function(){
 document.getElementById(inputId).value = p
 lista.innerHTML=""
+renderParametry()
 }
 
 lista.appendChild(div)
@@ -57,6 +59,8 @@ lista.appendChild(div)
 }
 
 })
+
+renderParametry()
 }
 
 
@@ -73,6 +77,7 @@ function usunProfil2(){
 document.getElementById("profil2_input").value=""
 document.getElementById("profil2_box").style.display="none"
 document.getElementById("btn_profil2").style.display="block"
+renderParametry()
 }
 
 
@@ -137,22 +142,49 @@ function renderParametry(){
     let container = document.getElementById("parametry_box")
     container.innerHTML = ""
 
+    const aktywneParametry = getSelectedParametry()
+    const parametryZProfili = getProfileParams()
+
     const wykluczone = ["ACTH"]
     parametryList
         .filter(p => !wykluczone.includes(p))
+        .filter(p => !parametryZProfili.has(p))
         .forEach(p => {
 
         let btn = document.createElement("button")
         btn.type = "button"
         btn.innerText = p
         btn.className = "param_btn"
-if(parametryWybrane.includes(p)){
+if(aktywneParametry.includes(p)){
     btn.classList.add("active")
 }
         btn.onclick = () => toggleParametr(p)
 
         container.appendChild(btn)
     })
+}
+
+function getSelectedParametry(){
+
+    const input = document.getElementById("parametry_input")
+
+    if(!input || !input.value.trim()){
+        return parametryWybrane.slice()
+    }
+
+    return input.value.split(",").map(x => x.trim()).filter(Boolean)
+}
+
+function getProfileParams(){
+
+    const selectedProfiles = [
+        document.getElementById("profil1_input")?.value.trim(),
+        document.getElementById("profil2_input")?.value.trim()
+    ].filter(Boolean)
+
+    return new Set(
+        selectedProfiles.flatMap(name => profileParamMap[name] || [])
+    )
 }
 
 
@@ -214,6 +246,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <label>Objętość próbki (µl)</label>
 
 <input type="number"
+class="search_box"
 name="objetosc"
 value="{{ objetosc or '' }}"
 required
@@ -227,6 +260,7 @@ autocomplete="off">
 type="text"
 name="profil1"
 id="profil1_input"
+class="search_box"
 value="{{ profil1 or '' }}"
 placeholder="Wpisz nazwę profilu..."
 autocomplete="off"
@@ -256,6 +290,7 @@ style="{% if profil2 %}display:none;{% endif %}">
 type="text"
 name="profil2"
 id="profil2_input"
+class="search_box"
 value="{{ profil2 or '' }}"
 placeholder="Wpisz nazwę profilu..."
 autocomplete="off"
