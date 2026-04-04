@@ -457,7 +457,7 @@ def ceny(request: Request):
         # LICZENIE (backend)
         # =========================
 
-        if "oblicz" in request.query_params or request.query_params.get("parametry"):
+        if "oblicz" in request.query_params:
             wynik = oblicz_cene(profil, wykonane, morfologia)
             if "oblicz" in request.query_params:
                 zapisz_historia("ceny", 0, profil, "", wykonane, wynik, morfologia)
@@ -471,6 +471,7 @@ def ceny(request: Request):
             "wynik": wynik,
             "morfologia": morfologia,
             "ma_morfologie": ma_morfologie,
+            "wykonane": wykonane,
 
             # 🔥 KLUCZOWE
             "parametry_ceny": parametry_ceny,

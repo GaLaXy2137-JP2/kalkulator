@@ -8,7 +8,7 @@
 <form method="get" action="/ceny">
 
 <input type="hidden" name="morfologia" id="morfologia_hidden" value="{{ morfologia }}">
-<input type="hidden" id="parametry_input" name="parametry">
+<input type="hidden" id="parametry_input" name="parametry" value="{{ (wykonane or []) | join(', ') }}">
 
 <div class="top_controls">
 {% if not wynik %}
@@ -71,12 +71,15 @@ Profil wykonany:
 </p>
 
 <h4 class="sekcja_naglowek">
-Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})
+    <span>Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})</span>
+    <button type="button" class="mini_btn" data-toggle-all="biochemia" onclick="event.preventDefault(); toggleAll('biochemia')">
+        Zaznacz wszystko
+    </button>
 </h4>
 
-<div id="parametry_box">
+<div id="parametry_box" data-section="biochemia">
 {% for p in sekcje.biochemia %}
-<button type="button" class="param_btn" onclick="toggleParametr('{{p}}')">
+<button type="button" class="param_btn {% if wykonane and p in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('{{p}}')">
     {{p}}
 </button>
 {% endfor %}
@@ -84,12 +87,15 @@ Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})
 
 {% if sekcje.mocz %}
 <h4 class="sekcja_naglowek">
-Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})
+    <span>Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})</span>
+    <button type="button" class="mini_btn" data-toggle-all="mocz" onclick="event.preventDefault(); toggleAll('mocz')">
+        Zaznacz wszystko
+    </button>
 </h4>
 
-<div id="parametry_box">
+<div id="parametry_box" data-section="mocz">
 {% for p in sekcje.mocz %}
-<button type="button" class="param_btn" onclick="toggleParametr('{{p}}')">
+<button type="button" class="param_btn {% if wykonane and p in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('{{p}}')">
     {{p}}
 </button>
 {% endfor %}
@@ -98,18 +104,21 @@ Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})
 
 {% if ma_morfologie and morfologia != "brak" %}
 <h4 class="sekcja_naglowek">
-Morfologia (<span id="morfo_count">0</span>/1)
+    <span>Morfologia (<span id="morfo_count">0</span>/1)</span>
+    <button type="button" class="mini_btn" data-toggle-all="morfologia" onclick="event.preventDefault(); toggleAll('morfologia')">
+        Zaznacz wszystko
+    </button>
 </h4>
 
-<div id="parametry_box">
+<div id="parametry_box" data-section="morfologia">
 {% if morfologia == "podstawowa" %}
-<button type="button" class="param_btn" onclick="toggleParametr('Morfologia')">
+<button type="button" class="param_btn {% if wykonane and 'Morfologia' in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('Morfologia')">
     Morfologia
 </button>
 {% endif %}
 
 {% if morfologia == "rozszerzona" %}
-<button type="button" class="param_btn" onclick="toggleParametr('Morfologia rozszerzona')">
+<button type="button" class="param_btn {% if wykonane and 'Morfologia rozszerzona' in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('Morfologia rozszerzona')">
     Morfologia rozszerzona
 </button>
 {% endif %}
@@ -215,6 +224,55 @@ function toggleParametr(p){
     policzCeneLive()
 }
 
+function toggleAll(section) {
+
+    const kontenerSekcji = document.querySelector(`[data-section="${section}"]`)
+
+    if (!kontenerSekcji) return
+
+    const przyciski = Array.from(kontenerSekcji.querySelectorAll(".param_btn"))
+
+    if (przyciski.length === 0) return
+
+    const wszystkoZaznaczone = przyciski.every(btn => btn.classList.contains("active"))
+
+    przyciski.forEach(btn => {
+        const nazwa = btn.innerText.trim()
+        const zaznaczony = btn.classList.contains("active")
+
+        if (wszystkoZaznaczone && zaznaczony) {
+            toggleParametr(nazwa)
+        } else if (!wszystkoZaznaczone && !zaznaczony) {
+            toggleParametr(nazwa)
+        }
+    })
+
+    updateCounters()
+    policzCeneLive()
+}
+
+function updateToggleAllLabels(){
+
+    const buttons = document.querySelectorAll("[data-toggle-all]")
+
+    buttons.forEach(button => {
+        const section = button.dataset.toggleAll
+        const kontenerSekcji = document.querySelector(`[data-section="${section}"]`)
+
+        if (!kontenerSekcji) return
+
+        const przyciski = Array.from(kontenerSekcji.querySelectorAll(".param_btn"))
+
+        if (przyciski.length === 0) return
+
+        const wszystkoZaznaczone = przyciski.every(btn => btn.classList.contains("active"))
+
+        button.textContent = wszystkoZaznaczone
+            ? "Odznacz wszystko"
+            : "Zaznacz wszystko"
+    })
+}
+
 // =========================
 // LICZNIKI
 // =========================
@@ -259,6 +317,8 @@ function updateCounters(){
             .filter(btn => btn.innerText.toLowerCase().includes("morfologia"))
         document.getElementById("morfo_count").textContent = morfoActive.length
     }
+
+    updateToggleAllLabels()
 }
 // =========================
 // LIVE CENA

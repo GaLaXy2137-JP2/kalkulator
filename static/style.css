@@ -257,6 +257,39 @@ gap: 10px;
 z-index: 20;
 }
 
+.sekcja_naglowek {
+display: flex;
+align-items: baseline;
+justify-content: flex-start;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.sekcja_naglowek .mini_btn {
+display: inline-flex !important;
+align-items: center;
+width: auto !important;
+min-width: 0;
+background: transparent !important;
+border: none !important;
+border-radius: 0 !important;
+box-shadow: none !important;
+padding: 0 !important;
+margin: 0;
+font-size: 12px;
+line-height: 1;
+font-weight: 500;
+color: #6b7280 !important;
+cursor: pointer;
+appearance: none;
+}
+
+.sekcja_naglowek .mini_btn:hover {
+background: transparent !important;
+color: #111827 !important;
+text-decoration: underline;
+}
+
 .sticky_panel button {
 background: #2563eb;
 color: white;
