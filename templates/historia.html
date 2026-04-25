@@ -131,6 +131,10 @@ LISTA
         {% if h.parametry %}
             <div><b>Parametry:</b> {{ h.parametry | length }}</div>
         {% endif %}
+
+        <div><b>Hemoliza:</b> {{ h.hemolysis or "" }}</div>
+        <div><b>Lipemia:</b> {{ h.lipemia or "" }}</div>
+        <div><b>Icterus:</b> {{ h.icterus or "" }}</div>
     {% endif %}
 
     {% if h.modul == "rozcienczenia" %}
@@ -143,6 +147,10 @@ LISTA
         {% if h.parametry %}
             <div><b>Parametry:</b> {{ h.parametry | length }}</div>
         {% endif %}
+
+        <div><b>Hemoliza:</b> {{ h.hemolysis or "" }}</div>
+        <div><b>Lipemia:</b> {{ h.lipemia or "" }}</div>
+        <div><b>Icterus:</b> {{ h.icterus or "" }}</div>
     {% endif %}
 
     {% if h.modul == "ceny" and h.wynik %}

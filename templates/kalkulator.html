@@ -188,9 +188,31 @@ function getProfileParams(){
 }
 
 
+function initHilSwitches(){
+
+    document.querySelectorAll(".hil_switch").forEach(group => {
+
+        const hiddenId = group.dataset.hiddenInput
+        const hiddenInput = document.getElementById(hiddenId)
+
+        if(!hiddenInput) return
+
+        group.querySelectorAll("button").forEach(button => {
+            button.addEventListener("click", function(){
+                hiddenInput.value = this.dataset.value
+
+                group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
+                this.classList.add("active")
+            })
+        })
+    })
+}
+
+
 // START
 document.addEventListener("DOMContentLoaded", function(){
     renderParametry()
+    initHilSwitches()
 })
 
 
@@ -242,6 +264,40 @@ document.addEventListener("DOMContentLoaded", function(){
 <h2>Kalkulator badań</h2>
 
 <form method="post">
+
+<div class="hil_toolbar">
+
+<input type="hidden" name="hemolysis" id="hemolysis_hidden" value="{{ hemolysis or 'none' }}">
+<input type="hidden" name="lipemia" id="lipemia_hidden" value="{{ lipemia or 'none' }}">
+<input type="hidden" name="icterus" id="icterus_hidden" value="{{ icterus or 'absent' }}">
+
+<div class="hil_group">
+<label>Hemoliza</label>
+<div class="hil_switch" data-hidden-input="hemolysis_hidden">
+<button type="button" data-value="none" class="{% if (hemolysis or 'none') == 'none' %}active{% endif %}">Brak</button>
+<button type="button" data-value="mild" class="{% if hemolysis == 'mild' %}active{% endif %}">Łagodna</button>
+<button type="button" data-value="high" class="{% if hemolysis == 'high' %}active{% endif %}">Duża</button>
+</div>
+</div>
+
+<div class="hil_group">
+<label>Lipemia</label>
+<div class="hil_switch" data-hidden-input="lipemia_hidden">
+<button type="button" data-value="none" class="{% if (lipemia or 'none') == 'none' %}active{% endif %}">Brak</button>
+<button type="button" data-value="mild" class="{% if lipemia == 'mild' %}active{% endif %}">Łagodna</button>
+<button type="button" data-value="high" class="{% if lipemia == 'high' %}active{% endif %}">Duża</button>
+</div>
+</div>
+
+<div class="hil_group">
+<label>Żółtaczka / Icterus</label>
+<div class="hil_switch" data-hidden-input="icterus_hidden">
+<button type="button" data-value="absent" class="{% if (icterus or 'absent') == 'absent' %}active{% endif %}">Brak</button>
+<button type="button" data-value="present" class="{% if icterus == 'present' %}active{% endif %}">Obecna</button>
+</div>
+</div>
+
+</div>
 
 <label>Objętość próbki (µl)</label>
 

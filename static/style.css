@@ -482,6 +482,88 @@ background: #e9eefc;
 background: #2563eb;
 color: white;
 }
+
+.hil_toolbar {
+display: flex;
+flex-direction: column;
+gap: 14px;
+margin-bottom: 18px;
+}
+
+.hil_group {
+display: flex;
+align-items: center;
+gap: 16px;
+flex-wrap: wrap;
+}
+
+.hil_group label {
+font-size: 13px;
+font-weight: 600;
+color: #334155;
+margin: 0;
+min-width: 150px;
+}
+
+.hil_switch {
+display: inline-flex;
+gap: 6px;
+background: #f5f7fb;
+padding: 4px;
+border-radius: 10px;
+width: auto;
+flex-wrap: wrap;
+}
+
+.hil_switch button {
+border: none !important;
+padding: 6px 14px !important;
+border-radius: 8px !important;
+background: transparent !important;
+cursor: pointer;
+font-size: 13px;
+font-weight: 600;
+color: #475569 !important;
+width: auto !important;
+min-width: 0 !important;
+display: inline-flex !important;
+align-items: center;
+justify-content: center;
+transition: all 0.2s ease;
+}
+
+.hil_switch button:hover {
+background: #e9eefc !important;
+}
+
+.hil_switch button.active {
+background: #2563eb !important;
+color: white !important;
+box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22);
+}
+
+@media (max-width: 900px) {
+.hil_toolbar {
+gap: 12px;
+}
+
+.hil_group {
+align-items: flex-start;
+gap: 8px;
+}
+
+.hil_group label {
+min-width: 0;
+}
+
+.hil_switch {
+width: 100%;
+}
+
+.hil_switch button {
+flex: 1 1 auto;
+}
+}
 /* =========================
 SEKCJA BADANIA
 ========================= */

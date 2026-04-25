@@ -114,6 +114,14 @@ def lista_parametrow():
     return sorted(parametry.keys())  
 
 
+def pobierz_hil_z_query(request: Request):
+    return {
+        "hemolysis": request.query_params.get("hemolysis", "none"),
+        "lipemia": request.query_params.get("lipemia", "none"),
+        "icterus": request.query_params.get("icterus", "absent"),
+    }
+
+
 def parse_json_field(value, default):
     if value is None:
         return default
@@ -149,7 +157,7 @@ def parametry_z_profili(profil1, profil2):
 # LOGIKA KALKULATORA  
 # =========================  
   
-def policz(objetosc, profil1, profil2, parametry_wybrane):  
+def policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis="none", lipemia="none", icterus="absent"):  
   
     lista = zbuduj_liste_parametrow(  
         profil1,  
@@ -163,9 +171,9 @@ def policz(objetosc, profil1, profil2, parametry_wybrane):
             "komunikat": "Brak wybranych parametrów"  
         }  
   
-    potrzebne = objetosc_pelnego_profilu(lista, parametry)  
+    potrzebne = objetosc_pelnego_profilu(lista, parametry, hemolysis, lipemia, icterus)  
   
-    if objetosc < 60:  
+    if objetosc <= 60:  
         return {  
             "komunikat": "Za mało próbki – anuluj profil",  
             "potrzebne_ul": potrzebne  
@@ -177,11 +185,11 @@ def policz(objetosc, profil1, profil2, parametry_wybrane):
             "potrzebne_ul": potrzebne  
         }  
   
-    min_g, max_g = licz_zakres_excel(objetosc, lista, parametry)  
+    min_g, max_g = licz_zakres_excel(objetosc, lista, parametry, hemolysis, lipemia, icterus)  
   
     lista_bez = [p for p in lista if p != "GLDH"]  
   
-    min_b, max_b = licz_zakres_excel(objetosc, lista_bez, parametry)  
+    min_b, max_b = licz_zakres_excel(objetosc, lista_bez, parametry, hemolysis, lipemia, icterus)  
   
     sr_g = int((min_g + max_g) / 2)  
     sr_b = int((min_b + max_b) / 2)  
@@ -226,12 +234,22 @@ def strona(request: Request):
     else:
         parametry_wybrane = []
 
+    hil = pobierz_hil_z_query(request)
+
     wynik = None
 
     if objetosc:
         try:
             objetosc_int = int(objetosc)
-            wynik = policz(objetosc_int, profil1, profil2, parametry_wybrane)
+            wynik = policz(
+                objetosc_int,
+                profil1,
+                profil2,
+                parametry_wybrane,
+                hil["hemolysis"],
+                hil["lipemia"],
+                hil["icterus"],
+            )
         except:
             wynik = None
 
@@ -249,6 +267,9 @@ def strona(request: Request):
             "profil1": profil1,
             "profil2": profil2,
             "parametry_wybrane": parametry_wybrane,
+            "hemolysis": hil["hemolysis"],
+            "lipemia": hil["lipemia"],
+            "icterus": hil["icterus"],
         }
     ) 
   
@@ -262,7 +283,10 @@ def oblicz(
     objetosc: int = Form(...),  
     profil1: str = Form(""),  
     profil2: str = Form(""),  
-    parametry_input: str = Form("")  
+    parametry_input: str = Form(""),
+    hemolysis: str = Form("none"),
+    lipemia: str = Form("none"),
+    icterus: str = Form("absent"),
 ):  
   
     if parametry_input:  
@@ -270,14 +294,18 @@ def oblicz(
     else:  
         parametry_wybrane = []  
   
-    wynik = policz(objetosc, profil1, profil2, parametry_wybrane)  
+    wynik = policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus)  
   
     zapisz_historia_db(
     "kalkulator",
     objetosc,
     profil1,
     profil2,
-    parametry_wybrane
+    parametry_wybrane,
+    wynik,
+    hemolysis=hemolysis,
+    lipemia=lipemia,
+    icterus=icterus,
 ) 
   
     return templates.TemplateResponse(  
@@ -292,7 +320,10 @@ def oblicz(
             "objetosc": objetosc,  
             "profil1": profil1,  
             "profil2": profil2, 
-	    "parametry_wybrane": parametry_wybrane 
+	    "parametry_wybrane": parametry_wybrane,
+            "hemolysis": hemolysis,
+            "lipemia": lipemia,
+            "icterus": icterus,
         }  
     )  
   
@@ -318,6 +349,8 @@ def rozcienczenia_strona(request: Request):
     else:
         parametry_wybrane = []
 
+    hil = pobierz_hil_z_query(request)
+
     wynik = None
 
     if objetosc:
@@ -331,7 +364,10 @@ def rozcienczenia_strona(request: Request):
             wynik = policz_rozcienczenia(
                 objetosc_int,
                 lista,
-                parametry
+                parametry,
+                hil["hemolysis"],
+                hil["lipemia"],
+                hil["icterus"],
             )
         except:
             wynik = None
@@ -348,7 +384,10 @@ def rozcienczenia_strona(request: Request):
             "objetosc": objetosc,
             "profil1": profil1,
             "profil2": profil2,
-            "parametry_wybrane": parametry_wybrane  # 🔥 KLUCZ
+            "parametry_wybrane": parametry_wybrane,
+            "hemolysis": hil["hemolysis"],
+            "lipemia": hil["lipemia"],
+            "icterus": hil["icterus"],
         }
     )  
 # =========================  
@@ -361,7 +400,10 @@ def oblicz_rozcienczenia(
     objetosc: int = Form(...),
     profil1: str = Form(""),
     profil2: str = Form(""),
-    parametry_input: str = Form("")  # 🔥 DODAJ TO
+    parametry_input: str = Form(""),
+    hemolysis: str = Form("none"),
+    lipemia: str = Form("none"),
+    icterus: str = Form("absent"),
 ):
 
     # 🔥 parsowanie parametrów
@@ -378,7 +420,10 @@ def oblicz_rozcienczenia(
     wynik = policz_rozcienczenia(
         objetosc,
         lista,
-        parametry
+        parametry,
+        hemolysis,
+        lipemia,
+        icterus,
     )
 
     zapisz_historia_db(
@@ -386,7 +431,11 @@ def oblicz_rozcienczenia(
     objetosc,
     profil1,
     profil2,
-    parametry_wybrane
+    parametry_wybrane,
+    wynik,
+    hemolysis=hemolysis,
+    lipemia=lipemia,
+    icterus=icterus,
 )
 
     return templates.TemplateResponse(
@@ -401,7 +450,10 @@ def oblicz_rozcienczenia(
             "objetosc": objetosc,
             "profil1": profil1,
             "profil2": profil2,
-	    "parametry_wybrane": parametry_wybrane
+	    "parametry_wybrane": parametry_wybrane,
+            "hemolysis": hemolysis,
+            "lipemia": lipemia,
+            "icterus": icterus,
         }
     )
 # =========================
@@ -419,12 +471,22 @@ def historia(request: Request):
         conn = connection_pool.getconn()
         cur = conn.cursor()
 
-        cur.execute("""
-            SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
-            FROM historia
-            ORDER BY data DESC, godzina DESC
-            LIMIT 100
-        """)
+        try:
+            cur.execute("""
+                SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, hemolysys AS hemolysis, lipemia, icterus
+                FROM historia
+                ORDER BY data DESC, godzina DESC
+                LIMIT 100
+            """)
+        except psycopg2.errors.UndefinedColumn:
+            conn.rollback()
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
+                FROM historia
+                ORDER BY data DESC, godzina DESC
+                LIMIT 100
+            """)
 
         rows = cur.fetchall()
         dane = []
@@ -446,6 +508,10 @@ def historia(request: Request):
                 except Exception:
                     pass
 
+                hil_meta = {}
+                if isinstance(wynik_value, dict):
+                    hil_meta = wynik_value.pop("_hil", {}) or {}
+
                 dane.append({
                     "data": str(r[0]),
                     "godzina": str(r[1])[:5] if r[1] else "",
@@ -454,7 +520,10 @@ def historia(request: Request):
                     "profil1": r[4],
                     "profil2": r[5],
                     "parametry": parametry_value if parametry_value is not None else [],
-                    "wynik": wynik_value if wynik_value is not None else {}
+                    "wynik": wynik_value if wynik_value is not None else {},
+                    "hemolysis": r[8] if len(r) > 8 and r[8] is not None else hil_meta.get("hemolysis", ""),
+                    "lipemia": r[9] if len(r) > 9 and r[9] is not None else hil_meta.get("lipemia", ""),
+                    "icterus": r[10] if len(r) > 10 and r[10] is not None else hil_meta.get("icterus", ""),
                 })
 
             except Exception as row_error:
@@ -468,7 +537,10 @@ def historia(request: Request):
                     "profil1": r[4] if len(r) > 4 else "",
                     "profil2": r[5] if len(r) > 5 else "",
                     "parametry": r[6] if len(r) > 6 else [],
-                    "wynik": r[7] if len(r) > 7 else {}
+                    "wynik": r[7] if len(r) > 7 else {},
+                    "hemolysis": r[8] if len(r) > 8 and r[8] is not None else "",
+                    "lipemia": r[9] if len(r) > 9 and r[9] is not None else "",
+                    "icterus": r[10] if len(r) > 10 and r[10] is not None else "",
                 })
 
         return templates.TemplateResponse(

@@ -1,3 +1,6 @@
+from silnik.hil import get_adjusted_volume
+
+
 # =========================
 # ODMIANA LICZEBNIKA
 # =========================
@@ -52,7 +55,7 @@ def zbuduj_liste_parametrow(profil1, profil2, parametry_wybrane, profile_map):
 # OBJĘTOŚĆ PEŁNEGO PROFILU
 # =========================
 
-def objetosc_pelnego_profilu(lista, parametry):
+def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, icterus=None):
 
     suma = 0
     ma_jony = False
@@ -65,7 +68,13 @@ def objetosc_pelnego_profilu(lista, parametry):
         if parametry[p]["jon"] == 1:
             ma_jony = True
         else:
-            suma += parametry[p]["ul"]
+            suma += get_adjusted_volume(
+                parametry[p]["ul"],
+                p,
+                hemolysis,
+                lipemia,
+                icterus,
+            )
 
     suma += 50
 
@@ -79,7 +88,7 @@ def objetosc_pelnego_profilu(lista, parametry):
 # SILNIK LICZENIA (Excel)
 # =========================
 
-def licz_zakres_excel(objetosc, lista_parametrow, parametry):
+def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lipemia=None, icterus=None):
 
     robocza = objetosc - 50
 
@@ -93,7 +102,13 @@ def licz_zakres_excel(objetosc, lista_parametrow, parametry):
         jonogram_mozliwy = False
 
     param_ul = [
-        parametry[p]["ul"]
+        get_adjusted_volume(
+            parametry[p]["ul"],
+            p,
+            hemolysis,
+            lipemia,
+            icterus,
+        )
         for p in lista_parametrow
         if p in parametry and parametry[p]["jon"] == 0
     ]

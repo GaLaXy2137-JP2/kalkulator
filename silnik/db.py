@@ -40,7 +40,7 @@ else:
 # ZAPIS HISTORII
 # =========================
 
-def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None):
+def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None, hemolysis=None, lipemia=None, icterus=None):
 
     conn = None
     cur = None
@@ -61,20 +61,50 @@ def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None,
         parametry_json = json.dumps(parametry) if parametry else json.dumps([])
         wynik_json = json.dumps(wynik) if wynik else json.dumps({})
 
-        cur.execute("""
-            INSERT INTO historia
-            (data, godzina, modul, objetosc, profil1, profil2, parametry, wynik)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            data,
-            godzina,
-            modul,
-            objetosc,
-            profil1,
-            profil2,
-            parametry_json,
-            wynik_json
-        ))
+        try:
+            cur.execute("""
+                INSERT INTO historia
+                (data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, hemolysys, lipemia, icterus)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data,
+                godzina,
+                modul,
+                objetosc,
+                profil1,
+                profil2,
+                parametry_json,
+                wynik_json,
+                hemolysis,
+                lipemia,
+                icterus,
+            ))
+        except psycopg2.errors.UndefinedColumn:
+            conn.rollback()
+            cur = conn.cursor()
+
+            legacy_wynik = wynik if isinstance(wynik, dict) else ({} if wynik is None else {"value": wynik})
+            if hemolysis or lipemia or icterus:
+                legacy_wynik["_hil"] = {
+                    "hemolysis": hemolysis or "",
+                    "lipemia": lipemia or "",
+                    "icterus": icterus or "",
+                }
+
+            cur.execute("""
+                INSERT INTO historia
+                (data, godzina, modul, objetosc, profil1, profil2, parametry, wynik)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data,
+                godzina,
+                modul,
+                objetosc,
+                profil1,
+                profil2,
+                parametry_json,
+                json.dumps(legacy_wynik),
+            ))
 
         conn.commit()
 
