@@ -423,7 +423,7 @@ def historia(request: Request):
         cur.execute("""
             SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
             FROM historia
-            ORDER BY data DESC
+            ORDER BY data DESC, godzina DESC
             LIMIT 100
         """)
 
