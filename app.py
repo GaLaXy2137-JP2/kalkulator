@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 import json
 from silnik.db import connection_pool
 from dotenv import load_dotenv
@@ -56,7 +57,7 @@ profile = {}
 # WCZYTANIE PARAMETRÓW  
 # =========================  
   
-with open("parametry.csv", newline="", encoding="utf-8-sig") as f:  
+with open(BASE_DIR / "parametry.csv", newline="", encoding="utf-8-sig") as f:  
     reader = csv.DictReader(f)  
   
     for r in reader:  
@@ -72,7 +73,7 @@ with open("parametry.csv", newline="", encoding="utf-8-sig") as f:
 # WCZYTANIE PROFILI  
 # =========================  
   
-with open("profile.csv", newline="", encoding="utf-8-sig") as f:  
+with open(BASE_DIR / "profile.csv", newline="", encoding="utf-8-sig") as f:  
     reader = csv.DictReader(f)  
   
     for r in reader:  
@@ -90,7 +91,7 @@ with open("profile.csv", newline="", encoding="utf-8-sig") as f:
 
 ceny_parametrow = {}
 
-with open("parametry_ceny.csv", newline="", encoding="utf-8-sig") as f:
+with open(BASE_DIR / "parametry_ceny.csv", newline="", encoding="utf-8-sig") as f:
     reader = csv.DictReader(f)
 
     for r in reader:
