@@ -1,3 +1,8 @@
+import os
+from pathlib import Path
+import json
+from silnik.db import connection_pool
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form  
 from fastapi.responses import HTMLResponse  
 from fastapi.templating import Jinja2Templates  
@@ -11,7 +16,14 @@ from silnik.liczenie_ceny import (
     wczytaj_ceny_morfologii  
 )  
 import csv  
-import json
+import psycopg2
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+DOTENV_LOADED = load_dotenv(dotenv_path=ENV_PATH)
+print(f"[app.py] .env loaded: {DOTENV_LOADED} | path: {ENV_PATH}")
+print(f"[app.py] DATABASE_URL loaded: {bool(os.getenv('DATABASE_URL'))}")
+
+from silnik.db import zapisz_historia_db
+
   
 # =========================  
 # SILNIKI  
@@ -25,7 +37,7 @@ from silnik.kalkulator import (
 )  
   
 from silnik.rozcienczenia import policz_rozcienczenia  
-from silnik.historia import zapisz_historia  
+from silnik.db import zapisz_historia_db  
   
 app = FastAPI()  
   
@@ -242,7 +254,13 @@ def oblicz(
   
     wynik = policz(objetosc, profil1, profil2, parametry_wybrane)  
   
-    zapisz_historia("kalkulator", objetosc, profil1, profil2, parametry_wybrane)  
+    zapisz_historia_db(
+    "kalkulator",
+    objetosc,
+    profil1,
+    profil2,
+    parametry_wybrane
+) 
   
     return templates.TemplateResponse(  
         "kalkulator.html",  
@@ -343,7 +361,13 @@ def oblicz_rozcienczenia(
         parametry
     )
 
-    zapisz_historia("rozcienczenia", objetosc, profil1, profil2, parametry_wybrane)
+    zapisz_historia_db(
+    "rozcienczenia",
+    objetosc,
+    profil1,
+    profil2,
+    parametry_wybrane
+)
 
     return templates.TemplateResponse(
         "rozcienczenia.html",
@@ -366,13 +390,36 @@ def oblicz_rozcienczenia(
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
 
-    try:
-        with open("historia.json", encoding="utf-8") as f:
-            dane = json.load(f)
-    except:
-        dane = []
+    conn = connection_pool.getconn()
+    cur = conn.cursor()
 
-    dane.reverse()
+    cur.execute("""
+        SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
+        FROM historia
+        ORDER BY data DESC, godzina DESC
+        LIMIT 10
+    """)
+
+    rows = cur.fetchall()
+
+    cur.close()
+    connection_pool.putconn(conn)
+
+    dane = []
+
+    for r in rows:
+        dane.append({
+            "data": str(r[0]),
+            "godzina": str(r[1])[:5],
+            "modul": r[2],
+            "objetosc": r[3],
+            "profil1": r[4],
+            "profil2": r[5],
+
+            # 🔥 KLUCZOWE
+            "parametry": json.loads(r[6]) if r[6] else [],
+            "wynik": json.loads(r[7]) if r[7] else {}
+        })
 
     return templates.TemplateResponse(
         "historia.html",
@@ -381,7 +428,6 @@ def historia(request: Request):
             "historia": dane
         }
     )
-
 # =========================
 # STRONA CEN
 # =========================
@@ -464,7 +510,15 @@ def ceny(request: Request):
         if "oblicz" in request.query_params:
             wynik = oblicz_cene(profil, wykonane, morfologia)
             if "oblicz" in request.query_params:
-                zapisz_historia("ceny", 0, profil, "", wykonane, wynik, morfologia)
+                zapisz_historia_db(
+                    "ceny",
+                    0,
+                    profil,
+                    "",
+                    wykonane,
+                    wynik,
+                    morfologia
+                )
     return templates.TemplateResponse(
         "ceny.html",
         {

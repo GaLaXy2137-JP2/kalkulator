@@ -107,7 +107,7 @@ LISTA
     {% if h.modul == "ceny" %}
 <a href="/ceny?profil={{ h.profil1 }}
 &parametry={{ (h.parametry or []) | join(',') }}
-&morfologia={{ h.morfologia }}">
+&morfologia={{ h.wynik.morfologia }}">
         <button class="btn_przywroc">Przywróć</button>
     </a>
     {% endif %}
