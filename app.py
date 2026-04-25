@@ -450,7 +450,7 @@ def historia(request: Request):
                 dane.append({
                     "data": str(r[0]),
                     from datetime import datetime
-                    "godzina": str(r[1])[:5] if r[1] else "",
+                    "godzina": str(r[1])[:5] if r[1] else
                     "modul": r[2],
                     "objetosc": r[3],
                     "profil1": r[4],

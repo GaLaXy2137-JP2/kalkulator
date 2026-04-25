@@ -2,6 +2,7 @@ import os
 import json
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from psycopg2 import pool
 import psycopg2
@@ -53,9 +54,9 @@ def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None,
         conn = connection_pool.getconn()
         cur = conn.cursor()
 
-        now = datetime.now()
+        now = datetime.now(ZoneInfo("Europe/Warsaw"))
         data = now.date()
-        godzina = now.time()
+        godzina = now.time().replace(tzinfo=None, microsecond=0)
 
         parametry_json = json.dumps(parametry) if parametry else json.dumps([])
         wynik_json = json.dumps(wynik) if wynik else json.dumps({})
