@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 import json
-from silnik.db import connection_pool
+#from silnik.db import connection_pool
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form  
 from fastapi.responses import HTMLResponse  
@@ -390,7 +390,7 @@ def oblicz_rozcienczenia(
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
-
+    from silnik.db import connection_pool
     conn = connection_pool.getconn()
     cur = conn.cursor()
 
