@@ -430,17 +430,42 @@ def historia(request: Request):
     dane = []
 
     for r in rows:
-        dane.append({
-            "data": str(r[0]),
-            "godzina": str(r[1])[:5],
-            "modul": r[2],
-            "objetosc": r[3],
-            "profil1": r[4],
-            "profil2": r[5],
+        try:
+            try:
+                parametry_value = parse_json_field(r[6], [])
+                if parametry_value == [] and r[6] not in (None, "", [], {}):
+                    parametry_value = r[6]
+            except Exception:
+                parametry_value = r[6]
 
-            "parametry": parse_json_field(r[6], []),
-            "wynik": parse_json_field(r[7], {})
-        })
+            try:
+                wynik_value = parse_json_field(r[7], {})
+                if wynik_value == {} and r[7] not in (None, "", [], {}):
+                    wynik_value = r[7]
+            except Exception:
+                wynik_value = r[7]
+
+            dane.append({
+                "data": str(r[0]),
+                "godzina": str(r[1])[:5],
+                "modul": r[2],
+                "objetosc": r[3],
+                "profil1": r[4],
+                "profil2": r[5],
+                "parametry": parametry_value,
+                "wynik": wynik_value,
+            })
+        except Exception:
+            dane.append({
+                "data": str(r[0]) if len(r) > 0 else "",
+                "godzina": str(r[1])[:5] if len(r) > 1 and r[1] is not None else "",
+                "modul": r[2] if len(r) > 2 else "",
+                "objetosc": r[3] if len(r) > 3 else "",
+                "profil1": r[4] if len(r) > 4 else "",
+                "profil2": r[5] if len(r) > 5 else "",
+                "parametry": r[6] if len(r) > 6 else [],
+                "wynik": r[7] if len(r) > 7 else {},
+            })
 
     return templates.TemplateResponse(
         request=request,
