@@ -411,7 +411,6 @@ def oblicz_rozcienczenia(
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
     from silnik.db import connection_pool
-    import traceback
 
     conn = None
     cur = None
@@ -460,7 +459,6 @@ def historia(request: Request):
 
             except Exception as row_error:
                 print(f"[historia] row parse error: {type(row_error).__name__}: {row_error}")
-                print(traceback.format_exc())
 
                 dane.append({
                     "data": str(r[0]) if len(r) > 0 else "",
@@ -483,22 +481,10 @@ def historia(request: Request):
         )
 
     except Exception as e:
-        tb = traceback.format_exc()
         print(f"[historia] ERROR: {type(e).__name__}: {e}")
-        print(tb)
 
         return HTMLResponse(
-            content=f"""
-            <html>
-                <head><title>Historia - Debug</title></head>
-                <body style="font-family: monospace; white-space: pre-wrap; padding: 20px;">
-                    <h2>Blad w /historia</h2>
-                    <b>{type(e).__name__}: {e}</b>
-
-{tb}
-                </body>
-            </html>
-            """,
+            content="Wystąpił błąd serwera",
             status_code=500
         )
 
