@@ -410,6 +410,21 @@ def oblicz_rozcienczenia(
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
+    def parse_history_value(value, empty_default):
+        if value is None:
+            return empty_default
+
+        if isinstance(value, (list, dict)):
+            return value
+
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except Exception:
+                return value
+
+        return value
+
     rows = []
     conn = None
     cur = None
@@ -426,6 +441,7 @@ def historia(request: Request):
         """)
 
         rows = cur.fetchall()
+        print(f"[historia] rows fetched: {len(rows)}")
 
     except Exception as e:
         print(f"[historia] ERROR: {type(e).__name__}: {e}")
@@ -440,19 +456,8 @@ def historia(request: Request):
 
     for r in rows:
         try:
-            try:
-                parametry_value = parse_json_field(r[6], [])
-                if parametry_value == [] and r[6] not in (None, "", [], {}):
-                    parametry_value = r[6]
-            except Exception:
-                parametry_value = r[6]
-
-            try:
-                wynik_value = parse_json_field(r[7], {})
-                if wynik_value == {} and r[7] not in (None, "", [], {}):
-                    wynik_value = r[7]
-            except Exception:
-                wynik_value = r[7]
+            parametry_value = parse_history_value(r[6], []) if len(r) > 6 else []
+            wynik_value = parse_history_value(r[7], {}) if len(r) > 7 else {}
 
             dane.append({
                 "data": str(r[0]),
@@ -464,7 +469,8 @@ def historia(request: Request):
                 "parametry": parametry_value,
                 "wynik": wynik_value,
             })
-        except Exception:
+        except Exception as e:
+            print(f"[historia] row parse error: {type(e).__name__}: {e} | row={r}")
             dane.append({
                 "data": str(r[0]) if len(r) > 0 else "",
                 "godzina": str(r[1])[:5] if len(r) > 1 and r[1] is not None else "",
