@@ -410,27 +410,14 @@ def oblicz_rozcienczenia(
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
-    def parse_history_value(value, empty_default):
-        if value is None:
-            return empty_default
+    from silnik.db import connection_pool
+    import traceback
 
-        if isinstance(value, (list, dict)):
-            return value
-
-        if isinstance(value, str):
-            try:
-                return json.loads(value)
-            except Exception:
-                return value
-
-        return value
-
-    rows = []
     conn = None
     cur = None
 
     try:
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        conn = connection_pool.getconn()
         cur = conn.cursor()
 
         cur.execute("""
@@ -441,55 +428,85 @@ def historia(request: Request):
         """)
 
         rows = cur.fetchall()
-        print(f"[historia] rows fetched: {len(rows)}")
+        dane = []
+
+        for r in rows:
+            try:
+                parametry_value = r[6]
+                wynik_value = r[7]
+
+                try:
+                    if isinstance(parametry_value, str):
+                        parametry_value = json.loads(parametry_value)
+                except Exception:
+                    pass
+
+                try:
+                    if isinstance(wynik_value, str):
+                        wynik_value = json.loads(wynik_value)
+                except Exception:
+                    pass
+
+                dane.append({
+                    "data": str(r[0]),
+                    "godzina": str(r[1])[:5] if r[1] else "",
+                    "modul": r[2],
+                    "objetosc": r[3],
+                    "profil1": r[4],
+                    "profil2": r[5],
+                    "parametry": parametry_value if parametry_value is not None else [],
+                    "wynik": wynik_value if wynik_value is not None else {}
+                })
+
+            except Exception as row_error:
+                print(f"[historia] row parse error: {type(row_error).__name__}: {row_error}")
+                print(traceback.format_exc())
+
+                dane.append({
+                    "data": str(r[0]) if len(r) > 0 else "",
+                    "godzina": str(r[1])[:5] if len(r) > 1 and r[1] else "",
+                    "modul": r[2] if len(r) > 2 else "",
+                    "objetosc": r[3] if len(r) > 3 else "",
+                    "profil1": r[4] if len(r) > 4 else "",
+                    "profil2": r[5] if len(r) > 5 else "",
+                    "parametry": r[6] if len(r) > 6 else [],
+                    "wynik": r[7] if len(r) > 7 else {}
+                })
+
+        return templates.TemplateResponse(
+            request=request,
+            name="historia.html",
+            context={
+                "request": request,
+                "historia": dane
+            }
+        )
 
     except Exception as e:
+        tb = traceback.format_exc()
         print(f"[historia] ERROR: {type(e).__name__}: {e}")
+        print(tb)
+
+        return HTMLResponse(
+            content=f"""
+            <html>
+                <head><title>Historia - Debug</title></head>
+                <body style="font-family: monospace; white-space: pre-wrap; padding: 20px;">
+                    <h2>Blad w /historia</h2>
+                    <b>{type(e).__name__}: {e}</b>
+
+{tb}
+                </body>
+            </html>
+            """,
+            status_code=500
+        )
 
     finally:
         if cur:
             cur.close()
         if conn:
-            conn.close()
-
-    dane = []
-
-    for r in rows:
-        try:
-            parametry_value = parse_history_value(r[6], []) if len(r) > 6 else []
-            wynik_value = parse_history_value(r[7], {}) if len(r) > 7 else {}
-
-            dane.append({
-                "data": str(r[0]),
-                "godzina": str(r[1])[:5],
-                "modul": r[2],
-                "objetosc": r[3],
-                "profil1": r[4],
-                "profil2": r[5],
-                "parametry": parametry_value,
-                "wynik": wynik_value,
-            })
-        except Exception as e:
-            print(f"[historia] row parse error: {type(e).__name__}: {e} | row={r}")
-            dane.append({
-                "data": str(r[0]) if len(r) > 0 else "",
-                "godzina": str(r[1])[:5] if len(r) > 1 and r[1] is not None else "",
-                "modul": r[2] if len(r) > 2 else "",
-                "objetosc": r[3] if len(r) > 3 else "",
-                "profil1": r[4] if len(r) > 4 else "",
-                "profil2": r[5] if len(r) > 5 else "",
-                "parametry": r[6] if len(r) > 6 else [],
-                "wynik": r[7] if len(r) > 7 else {},
-            })
-
-    return templates.TemplateResponse(
-        request=request,
-        name="historia.html",
-        context={
-            "request": request,
-            "historia": dane
-        }
-    )
+            connection_pool.putconn(conn)
 # =========================
 # STRONA CEN
 # =========================
