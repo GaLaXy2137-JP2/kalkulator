@@ -410,10 +410,14 @@ def oblicz_rozcienczenia(
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
-    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-    cur = conn.cursor()
+    rows = []
+    conn = None
+    cur = None
 
     try:
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        cur = conn.cursor()
+
         cur.execute("""
             SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
             FROM historia
@@ -423,9 +427,14 @@ def historia(request: Request):
 
         rows = cur.fetchall()
 
+    except Exception as e:
+        print(f"[historia] ERROR: {type(e).__name__}: {e}")
+
     finally:
-        cur.close()
-        conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
     dane = []
 
