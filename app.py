@@ -112,6 +112,22 @@ def lista_profili():
   
 def lista_parametrow():  
     return sorted(parametry.keys())  
+
+
+def parse_json_field(value, default):
+    if value is None:
+        return default
+
+    if isinstance(value, (dict, list)):
+        return value
+
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return default
+
+    return default
   
 # =========================  
 # PARAMETRY Z PROFILI  
@@ -421,9 +437,8 @@ def historia(request: Request):
             "profil1": r[4],
             "profil2": r[5],
 
-            # 🔥 KLUCZOWE
-            "parametry": json.loads(r[6]) if r[6] else [],
-            "wynik": json.loads(r[7]) if r[7] else {}
+            "parametry": parse_json_field(r[6], []),
+            "wynik": parse_json_field(r[7], {})
         })
 
     return templates.TemplateResponse(

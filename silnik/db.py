@@ -78,7 +78,9 @@ def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None,
         conn.commit()
 
     except Exception as e:
-        print(f"[db.py] ERROR: {type(e)._name_}: {e}")
+        if conn:
+            conn.rollback()
+        print(f"[db.py] ERROR: {type(e).__name__}: {e}")
 
     finally:
         if cur:
