@@ -221,8 +221,9 @@ def strona(request: Request):
 
     # ✅ TO MUSI BYĆ W ŚRODKU FUNKCJI
     return templates.TemplateResponse(
-        "kalkulator.html",
-        {
+        request=request,
+        name="kalkulator.html",
+        context={
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -264,8 +265,9 @@ def oblicz(
 ) 
   
     return templates.TemplateResponse(  
-        "kalkulator.html",  
-        {  
+        request=request,
+        name="kalkulator.html",  
+        context={  
             "request": request,  
             "profile": lista_profili(),  
             "profile_param_map": profile,
@@ -319,8 +321,9 @@ def rozcienczenia_strona(request: Request):
             wynik = None
 
     return templates.TemplateResponse(
-        "rozcienczenia.html",
-        {
+        request=request,
+        name="rozcienczenia.html",
+        context={
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -371,8 +374,9 @@ def oblicz_rozcienczenia(
 )
 
     return templates.TemplateResponse(
-        "rozcienczenia.html",
-        {
+        request=request,
+        name="rozcienczenia.html",
+        context={
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -423,8 +427,9 @@ def historia(request: Request):
         })
 
     return templates.TemplateResponse(
-        "historia.html",
-        {
+        request=request,
+        name="historia.html",
+        context={
             "request": request,
             "historia": dane
         }
@@ -521,8 +526,9 @@ def ceny(request: Request):
                     morfologia
                 )
     return templates.TemplateResponse(
-        "ceny.html",
-        {
+        request=request,
+        name="ceny.html",
+        context={
             "request": request,
             "profile": lista_profili_ceny(),
             "wybrany_profil": profil,
