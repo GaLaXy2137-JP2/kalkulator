@@ -33,6 +33,7 @@ from silnik.db import connection_pool, pobierz_kolumny_historia, zapisz_historia
 from silnik.kalkulator import (  
     odmien_badanie,  
     objetosc_pelnego_profilu,  
+    rozbij_objetosc_pelnego_profilu,
     licz_zakres_excel,  
     zbuduj_liste_parametrow  
 )  
@@ -169,18 +170,26 @@ def policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis="none", lipe
             "komunikat": "Brak wybranych parametrów"  
         }  
   
-    potrzebne = objetosc_pelnego_profilu(lista, parametry, hemolysis, lipemia, icterus)  
+    potrzebne_breakdown = rozbij_objetosc_pelnego_profilu(lista, parametry, hemolysis, lipemia, icterus)
+    potrzebne = potrzebne_breakdown["suma"]
+
+    wynik_potrzebne = {
+        "potrzebne_ul": potrzebne,
+        "potrzebne_martwa_objetosc_ul": potrzebne_breakdown["martwa_objetosc_ul"],
+        "potrzebne_jonogram_ul": potrzebne_breakdown["jonogram_ul"],
+        "potrzebne_parametry_ul": potrzebne_breakdown["parametry_ul"],
+    }
   
     if objetosc <= 60:  
         return {  
             "komunikat": "Za mało próbki – anuluj profil",  
-            "potrzebne_ul": potrzebne  
+            **wynik_potrzebne,
         }  
   
     if objetosc >= potrzebne:  
         return {  
             "komunikat": "Materiał wystarczający na cały profil",  
-            "potrzebne_ul": potrzebne  
+            **wynik_potrzebne,
         }  
   
     min_g, max_g = licz_zakres_excel(objetosc, lista, parametry, hemolysis, lipemia, icterus)  
@@ -201,13 +210,13 @@ def policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis="none", lipe
             "bez_gldh": f"{min_b}-{max_b}",  
             "sr_z_gldh": f"{sr_g} {forma_g}",  
             "sr_bez_gldh": f"{sr_b} {forma_b}",  
-            "potrzebne_ul": potrzebne  
+            **wynik_potrzebne,
         }  
     else:  
         return {  
             "bez_gldh": f"{min_b}-{max_b}",  
             "sr_bez_gldh": f"{sr_b} {forma_b}",  
-            "potrzebne_ul": potrzebne  
+            **wynik_potrzebne,
         }  
   
 # =========================  
@@ -556,88 +565,65 @@ def lista_profili_ceny():
     return sorted(profile_param.keys())
 
 
-@app.get("/ceny", response_class=HTMLResponse)
-def ceny(request: Request):
+@app.api_route("/ceny", methods=["GET", "POST"], response_class=HTMLResponse)
+async def ceny(request: Request):
 
-    profil = request.query_params.get("profil")
-    morfologia = request.query_params.get("morfologia", "brak")
-    parametry_input = request.query_params.get("parametry")
-
-    if parametry_input:
-        wykonane = [p.strip() for p in parametry_input.split(",")]
-    else:
-        wykonane = []
-
-    wynik = None
-    sekcje = None
-    ma_morfologie = False
-
-    # 🔥 JEDYNE ŹRÓDŁO PARAMETRÓW (backend + frontend)
+    profile_param = wczytaj_profile_parametry()
+    profile_morf = wczytaj_profile_morfologia()
+    ceny_profili = wczytaj_ceny_profili()
+    ceny_morf = wczytaj_ceny_morfologii()
     parametry_ceny = wczytaj_parametry()
 
-    # 🔥 cena profilu (do live JS)
-    cena_profilu = 0
+    profil = ""
+    morfologia = "brak"
+    wykonane = []
+    wynik = None
+    zapisano = False
+
+    if request.method == "POST":
+        form = await request.form()
+        profil = (form.get("profil") or "").strip()
+        morfologia = (form.get("morfologia") or "brak").strip() or "brak"
+        wykonane = parse_json_field(form.get("wykonane_json"), [])
+        akcja = (form.get("action") or "").strip()
+    else:
+        profil = (request.query_params.get("profil") or "").strip()
+        morfologia = (request.query_params.get("morfologia") or "brak").strip() or "brak"
+        wykonane = parse_json_field(request.query_params.get("wykonane_json"), [])
+
+        if not wykonane:
+            parametry_input = request.query_params.get("parametry")
+            if parametry_input:
+                wykonane = [p.strip() for p in parametry_input.split(",") if p.strip()]
+
+        akcja = ""
+
+    if not isinstance(wykonane, list):
+        wykonane = []
+
+    wykonane = [str(p).strip() for p in wykonane if str(p).strip()]
+    wykonane = list(dict.fromkeys(wykonane))
+
+    ma_morfologie = profile_morf.get(profil, 0) == 1 if profil else False
+
+    if not ma_morfologie:
+        morfologia = "brak"
 
     if profil:
+        wynik = oblicz_cene(profil, wykonane, morfologia)
 
-        profile_param = wczytaj_profile_parametry()
-        profile_morf = wczytaj_profile_morfologia()
-        ceny_profili = wczytaj_ceny_profili()
-        ceny_morf = wczytaj_ceny_morfologii()
+        if request.method == "POST" and akcja == "save" and wynik:
+            zapisz_historia_db(
+                "ceny",
+                0,
+                profil,
+                "",
+                wykonane,
+                wynik,
+                morfologia
+            )
+            zapisano = True
 
-        lista = profile_param.get(profil, [])
-
-        # 🔥 cena bazowa profilu
-        cena_profilu = ceny_profili.get(profil, 0)
-
-        # 🔥 dodanie morfologii do ceny
-        if morfologia == "podstawowa":
-            cena_profilu += ceny_morf.get("podstawowa", 0)
-
-        if morfologia == "rozszerzona":
-            cena_profilu += ceny_morf.get("rozszerzona", 0)
-
-        # czy profil ma morfologię
-        ma_morfologie = profile_morf.get(profil, 0) == 1
-        print("PARAMETRY CENY:", parametry_ceny)
-        print("WYKONANE:", wykonane)
-        # =========================
-        # PODZIAŁ NA SEKCJE
-        # =========================
-
-        sekcje = {
-            "biochemia": [],
-            "mocz": []
-        }
-
-        BADANIA_MOCZU = [
-            "Stosunek; białko / kreatynina w moczu",
-            "Badanie osadu moczu",
-            "Badanie moczu podstawowe"
-        ]
-
-        for p in lista:
-            if p in BADANIA_MOCZU:
-                sekcje["mocz"].append(p)
-            else:
-                sekcje["biochemia"].append(p)
-
-        # =========================
-        # LICZENIE (backend)
-        # =========================
-
-        if "oblicz" in request.query_params:
-            wynik = oblicz_cene(profil, wykonane, morfologia)
-            if "oblicz" in request.query_params:
-                zapisz_historia_db(
-                    "ceny",
-                    0,
-                    profil,
-                    "",
-                    wykonane,
-                    wynik,
-                    morfologia
-                )
     return templates.TemplateResponse(
         request=request,
         name="ceny.html",
@@ -645,14 +631,15 @@ def ceny(request: Request):
             "request": request,
             "profile": lista_profili_ceny(),
             "wybrany_profil": profil,
-            "sekcje": sekcje,
             "wynik": wynik,
             "morfologia": morfologia,
             "ma_morfologie": ma_morfologie,
             "wykonane": wykonane,
-
-            # 🔥 KLUCZOWE
             "parametry_ceny": parametry_ceny,
-            "cena_profilu": cena_profilu,
+            "profile_param_map": profile_param,
+            "profile_morf_map": profile_morf,
+            "ceny_profili_map": ceny_profili,
+            "ceny_morf_map": ceny_morf,
+            "zapisano": zapisano,
         }
     )

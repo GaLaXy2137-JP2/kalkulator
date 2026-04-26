@@ -71,7 +71,20 @@ def znajdz_parametr(nazwa_parametru, parametry, indeks_parametrow=None):
 
 def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, icterus=None):
 
-    suma = 0
+    breakdown = rozbij_objetosc_pelnego_profilu(
+        lista,
+        parametry,
+        hemolysis,
+        lipemia,
+        icterus,
+    )
+
+    return breakdown["suma"]
+
+
+def rozbij_objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, icterus=None):
+
+    parametry_ul = 0
     ma_jony = False
     indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
@@ -84,7 +97,7 @@ def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, ict
         if parametry[parametr_key]["jon"] == 1:
             ma_jony = True
         else:
-            suma += get_adjusted_volume(
+            parametry_ul += get_adjusted_volume(
                 parametry[parametr_key]["ul"],
                 parametr_key,
                 hemolysis,
@@ -92,12 +105,16 @@ def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, ict
                 icterus,
             )
 
-    suma += 50
+    martwa_objetosc_ul = 50
+    jonogram_ul = 20 if ma_jony else 0
+    suma = martwa_objetosc_ul + jonogram_ul + parametry_ul
 
-    if ma_jony:
-        suma += 20
-
-    return suma
+    return {
+        "martwa_objetosc_ul": martwa_objetosc_ul,
+        "jonogram_ul": jonogram_ul,
+        "parametry_ul": parametry_ul,
+        "suma": suma,
+    }
 
 
 # =========================
@@ -115,7 +132,7 @@ def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lip
         if parametr_key and parametry[parametr_key]["jon"] == 1:
             jony.append(parametr_key)
 
-    liczba_jonow = len(jony)
+    liczba_jonow = 1 if len(jony) > 0 else 0
 
     if liczba_jonow > 0 and robocza >= 20:
         robocza -= 20
@@ -135,9 +152,18 @@ def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lip
         for parametr_key in [znajdz_parametr(p, parametry, indeks_parametrow)]
         if parametr_key and parametry[parametr_key]["jon"] == 0
     ]
+    if robocza <= 0:
+        if jonogram_mozliwy:
+            return (liczba_jonow, liczba_jonow)
+        else:
+            return (0, 0)
 
-    if robocza <= 0 or not param_ul:
-        return (0,0)
+    # jeśli nie ma parametrów BIO
+    if not param_ul:
+        if jonogram_mozliwy:
+            return (liczba_jonow, liczba_jonow)
+        else:
+            return (0, 0)
 
     # MAX (od najmniejszych)
     suma = 0

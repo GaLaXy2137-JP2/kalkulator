@@ -1033,6 +1033,14 @@ document.addEventListener("DOMContentLoaded", function(){
     color: #0f172a;
 }
 
+.calc-meta-note {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #64748b;
+}
+
 .calc-result-card {
     margin-top: 4px;
     padding: 22px 20px;
@@ -1117,6 +1125,39 @@ document.addEventListener("DOMContentLoaded", function(){
     font-size: 14px;
     line-height: 1.55;
     color: #334155;
+}
+
+.calc-volume-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.calc-volume-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #475569;
+}
+
+.calc-volume-row strong {
+    color: #0f172a;
+    font-size: 13px;
+}
+
+.calc-volume-row-total {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.calc-volume-row-total strong {
+    color: #1e3a8a;
 }
 
 .calc-crm-card {
@@ -1440,11 +1481,12 @@ document.addEventListener("DOMContentLoaded", function(){
 <div class="calc-sample-meta">
 <div class="calc-meta-card">
 <span class="calc-meta-label">Objętość próbki</span>
-<span class="calc-meta-value">{{ objetosc or 0 }} µL</span>
+<span class="calc-meta-value">{{ (objetosc or 0) | int }} µL</span>
 </div>
 <div class="calc-meta-card">
 <span class="calc-meta-label">Objętość dostępna</span>
 <span class="calc-meta-value">{{ ((objetosc | int) - 50) if objetosc and (objetosc | int) > 50 else 0 }} µL</span>
+<span class="calc-meta-note">Po odjęciu 50 µL martwej objętości.</span>
 </div>
 </div>
 
@@ -1453,14 +1495,16 @@ document.addEventListener("DOMContentLoaded", function(){
 {% if wynik.komunikat %}
 <h3 class="calc-result-headline">{{ wynik.komunikat }}</h3>
 {% if wynik.potrzebne_ul is defined %}
-<p class="calc-result-support">Szacowana objętość wymagana dla bieżącego zestawu badań: {{ wynik.potrzebne_ul }} µL.</p>
+<p class="calc-result-support">
+Szacowana objętość wymagana dla bieżącego zestawu badań: {{ wynik.potrzebne_martwa_objetosc_ul | round(0) | int }} µL martwej objętości{% if wynik.potrzebne_jonogram_ul %} + {{ wynik.potrzebne_jonogram_ul | round(0) | int }} µL na jonogram{% endif %} + {{ wynik.potrzebne_parametry_ul | round(0) | int }} µL na parametry = {{ wynik.potrzebne_ul | round(0) | int }} µL.
+</p>
 {% endif %}
 <a href="/" class="calc-reset-link">
 <button type="button" class="btn-neutral">Nowe obliczenie</button>
 </a>
 {% else %}
 <h3 class="calc-result-headline">Można wykonać: {{ wynik.sr_bez_gldh }}</h3>
-<p class="calc-result-support">Szybkie podsumowanie wariantu z GLDH i bez GLDH dla aktualnej próbki.</p>
+<p class="calc-result-support">{% if wynik.sr_z_gldh %}Szybkie podsumowanie wariantu z GLDH i bez GLDH dla aktualnej próbki.{% else %}Szybkie podsumowanie dla aktualnej próbki.{% endif %}</p>
 <div class="calc-result-breakdown">
 {% if wynik.sr_z_gldh %}
 <div class="calc-breakdown-pill">Z GLDH: {{ wynik.sr_z_gldh }}</div>
@@ -1488,7 +1532,28 @@ Bez GLDH: {{ wynik.bez_gldh }}
 
 <div class="calc-info-card">
 <h3>Potrzebna objętość</h3>
-<div class="calc-range-text">{{ wynik.potrzebne_ul }} µL</div>
+<div class="calc-range-text">
+<div class="calc-volume-breakdown">
+<div class="calc-volume-row">
+<span>Martwa objętość</span>
+<strong>{{ wynik.potrzebne_martwa_objetosc_ul | round(0) | int }} µL</strong>
+</div>
+{% if wynik.potrzebne_jonogram_ul %}
+<div class="calc-volume-row">
+<span>Rezerwa na jonogram</span>
+<strong>{{ wynik.potrzebne_jonogram_ul | round(0) | int }} µL</strong>
+</div>
+{% endif %}
+<div class="calc-volume-row">
+<span>Parametry</span>
+<strong>{{ wynik.potrzebne_parametry_ul | round(0) | int }} µL</strong>
+</div>
+<div class="calc-volume-row calc-volume-row-total">
+<span>Suma</span>
+<strong>{{ wynik.potrzebne_ul | round(0) | int }} µL</strong>
+</div>
+</div>
+</div>
 </div>
 </div>
 {% endif %}
