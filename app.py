@@ -23,7 +23,7 @@ DOTENV_LOADED = load_dotenv(dotenv_path=ENV_PATH)
 print(f"[app.py] .env loaded: {DOTENV_LOADED} | path: {ENV_PATH}")
 print(f"[app.py] DATABASE_URL loaded: {bool(os.getenv('DATABASE_URL'))}")
 
-from silnik.db import zapisz_historia_db
+from silnik.db import connection_pool, pobierz_kolumny_historia, zapisz_historia_db, zbuduj_select_historii
 
   
 # =========================  
@@ -38,8 +38,6 @@ from silnik.kalkulator import (
 )  
   
 from silnik.rozcienczenia import policz_rozcienczenia  
-from silnik.db import zapisz_historia_db  
-  
 app = FastAPI()  
   
 app.mount("/static", StaticFiles(directory="static"), name="static")  
@@ -462,8 +460,6 @@ def oblicz_rozcienczenia(
 
 @app.get("/historia", response_class=HTMLResponse)
 def historia(request: Request):
-    from silnik.db import connection_pool
-
     conn = None
     cur = None
 
@@ -471,22 +467,8 @@ def historia(request: Request):
         conn = connection_pool.getconn()
         cur = conn.cursor()
 
-        try:
-            cur.execute("""
-                SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, hemolysys AS hemolysis, lipemia, icterus
-                FROM historia
-                ORDER BY data DESC, godzina DESC
-                LIMIT 100
-            """)
-        except psycopg2.errors.UndefinedColumn:
-            conn.rollback()
-            cur = conn.cursor()
-            cur.execute("""
-                SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik
-                FROM historia
-                ORDER BY data DESC, godzina DESC
-                LIMIT 100
-            """)
+        dostepne_kolumny = pobierz_kolumny_historia(cur)
+        cur.execute(zbuduj_select_historii(dostepne_kolumny))
 
         rows = cur.fetchall()
         dane = []
