@@ -16,15 +16,27 @@ margin:0;
 }
 
 .wrapper{
-display:flex;
+min-height:100vh;
 }
 
 .sidebar{
-width:220px;
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+width:260px;
 background:#2c3e50;
 color:white;
-min-height:100vh;
-padding:20px;
+padding:88px 20px 20px;
+box-sizing:border-box;
+transform:translateX(-100%);
+transition:transform 0.25s ease;
+z-index:40;
+box-shadow:18px 0 36px rgba(15, 23, 42, 0.24);
+}
+
+.sidebar.open{
+transform:translateX(0);
 }
 
 .sidebar h2{
@@ -45,8 +57,95 @@ background:#34495e;
 }
 
 .content{
-flex:1;
-padding:40px;
+width:100%;
+box-sizing:border-box;
+padding:88px 32px 32px;
+}
+
+.topbar{
+position:fixed;
+top:0;
+left:0;
+right:0;
+height:72px;
+display:flex;
+align-items:center;
+gap:16px;
+padding:0 20px;
+box-sizing:border-box;
+background:rgba(244, 246, 247, 0.92);
+backdrop-filter:blur(10px);
+z-index:30;
+}
+
+.menu_toggle{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:48px;
+height:48px;
+padding:0;
+border-radius:14px;
+border:1px solid #dbe4ef;
+background:#ffffff;
+color:#0f172a;
+box-shadow:0 10px 24px rgba(15, 23, 42, 0.08);
+cursor:pointer;
+}
+
+.menu_toggle:hover{
+background:#f8fafc;
+}
+
+.menu_toggle_bar{
+display:block;
+width:18px;
+height:2px;
+background:#0f172a;
+border-radius:999px;
+position:relative;
+}
+
+.menu_toggle_bar::before,
+.menu_toggle_bar::after{
+content:"";
+position:absolute;
+left:0;
+width:18px;
+height:2px;
+background:#0f172a;
+border-radius:999px;
+}
+
+.menu_toggle_bar::before{
+top:-6px;
+}
+
+.menu_toggle_bar::after{
+top:6px;
+}
+
+.topbar_title{
+font-size:14px;
+font-weight:700;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:#64748b;
+}
+
+.sidebar_backdrop{
+position:fixed;
+inset:0;
+background:rgba(15, 23, 42, 0.28);
+opacity:0;
+pointer-events:none;
+transition:opacity 0.25s ease;
+z-index:35;
+}
+
+.sidebar_backdrop.open{
+opacity:1;
+pointer-events:auto;
 }
 
 /* GLOBALNE STYLE APLIKACJI */
@@ -251,6 +350,16 @@ cursor:pointer;
 background:#ecf0f1;
 }
 
+@media (max-width: 900px){
+.content{
+padding:84px 16px 24px;
+}
+
+.topbar{
+padding:0 16px;
+}
+}
+
 </style>
 
 </head>
@@ -259,7 +368,16 @@ background:#ecf0f1;
 
 <div class="wrapper">
 
-<div class="sidebar">
+<div class="topbar">
+<button type="button" class="menu_toggle" id="menu_toggle" aria-label="Pokaż moduły" aria-expanded="false" aria-controls="sidebar">
+<span class="menu_toggle_bar"></span>
+</button>
+<div class="topbar_title">Moduły</div>
+</div>
+
+<div class="sidebar_backdrop" id="sidebar_backdrop"></div>
+
+<div class="sidebar" id="sidebar">
 
 <h2>Moduły</h2>
 
@@ -280,6 +398,42 @@ background:#ecf0f1;
 </div>
 
 <!-- <script src="/static/main.js"></script> -->
+
+<script>
+(function () {
+	const sidebar = document.getElementById("sidebar")
+	const toggle = document.getElementById("menu_toggle")
+	const backdrop = document.getElementById("sidebar_backdrop")
+
+	if (!sidebar || !toggle || !backdrop) return
+
+	function setOpen(isOpen) {
+		sidebar.classList.toggle("open", isOpen)
+		backdrop.classList.toggle("open", isOpen)
+		toggle.setAttribute("aria-expanded", String(isOpen))
+	}
+
+	toggle.addEventListener("click", function () {
+		setOpen(!sidebar.classList.contains("open"))
+	})
+
+	backdrop.addEventListener("click", function () {
+		setOpen(false)
+	})
+
+	sidebar.querySelectorAll("a").forEach(function (link) {
+		link.addEventListener("click", function () {
+			setOpen(false)
+		})
+	})
+
+	document.addEventListener("keydown", function (event) {
+		if (event.key === "Escape") {
+			setOpen(false)
+		}
+	})
+})()
+</script>
 
 </body>
 

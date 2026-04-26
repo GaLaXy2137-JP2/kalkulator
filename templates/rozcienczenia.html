@@ -1,266 +1,1130 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<script>
+{% macro render_step_nieroz(krok, wynik) -%}
+<div class="dilution-step-card">
+{% if wynik.tryb_nieroz == "zadne" %}
+<h3>KROK {{ krok }} — Parametry nierozcieńczalne</h3>
+<p>Nie można wykonać żadnego z parametrów nierozcieńczalnych:</p>
+<ul class="dilution-step-list">
+{% for p in wynik.nierozcienczalne %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+{% elif wynik.tryb_nieroz == "wybor" %}
+<h3>KROK {{ krok }} — Wybierz jedno z</h3>
+<ul class="dilution-step-list">
+{% for p in wynik.nieroz_mieszczace %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+{% elif wynik.tryb_nieroz == "wszystkie" %}
+<h3>KROK {{ krok }} — Wykonaj</h3>
+<ul class="dilution-step-list">
+{% for p in wynik.nieroz_mieszczace %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+</div>
+{%- endmacro %}
 
+{% macro render_step_bez(krok, wynik) -%}
+<div class="dilution-step-card">
+<h3>KROK {{ krok }} — Wykonaj bez rozcieńczenia</h3>
+<ul class="dilution-step-list">
+{% for p in wynik.bez_rozcienczenia %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+</div>
+{%- endmacro %}
+
+{% macro render_step_rozc(krok, wynik) -%}
+<div class="dilution-step-card dilution-step-card-highlight">
+<h3>KROK {{ krok }} — Rozcieńczenie</h3>
+{% if wynik.df > 0 %}
+<p>
+{% if wynik.baza == 50 %}
+Rozcieńczenie z pozostałych 50 µl próbki:
+{% else %}
+Rozcieńczenie z całej próbki:
+{% endif %}
+</p>
+<p class="dilution-ratio">1:{{ wynik.df }} ({{ wynik.df }}x)</p>
+<p>{{ wynik.baza }} µl próbki + {{ (wynik.df * wynik.baza) - wynik.baza }} µl rozcieńczalnika</p>
+{% else %}
+<p>Rozcieńczenie nie jest potrzebne</p>
+{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro render_step_do(krok, wynik) -%}
+<div class="dilution-step-card">
+<h3>KROK {{ krok }} — Wykonaj z rozcieńczenia</h3>
+<ul class="dilution-step-list">
+{% for p in wynik.do_rozcienczenia %}
+<li>{{ p.nazwa }}</li>
+{% endfor %}
+</ul>
+</div>
+{%- endmacro %}
+
+{% set state = namespace(total=0, has_step1=false, has_step2=false, has_step3=false, has_step4=false) %}
+{% if wynik and not wynik.pelny_profil %}
+    {% set state.has_step1 = wynik.tryb_nieroz != "brak" %}
+    {% set state.has_step2 = wynik.bez_rozcienczenia %}
+    {% set state.has_step3 = true %}
+    {% set state.has_step4 = wynik.do_rozcienczenia %}
+    {% if state.has_step1 %}{% set state.total = state.total + 1 %}{% endif %}
+    {% if state.has_step2 %}{% set state.total = state.total + 1 %}{% endif %}
+    {% if state.has_step3 %}{% set state.total = state.total + 1 %}{% endif %}
+    {% if state.has_step4 %}{% set state.total = state.total + 1 %}{% endif %}
+{% endif %}
+{% set single_results_panel = (not wynik) or wynik.pelny_profil or (state.total <= 2) %}
+
+<script>
 const profileList = {{ profile | tojson }}
 const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
-console.log("PARAMETRY:", parametryList)
 
-// =========================
-// POKAZ LISTĘ PROFILI
-// =========================
+function zamknijListe(listaId){
+let lista = document.getElementById(listaId)
+if(!lista) return
+lista.innerHTML = ""
+lista.dataset.open = "false"
+}
+
+function zamknijWszystkieListy(){
+document.querySelectorAll(".calc-app .lista").forEach(lista => {
+lista.innerHTML = ""
+lista.dataset.open = "false"
+})
+}
+
+function wypelnijListe(inputId, listaId, text = ""){
+let lista = document.getElementById(listaId)
+if(!lista) return
+
+lista.innerHTML = ""
+
+profileList.forEach(function(p){
+if(text && !p.toLowerCase().includes(text)) return
+
+let div = document.createElement("div")
+div.innerText = p
+
+div.onclick = function(){
+document.getElementById(inputId).value = p
+zamknijListe(listaId)
+updateClearButton(inputId)
+renderParametry()
+}
+
+lista.appendChild(div)
+})
+
+lista.dataset.open = lista.childElementCount ? "true" : "false"
+}
 
 function pokazListe(inputId, listaId){
+let lista = document.getElementById(listaId)
+if(!lista) return
 
-    let lista = document.getElementById(listaId)
-    lista.innerHTML = ""
-
-    profileList.forEach(function(p){
-
-        let div = document.createElement("div")
-        div.innerText = p
-
-        div.onclick = function(){
-            document.getElementById(inputId).value = p
-            lista.innerHTML = ""
-            renderParametry()
-        }
-
-        lista.appendChild(div)
-    })
+if(lista.dataset.open === "true"){
+zamknijListe(listaId)
+return
 }
 
-
-// =========================
-// FILTRUJ
-// =========================
+zamknijWszystkieListy()
+wypelnijListe(inputId, listaId)
+}
 
 function filtruj(event, inputId, listaId){
+let input = document.getElementById(inputId)
+let text = input.value.toLowerCase()
 
-    let input = document.getElementById(inputId)
-    let lista = document.getElementById(listaId)
-    let text = input.value.toLowerCase()
-
-    lista.innerHTML = ""
-
-    profileList.forEach(function(p){
-
-        if(p.toLowerCase().includes(text)){
-
-            let div = document.createElement("div")
-            div.innerText = p
-
-            div.onclick = function(){
-                document.getElementById(inputId).value = p
-                lista.innerHTML = ""
-            }
-
-            lista.appendChild(div)
-        }
-
-    })
-
-    renderParametry()
+updateClearButton(inputId)
+zamknijWszystkieListy()
+wypelnijListe(inputId, listaId, text)
+renderParametry()
 }
 
-
-// =========================
-// PROFIL 2
-// =========================
-
 function pokazProfil2(){
-    document.getElementById("profil2_box").style.display = "block"
-    document.getElementById("btn_profil2").style.display = "none"
+document.getElementById("profil2_slot").hidden = true
+document.getElementById("profil2_box").hidden = false
+document.getElementById("profil2_box").style.display = "flex"
+document.getElementById("profil2_input").focus()
+zamknijWszystkieListy()
+updateClearButton("profil2_input")
 }
 
 function usunProfil2(){
-    document.getElementById("profil2_input").value = ""
-    document.getElementById("profil2_box").style.display = "none"
-    document.getElementById("btn_profil2").style.display = "block"
-    renderParametry()
+document.getElementById("profil2_input").value = ""
+const lista = document.getElementById("lista2")
+if(lista) lista.innerHTML = ""
+document.getElementById("profil2_box").hidden = true
+document.getElementById("profil2_box").style.display = "none"
+document.getElementById("profil2_slot").hidden = false
+document.getElementById("profil2_slot").style.display = "flex"
+updateClearButton("profil2_input")
+renderParametry()
 }
 
+function updateClearButton(inputId){
+const input = document.getElementById(inputId)
+const button = document.querySelector(`.calc-clear-input[data-target="${inputId}"]`)
 
-// =========================
-// ZAMKNIJ LISTĘ
-// =========================
+if(!input || !button) return
 
-document.addEventListener("click", function(e){
+button.style.display = input.value.trim() ? "inline-flex" : "none"
+}
 
-    if(!e.target.closest(".lista") && !e.target.closest("input")){
-        document.getElementById("lista1").innerHTML = ""
-        document.getElementById("lista2").innerHTML = ""
-    }
+function clearProfileInput(inputId, listaId){
+const input = document.getElementById(inputId)
+const lista = document.getElementById(listaId)
 
+if(input){
+input.value = ""
+input.focus()
+}
+
+if(lista){
+lista.innerHTML = ""
+lista.dataset.open = "false"
+}
+
+updateClearButton(inputId)
+renderParametry()
+}
+
+function initClearButtons(){
+["profil1_input", "profil2_input"].forEach(updateClearButton)
+}
+
+function initProfile2(){
+const input = document.getElementById("profil2_input")
+const slot = document.getElementById("profil2_slot")
+const box = document.getElementById("profil2_box")
+
+if(!input || !slot || !box) return
+
+if(input.value.trim()){
+slot.hidden = true
+box.hidden = false
+box.style.display = "flex"
+} else {
+slot.hidden = false
+slot.style.display = "flex"
+box.hidden = true
+box.style.display = "none"
+}
+}
+
+function initProfileDropdowns(){
+document.addEventListener("click", function(event){
+if(event.target.closest(".calc-input-wrap") || event.target.closest(".calc-app .lista")) return
+zamknijWszystkieListy()
 })
 
-
-// =========================
-// PARAMETRY TOGGLE
-// =========================
-
-function toggleParametryBox(){
-
-    let box = document.getElementById("parametry_box")
-    let btn = document.getElementById("btn_parametry")
-
-    let isHidden = box.style.display === "none" || box.style.display === ""
-
-    if(isHidden){
-        box.style.display = "block"
-        btn.innerText = "− Ukryj dodatkowe parametry"
-        btn.classList.add("hide")   // 🔥 TO DODAJ
-
-        renderParametry()
-    } else {
-        box.style.display = "none"
-        btn.innerText = "+ Dodaj dodatkowe parametry"
-        btn.classList.remove("hide") // 🔥 TO DODAJ
-    }
-
+document.addEventListener("keydown", function(event){
+if(event.key === "Escape"){
+zamknijWszystkieListy()
+}
+})
 }
 
-// =========================
-// RENDER PARAMETRÓW
-// =========================
+function toggleParametryBox(){
+let box = document.getElementById("parametry_box")
+let btn = document.getElementById("btn_parametry")
+
+let isVisible = box.style.display === "block"
+
+if(isVisible){
+box.style.display = "none"
+btn.innerText = "+ Dodaj dodatkowe parametry"
+btn.classList.remove("hide")
+} else {
+box.style.display = "block"
+btn.innerText = "− Ukryj dodatkowe parametry"
+btn.classList.add("hide")
+renderParametry()
+}
+}
 
 function renderParametry(){
+let container = document.getElementById("parametry_box")
+if(!container) return
+container.innerHTML = ""
 
-    let container = document.getElementById("parametry_box")
-    container.innerHTML = ""
+const aktywneParametry = getSelectedParametry()
+const parametryZProfili = getProfileParams()
 
-    const aktywneParametry = getSelectedParametry()
-    const parametryZProfili = getProfileParams()
-
-    parametryList
-        .filter(p => p !== "ACTH")
-        .filter(p => !parametryZProfili.has(p))
-        .forEach(p => {
-
-        let btn = document.createElement("button")
-        btn.type = "button"
-        btn.innerText = p
-        btn.className = "param_btn"
-	if(aktywneParametry.includes(p)){ btn.classList.add("active") }
-        btn.onclick = () => toggleParametr(p)
-
-        container.appendChild(btn)
-    })
+parametryList
+.filter(p => p !== "ACTH")
+.filter(p => !parametryZProfili.has(p))
+.forEach(p => {
+let btn = document.createElement("button")
+btn.type = "button"
+btn.innerText = p
+btn.className = "param_btn"
+if(aktywneParametry.includes(p)){
+btn.classList.add("active")
+}
+btn.onclick = () => toggleParametr(p)
+container.appendChild(btn)
+})
 }
 
 function getSelectedParametry(){
+const input = document.getElementById("parametry_input")
 
-    const input = document.getElementById("parametry_input")
 
-    if(!input || !input.value.trim()){
-        return parametryWybrane.slice()
-    }
-
-    return input.value.split(",").map(x => x.trim()).filter(Boolean)
+function getLeftPanelStack(){
+    return document.querySelector(".calc-panel-input .calc-panel-stack")
 }
 
-function getProfileParams(){
-
-    const selectedProfiles = [
-        document.getElementById("profil1_input")?.value.trim(),
-        document.getElementById("profil2_input")?.value.trim()
-    ].filter(Boolean)
-
-    return new Set(
-        selectedProfiles.flatMap(name => profileParamMap[name] || [])
-    )
+function zapiszScrollLewegoPanelu(){
+    const panel = getLeftPanelStack()
+    if(!panel) return
+    sessionStorage.setItem("dilutionLeftPanelScroll", String(panel.scrollTop))
 }
 
+function przywrocScrollLewegoPanelu(){
+    const panel = getLeftPanelStack()
+    const saved = sessionStorage.getItem("dilutionLeftPanelScroll")
 
-function initHilSwitches(){
+    if(!panel || saved === null) return
 
-    document.querySelectorAll(".hil_switch").forEach(group => {
-
-        const hiddenId = group.dataset.hiddenInput
-        const hiddenInput = document.getElementById(hiddenId)
-
-        if(!hiddenInput) return
-
-        group.querySelectorAll("button").forEach(button => {
-            button.addEventListener("click", function(){
-                hiddenInput.value = this.dataset.value
-
-                group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
-                this.classList.add("active")
-            })
-        })
+    requestAnimationFrame(function(){
+        panel.scrollTop = Number(saved) || 0
     })
 }
 
+function initLeftPanelScrollMemory(){
+    const panel = getLeftPanelStack()
+    if(!panel) return
 
-// =========================
-// KLIK PARAMETRU
-// =========================
+    panel.addEventListener("scroll", zapiszScrollLewegoPanelu)
+    przywrocScrollLewegoPanelu()
+}
+if(!input || !input.value.trim()){
+return parametryWybrane.slice()
+}
+
+return input.value.split(",").map(x => x.trim()).filter(Boolean)
+}
+
+    zapiszScrollLewegoPanelu()
+function getProfileParams(){
+const selectedProfiles = [
+document.getElementById("profil1_input")?.value.trim(),
+document.getElementById("profil2_input")?.value.trim()
+].filter(Boolean)
+
+return new Set(
+selectedProfiles.flatMap(name => profileParamMap[name] || [])
+)
+}
+
+function initHilSwitches(){
+document.querySelectorAll(".hil_switch").forEach(group => {
+const hiddenId = group.dataset.hiddenInput
+const hiddenInput = document.getElementById(hiddenId)
+if(!hiddenInput) return
+
+group.querySelectorAll("button").forEach(button => {
+button.addEventListener("click", function(){
+hiddenInput.value = this.dataset.value
+group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
+this.classList.add("active")
+})
+})
+})
+}
 
 function toggleParametr(p){
+let input = document.getElementById("parametry_input")
 
-    let input = document.getElementById("parametry_input")
+let current = input.value
+? input.value.split(",").map(x => x.trim())
+: []
 
-    let current = input.value
-        ? input.value.split(",").map(x => x.trim())
-        : []
+let btns = document.querySelectorAll(".param_btn")
+let clickedBtn = Array.from(btns).find(b => b.innerText === p)
 
-    let btns = document.querySelectorAll(".param_btn")
-    let clickedBtn = Array.from(btns).find(b => b.innerText === p)
-
-    if(current.includes(p)){
-        current = current.filter(x => x !== p)
-        if(clickedBtn) clickedBtn.classList.remove("active")
-    } else {
-        current.push(p)
-        if(clickedBtn) clickedBtn.classList.add("active")
-    }
-
-    input.value = current.join(", ")
+if(current.includes(p)){
+current = current.filter(x => x !== p)
+if(clickedBtn) clickedBtn.classList.remove("active")
+} else {
+current.push(p)
+if(clickedBtn) clickedBtn.classList.add("active")
 }
- document.addEventListener("DOMContentLoaded", function(){
 
-    if(parametryWybrane.length > 0){
+input.value = current.join(", ")
+}
 
-        // 🔥 wpisz do inputa
-        document.getElementById("parametry_input").value =
-            parametryWybrane.join(", ")
+function initSubmitButton(){
+const form = document.querySelector(".calc-form-card")
+const button = document.getElementById("calc_submit_btn")
 
-        // 🔥 otwórz panel
-        const box = document.getElementById("parametry_box")
-        const btn = document.getElementById("btn_parametry")
+if(!form || !button || button.disabled) return
 
-        box.style.display = "block"
+form.addEventListener("submit", function(){
+button.disabled = true
+button.innerText = "Obliczanie..."
+button.classList.add("is-disabled")
+})
+}
 
-        btn.innerText = "− Ukryj dodatkowe parametry"
-        btn.classList.add("hide")
+document.addEventListener("DOMContentLoaded", function(){
+renderParametry()
+initHilSwitches()
+initClearButtons()
+initProfile2()
+initProfileDropdowns()
+initSubmitButton()
+initLeftPanelScrollMemory()
 
-        // 🔥 render
-        renderParametry()
-    }
+if(parametryWybrane.length > 0){
+const input = document.getElementById("parametry_input")
+const box = document.getElementById("parametry_box")
+const btn = document.getElementById("btn_parametry")
 
-    initHilSwitches()
-
+input.value = parametryWybrane.join(", ")
+box.style.display = "block"
+btn.innerText = "− Ukryj dodatkowe parametry"
+btn.classList.add("hide")
+renderParametry()
+}
 })
 </script>
 
+<style>
+.calc-app {
+    width: 100%;
+    max-width: none;
+    margin-top: -24px;
+    padding: 14px 16px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07) !important;
+    box-sizing: border-box;
+}
 
-<div class="container">
+.calc-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-<h2>Rozcieńczenia</h2>
+.calc-form-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
 
+.calc-column {
+    min-width: 0;
+}
 
-<form method="post">
+.calc-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
 
-<div class="hil_toolbar">
+.calc-panel-input {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.calc-panel-highlight {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+}
+
+.calc-panel-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calc-panel-kicker,
+.calc-panel-note,
+.calc-section-kicker,
+.calc-section-note {
+    display: none;
+}
+
+.calc-panel-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.calc-panel-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calc-panel-actions {
+    margin-top: auto;
+    padding-top: 10px;
+    padding-bottom: 6px;
+    flex-shrink: 0;
+    background: #ffffff;
+    position: sticky;
+    bottom: 0;
+    z-index: 8;
+    box-shadow: 0 -10px 24px rgba(255, 255, 255, 0.96);
+}
+
+.calc-section {
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calc-section-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.calc-section-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.calc-field label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #334155;
+}
+
+.calc-app .search_box {
+    margin: 0 !important;
+    min-height: 38px;
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+.calc-app .search_box:focus {
+    outline: none;
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+}
+
+.calc-hil-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+}
+
+.calc-app .hil_group {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+    border: 1px solid #dbe4f0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.calc-app .hil_group label {
+    min-width: 0;
+    font-size: 9px;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+
+.calc-app .hil_switch {
+    width: 100%;
+    padding: 3px !important;
+    gap: 3px !important;
+    background: #e8eef8 !important;
+    border-radius: 999px !important;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+    min-width: 0;
+}
+
+.calc-app .hil_switch button {
+    flex: 1 1 auto !important;
+    min-width: 0;
+    min-height: 24px;
+    padding: 3px 5px !important;
+    border-radius: 999px !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.calc-app .hil_switch button:hover {
+    background: #e6eefc !important;
+    transform: translateY(-1px);
+}
+
+.calc-app .hil_switch button.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.22);
+}
+
+.calc-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+}
+
+.calc-stack,
+.calc-profile-side {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    height: 100%;
+    position: relative;
+}
+
+.calc-profile-row,
+.calc-profile-side {
+    min-width: 0;
+}
+
+.calc-profile-secondary {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    height: 100%;
+    position: relative;
+}
+
+.calc-profile-secondary[style*="display:flex"] {
+    display: flex;
+}
+
+.calc-profile-grid .calc-field {
+    height: 100%;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.calc-profile-field-head {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.calc-profile-toggle-slot {
+    width: 100%;
+    min-height: 100%;
+}
+
+.calc-profile-toggle-slot .calc-field,
+.calc-profile-toggle-slot .calc-profile-field-head {
+    width: 100%;
+}
+
+.calc-profile-toggle-slot .calc-profile-field-head label {
+    visibility: hidden;
+}
+
+.calc-profile-toggle-slot .btn_add_profile {
+    width: 100% !important;
+    min-height: 38px;
+    height: 38px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    top: -8px;
+}
+
+.calc-input-button-wrap {
+    overflow: visible;
+    border-radius: 12px;
+}
+
+.calc-profile-topbar {
+    display: flex;
+    justify-content: flex-end;
+    width: auto;
+}
+
+.calc-profile-topbar .btn-secondary {
+    min-height: 28px;
+    padding: 0 10px !important;
+    font-size: 11px;
+    border-radius: 999px !important;
+    box-shadow: 0 4px 10px rgba(148, 163, 184, 0.1);
+}
+
+.calc-input-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.calc-input-wrap .search_box {
+    padding-right: 34px !important;
+}
+
+.calc-clear-input {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 20px !important;
+    min-width: 20px;
+    min-height: 20px !important;
+    height: 20px;
+    display: none;
+    align-items: center;
+    border-radius: 999px !important;
+    border: none !important;
+    background: #e8eef8 !important;
+    color: #1e3a8a !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+    line-height: 1;
+    z-index: 2;
+}
+
+.calc-clear-input:hover,
+.calc-clear-input:focus {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+    transform: translateY(-50%) !important;
+}
+
+.calc-app .lista {
+    margin: 0;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 96px;
+    overflow: auto;
+    z-index: 30;
+    border: 1px solid #dbe4f0;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.calc-app .lista:empty {
+    display: none;
+}
+
+.calc-app .lista div {
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+.calc-app .lista div:hover {
+    background: #eff6ff;
+}
+
+.calc-app button {
+    min-height: 36px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.calc-app button:hover {
+    transform: translateY(-1px);
+}
+
+.calc-app button:disabled:hover {
+    transform: none;
+}
+
+.btn-primary {
+    width: 100%;
+    background: #2563eb !important;
+    color: #ffffff !important;
+    box-shadow: 0 16px 28px rgba(37, 99, 235, 0.22);
+}
+
+.btn-primary.is-disabled,
+.btn-primary:disabled {
+    background: #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: none;
+    cursor: default;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8 !important;
+}
+
+.btn-primary.is-disabled:hover,
+.btn-primary:disabled:hover {
+    background: #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    width: auto !important;
+    padding: 0 14px !important;
+    background: #ffffff !important;
+    color: #1e3a8a !important;
+    border: 1px solid #bfdbfe !important;
+    box-shadow: 0 6px 14px rgba(148, 163, 184, 0.12);
+}
+
+.btn-secondary.btn_add_profile {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100% !important;
+}
+
+.btn-secondary:hover {
+    background: #eff6ff !important;
+    border-color: #93c5fd !important;
+}
+
+.btn-neutral {
+    width: 100%;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+}
+
+.btn-neutral:hover {
+    background: #f8fafc !important;
+}
+
+.calc-app #parametry_box {
+    margin-top: 0;
+    padding: 10px;
+    max-height: 120px;
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+}
+
+.calc-app .param_btn {
+    margin: 4px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    box-shadow: none;
+    min-height: 0;
+    font-size: 12px;
+}
+
+.calc-app .param_btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.calc-app .param_btn.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+}
+
+.calc-submit-row {
+    padding-top: 2px;
+}
+
+.calc-submit-row .btn-primary {
+    min-height: 42px;
+    border-radius: 12px;
+}
+
+.dilution-step-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dilution-step-card {
+    padding: 16px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dilution-step-card-highlight {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border-color: #dbeafe;
+}
+
+.dilution-step-card h3,
+.dilution-success-card h3,
+.dilution-empty h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.dilution-step-card p,
+.dilution-success-card p,
+.dilution-empty p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #334155;
+}
+
+.dilution-ratio {
+    font-size: 20px !important;
+    font-weight: 800;
+    color: #1d4ed8 !important;
+}
+
+.dilution-step-list {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #334155;
+}
+
+.dilution-success-card,
+.dilution-empty {
+    padding: 20px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #dbeafe;
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dilution-panel-actions {
+    margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+    .calc-app {
+        margin-top: -8px;
+        padding: 16px !important;
+    }
+
+    .calc-hil-grid,
+    .calc-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calc-app .hil_group {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .calc-panel {
+        padding: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .calc-app {
+        height: calc(100vh - 96px);
+        padding: 10px 12px !important;
+        overflow: hidden;
+    }
+
+    .calc-shell,
+    .calc-form-card,
+    .calc-column,
+    .calc-panel-input,
+    .calc-panel-results,
+    .calc-panel-side {
+        height: 100%;
+        min-height: 0;
+    }
+
+    .calc-form-card {
+        display: grid !important;
+        grid-template-columns: minmax(360px, 1.08fr) minmax(330px, 0.88fr) minmax(300px, 0.82fr);
+        gap: 14px;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .calc-column-results-wide {
+        grid-column: 2 / span 2;
+    }
+
+    .calc-panel {
+        overflow: visible;
+    }
+
+    .calc-panel-stack,
+    .dilution-step-stack {
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .calc-panel-input .calc-panel-stack {
+        padding-bottom: 10px;
+        overflow: auto;
+    }
+
+    .calc-panel-actions {
+        margin-top: 0;
+        padding-bottom: 8px;
+    }
+}
+</style>
+
+<div class="container calc-app">
+<div class="calc-shell">
+<form method="post" class="calc-form-card">
+<div class="calc-column calc-column-input">
+<div class="calc-panel calc-panel-input">
+<div class="calc-panel-heading">
+<p class="calc-panel-kicker">Panel 1</p>
+<h3 class="calc-panel-title">Dane i konfiguracja</h3>
+<p class="calc-panel-note">Wszystkie dane wejściowe do obliczania rozcieńczeń.</p>
+</div>
+
+<div class="calc-panel-stack">
+<section class="calc-section">
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Próbka</p>
+<h3 class="calc-section-title">Objętość próbki</h3>
+<p class="calc-section-note">Wprowadź objętość próbki do analizy rozcieńczeń.</p>
+</div>
+<div class="calc-field">
+<label for="sample_volume">Objętość próbki (µl)</label>
+<input type="number" id="sample_volume" class="search_box" name="objetosc" value="{{ objetosc or '' }}" required autocomplete="off">
+</div>
+</section>
+
+<section class="calc-section">
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Profile</p>
+<h3 class="calc-section-title">Profile badań</h3>
+<p class="calc-section-note">Wybierz profil główny i opcjonalny profil dodatkowy.</p>
+</div>
+
+<div class="calc-profile-grid">
+<div class="calc-stack">
+<div class="calc-profile-row">
+<div class="calc-field">
+<div class="calc-profile-field-head">
+<label>Profil 1</label>
+</div>
+<div class="calc-input-wrap">
+<input type="text" name="profil1" id="profil1_input" class="search_box" value="{{ profil1 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil1_input','lista1')" onkeyup="filtruj(event,'profil1_input','lista1')" oninput="updateClearButton('profil1_input')">
+<button type="button" class="calc-clear-input" data-target="profil1_input" onclick="clearProfileInput('profil1_input','lista1')" aria-label="Wyczyść profil 1">&times;</button>
+</div>
+<div id="lista1" class="lista"></div>
+</div>
+</div>
+</div>
+
+<div class="calc-profile-side">
+<div id="profil2_slot" class="calc-profile-toggle-slot" {% if profil2 %}hidden{% endif %}>
+<div class="calc-field">
+<div class="calc-profile-field-head">
+<label>Profil 2</label>
+</div>
+<div class="calc-input-wrap calc-input-button-wrap">
+<button type="button" id="btn_profil2" class="btn_add_profile btn-secondary" onclick="pokazProfil2()">+ Dodaj drugi profil</button>
+</div>
+</div>
+</div>
+
+<div id="profil2_box" class="calc-profile-secondary" {% if not profil2 %}hidden{% endif %}>
+<div class="calc-field">
+<div class="calc-profile-field-head">
+<label>Profil 2</label>
+<div class="calc-profile-topbar">
+<button type="button" class="btn-secondary" onclick="usunProfil2()">Ukryj drugi profil</button>
+</div>
+</div>
+<div class="calc-input-wrap">
+<input type="text" name="profil2" id="profil2_input" class="search_box" value="{{ profil2 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil2_input','lista2')" onkeyup="filtruj(event,'profil2_input','lista2')" oninput="updateClearButton('profil2_input')">
+<button type="button" class="calc-clear-input" data-target="profil2_input" onclick="clearProfileInput('profil2_input','lista2')" aria-label="Wyczyść profil 2">&times;</button>
+</div>
+<div id="lista2" class="lista"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="calc-section">
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Dodatkowe</p>
+<h3 class="calc-section-title">Dodatkowe parametry</h3>
+<p class="calc-section-note">Dodaj pojedyncze badania poza profilami.</p>
+</div>
+<button type="button" id="btn_parametry" class="btn_add_profile btn-secondary" onclick="toggleParametryBox()">+ Dodaj dodatkowe parametry</button>
+<input type="hidden" id="parametry_input" name="parametry_input">
+<div id="parametry_box" style="display:none;"></div>
+</section>
+
+<section class="calc-section">
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Jakość</p>
+<h3 class="calc-section-title">Jakość próbki (HIL)</h3>
+<p class="calc-section-note">Ustaw wpływ jakości próbki na rozcieńczenia.</p>
+</div>
 
 <input type="hidden" name="hemolysis" id="hemolysis_hidden" value="{{ hemolysis or 'none' }}">
 <input type="hidden" name="lipemia" id="lipemia_hidden" value="{{ lipemia or 'none' }}">
 <input type="hidden" name="icterus" id="icterus_hidden" value="{{ icterus or 'absent' }}">
 
+<div class="hil_toolbar calc-hil-grid">
 <div class="hil_group">
 <label>Hemoliza</label>
 <div class="hil_switch" data-hidden-input="hemolysis_hidden">
@@ -280,289 +1144,94 @@ function toggleParametr(p){
 </div>
 
 <div class="hil_group">
-<label>Żółtaczka / Icterus</label>
+<label>Żółtaczka</label>
 <div class="hil_switch" data-hidden-input="icterus_hidden">
 <button type="button" data-value="absent" class="{% if (icterus or 'absent') == 'absent' %}active{% endif %}">Brak</button>
 <button type="button" data-value="present" class="{% if icterus == 'present' %}active{% endif %}">Obecna</button>
 </div>
 </div>
-
+</div>
+</section>
 </div>
 
-
-<label>Objętość próbki (µl)</label>
-
-<input
-type="number"
-class="search_box"
-name="objetosc"
-value="{{ objetosc or '' }}"
-required
-autocomplete="off">
-
-
-<label>Profil 1</label>
-
-<input
-type="text"
-name="profil1"
-id="profil1_input"
-class="search_box"
-value="{{ profil1 or '' }}"
-placeholder="Wpisz nazwę profilu..."
-autocomplete="off"
-onclick="pokazListe('profil1_input','lista1')"
-onkeyup="filtruj(event,'profil1_input','lista1')">
-
-<div id="lista1" class="lista"></div>
-
-
-<button
-type="button"
-id="btn_profil2"
-class="btn_add_profile"
-onclick="pokazProfil2()"
-style="{% if profil2 %}display:none;{% endif %}">
-
-+ Dodaj drugi profil
-
-</button>
-
-
-<div
-id="profil2_box"
-style="{% if profil2 %}display:block;{% else %}display:none;{% endif %}">
-
-
-<label>Profil 2</label>
-
-<input
-type="text"
-name="profil2"
-id="profil2_input"
-class="search_box"
-value="{{ profil2 or '' }}"
-placeholder="Wpisz nazwę profilu..."
-autocomplete="off"
-onclick="pokazListe('profil2_input','lista2')"
-onkeyup="filtruj(event,'profil2_input','lista2')">
-
-<div id="lista2" class="lista"></div>
-
-
-<button
-type="button"
-class="btn_remove"
-onclick="usunProfil2()">
-
-Usuń drugi profil
-
-</button>
-
+<div class="calc-panel-actions">
+<div class="calc-submit-row">
+<button type="submit" id="calc_submit_btn" name="oblicz" class="btn-primary" {% if wynik %}disabled{% endif %}>{% if wynik %}Obliczono{% else %}Oblicz rozcieńczenia{% endif %}</button>
+</div>
+</div>
+</div>
 </div>
 
-<button 
-type="button"
-id="btn_parametry"
-class="btn_add_profile"
-onclick="toggleParametryBox()">
-+ Dodaj dodatkowe parametry
-</button>
+<div class="calc-column calc-column-results {% if single_results_panel %}calc-column-results-wide{% endif %}">
+<div class="calc-panel calc-panel-highlight calc-panel-results">
+<div class="calc-panel-heading">
+<h3 class="calc-panel-title">{% if single_results_panel %}Kroki{% else %}Kroki 1 i 2{% endif %}</h3>
+</div>
 
-<input type="hidden" id="parametry_input" name="parametry_input">
-
-<div id="parametry_box" style="display:none;"></div>
-
+<div class="dilution-step-stack">
 {% if not wynik %}
-
-<button type="submit">
-Oblicz rozcieńczenia
-</button>
-
+<div class="dilution-empty">
+<h3>Instrukcja pojawi się tutaj</h3>
+<p>Po uzupełnieniu danych panel pokaże kolejne kroki rozcieńczeń.</p>
+</div>
+{% elif wynik.pelny_profil %}
+<div class="dilution-success-card">
+<h3>✔ Starczy na cały profil</h3>
+<p>Nie trzeba wykonywać dodatkowych kroków rozcieńczenia dla tego zestawu badań.</p>
+</div>
+<div class="dilution-panel-actions">
+<a class="calc-reset-link" href="/rozcienczenia"><button type="button" class="btn-neutral">Nowe obliczenie</button></a>
+</div>
+{% else %}
+{% set ns = namespace(krok=1) %}
+{% if state.has_step1 %}
+{{ render_step_nieroz(ns.krok, wynik) }}
+{% set ns.krok = ns.krok + 1 %}
 {% endif %}
+{% if state.has_step2 %}
+{{ render_step_bez(ns.krok, wynik) }}
+{% set ns.krok = ns.krok + 1 %}
+{% endif %}
+{% if single_results_panel %}
+{{ render_step_rozc(ns.krok, wynik) }}
+{% set ns.krok = ns.krok + 1 %}
+{% if state.has_step4 %}
+{{ render_step_do(ns.krok, wynik) }}
+{% endif %}
+<div class="dilution-panel-actions">
+<a class="calc-reset-link" href="/rozcienczenia"><button type="button" class="btn-neutral">Nowe obliczenie</button></a>
+</div>
+{% endif %}
+{% endif %}
+</div>
+</div>
+</div>
 
+{% if wynik and not wynik.pelny_profil and not single_results_panel %}
+<div class="calc-column calc-column-side">
+<div class="calc-panel calc-panel-side">
+<div class="calc-panel-heading">
+<h3 class="calc-panel-title">Kroki 3 i 4</h3>
+</div>
+
+<div class="dilution-step-stack">
+{% set ns = namespace(krok=1) %}
+{% if state.has_step1 %}{% set ns.krok = ns.krok + 1 %}{% endif %}
+{% if state.has_step2 %}{% set ns.krok = ns.krok + 1 %}{% endif %}
+{{ render_step_rozc(ns.krok, wynik) }}
+{% set ns.krok = ns.krok + 1 %}
+{% if state.has_step4 %}
+{{ render_step_do(ns.krok, wynik) }}
+{% endif %}
+<div class="dilution-panel-actions">
+<a class="calc-reset-link" href="/rozcienczenia"><button type="button" class="btn-neutral">Nowe obliczenie</button></a>
+</div>
+</div>
+</div>
+</div>
+{% endif %}
 </form>
-
-
-{% if wynik %}
-
-    {% if wynik.pelny_profil %}
-
-        <div class="panel">
-            <h3>✔ Starczy na cały profil</h3>
-        </div>
-
-        <a href="/rozcienczenia">
-            <button type="button" style="margin-top: 15px;">
-                Oblicz ponownie
-        </button>
-
-        </a>
-        </div>
-
-    {% else %}
-
-{% set krok = 1 %}
-
-
-<!-- ========================= -->
-<!-- KROK 1 -->
-<!-- ========================= -->
-
-{% if wynik.tryb_nieroz != "brak" %}
-
-<div class="panel">
-
-{% if wynik.tryb_nieroz == "zadne" %}
-
-<h3>KROK {{ krok }} — Parametry nierozcieńczalne</h3>
-
-Nie można wykonać żadnego z parametrów nierozcieńczalnych:
-
-<ul>
-
-{% for p in wynik.nierozcienczalne %}
-<li>{{ p.nazwa }}</li>
-{% endfor %}
-
-</ul>
-
-{% elif wynik.tryb_nieroz == "wybor" %}
-
-<h3>KROK {{ krok }} — Wybierz jedno z</h3>
-
-<ul>
-
-{% for p in wynik.nieroz_mieszczace %}
-<li>{{ p.nazwa }}</li>
-{% endfor %}
-
-</ul>
-
-{% elif wynik.tryb_nieroz == "wszystkie" %}
-
-<h3>KROK {{ krok }} — Wykonaj</h3>
-
-<ul>
-
-{% for p in wynik.nieroz_mieszczace %}
-<li>{{ p.nazwa }}</li>
-{% endfor %}
-
-</ul>
-
-{% endif %}
-
 </div>
-
-{% set krok = krok + 1 %}
-
-{% endif %}
-
-
-<!-- ========================= -->
-<!-- KROK 2 -->
-<!-- ========================= -->
-
-{% if wynik.bez_rozcienczenia %}
-
-<div class="panel">
-
-<h3>KROK {{ krok }} — Wykonaj bez rozcieńczenia</h3>
-
-<ul>
-
-{% for p in wynik.bez_rozcienczenia %}
-<li>{{ p.nazwa }}</li>
-{% endfor %}
-
-</ul>
-
-</div>
-
-{% set krok = krok + 1 %}
-
-{% endif %}
-
-
-<!-- ========================= -->
-<!-- KROK 3 -->
-<!-- ========================= -->
-
-<div class="panel">
-
-<h3>KROK {{ krok }} — Rozcieńczenie</h3>
-
-{% if wynik.df > 0 %}
-
-{% if wynik.baza == 50 %}
-
-Rozcieńczenie z pozostałych 50 µl próbki:
-
-{% else %}
-
-Rozcieńczenie z całej próbki:
-
-{% endif %}
-
-<br><br>
-
-<b>1:{{ wynik.df }} ({{ wynik.df }}x)</b>
-
-<br><br>
-
-{{ wynik.baza }} µl próbki + {{ (wynik.df * wynik.baza) - wynik.baza }} µl rozcieńczalnika
-
-{% else %}
-
-Rozcieńczenie nie jest potrzebne
-
-{% endif %}
-
-</div>
-
-{% set krok = krok + 1 %}
-
-
-<!-- ========================= -->
-<!-- KROK 4 -->
-<!-- ========================= -->
-
-{% if wynik.do_rozcienczenia %}
-
-<div class="panel">
-
-<h3>KROK {{ krok }} — Wykonaj z rozcieńczenia</h3>
-
-<ul>
-
-{% for p in wynik.do_rozcienczenia %}
-<li>{{ p.nazwa }}</li>
-{% endfor %}
-
-</ul>
-
-</div>
-
-{% endif %}
-
-
-<br><br>
-
-
-<a href="/rozcienczenia">
-
-<button type="button">
-Nowe obliczenie
-</button>
-
-</a>
-
-
-    {% endif %}
-
-{% endif %}
-
 </div>
 
 {% endblock %}
