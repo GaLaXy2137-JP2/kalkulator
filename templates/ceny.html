@@ -584,11 +584,26 @@
 }
 
 .ceny-app button:disabled {
-    background: #cbd5e1 !important;
-    color: #64748b !important;
+    background: color-mix(in srgb, var(--bg-elevated) 72%, var(--border) 28%) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--border) !important;
     box-shadow: none !important;
     cursor: not-allowed;
     transform: none !important;
+}
+
+.ceny-app .btn-primary:disabled,
+.ceny-app .btn-secondary:disabled {
+    background: color-mix(in srgb, var(--bg-elevated) 78%, var(--bg-muted) 22%) !important;
+    color: var(--text-muted) !important;
+    border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .ceny-app .btn-primary:disabled,
+[data-theme="dark"] .ceny-app .btn-secondary:disabled {
+    background: color-mix(in srgb, var(--bg-elevated) 82%, #dbeafe 18%) !important;
+    color: #9fb0c8 !important;
+    border-color: rgba(148, 163, 184, 0.24) !important;
 }
 
 .ceny-app .ceny-save-banner {
@@ -654,6 +669,116 @@
     .ceny-app .ceny-section-toggle {
         justify-self: start;
     }
+}
+
+.ceny-app {
+    background: var(--bg-panel);
+}
+
+.ceny-app .calc-panel,
+.ceny-app .calc-section,
+.ceny-app .calc-info-card,
+.ceny-app .lista,
+.ceny-app .search_box,
+.ceny-app .ceny-empty-list,
+.ceny-app .ceny-study-row,
+.ceny-app .calc-result-placeholder,
+.ceny-app .ceny-center-placeholder {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-soft) !important;
+    color: var(--text) !important;
+}
+
+.ceny-app .calc-panel-highlight,
+.ceny-app .calc-result-card,
+.ceny-app .ceny-center-placeholder,
+.ceny-app .calc-result-placeholder {
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 36%, var(--bg-elevated) 64%) 100%) !important;
+}
+
+.ceny-app .calc-panel-title,
+.ceny-app .calc-section-title,
+.ceny-app .calc-result-headline,
+.ceny-app .ceny-study-title,
+.ceny-app .calc-range-text,
+.ceny-app .ceny-summary-value,
+.ceny-app .calc-info-card h3,
+.ceny-app .calc-field label,
+.ceny-app .lista div {
+    color: var(--text) !important;
+}
+
+.ceny-app .ceny-center-placeholder p,
+.ceny-app .calc-result-placeholder p,
+.ceny-app .calc-result-support,
+.ceny-app .ceny-summary-label,
+.ceny-app .ceny-study-count,
+.ceny-app .ceny-empty-list,
+.ceny-app .calc-info-card h3,
+.ceny-app .calc-clear-input,
+.ceny-app .ceny-final-label {
+    color: var(--text-muted) !important;
+}
+
+.ceny-app .search_box:focus {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent) !important;
+}
+
+.ceny-app .hil_switch button,
+.ceny-app .ceny-section-toggle,
+.ceny-app .btn-neutral,
+.ceny-app .calc-clear-input {
+    background: var(--bg-elevated) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.ceny-app .hil_switch button.active,
+.ceny-app .ceny-profile-meta,
+.ceny-app .ceny-study-row.active,
+.ceny-app .btn-secondary,
+.ceny-app .calc-result-eyebrow {
+    background: var(--green-soft) !important;
+    color: var(--green) !important;
+    border-color: var(--green-border) !important;
+}
+
+.ceny-app .btn-primary {
+    background: var(--green) !important;
+    color: #ffffff !important;
+    box-shadow: 0 14px 24px color-mix(in srgb, var(--green) 24%, transparent) !important;
+}
+
+.ceny-app .btn-primary:hover {
+    background: var(--green-strong) !important;
+}
+
+.ceny-app .hil_switch button:hover,
+.ceny-app .ceny-section-toggle:hover,
+.ceny-app .ceny-study-row:hover,
+.ceny-app .lista div:hover,
+.ceny-app .btn-neutral:hover,
+.ceny-app .calc-clear-input:hover {
+    background: var(--green-soft) !important;
+    color: var(--green) !important;
+    border-color: var(--green-border) !important;
+}
+
+.ceny-app .ceny-final-box {
+    background: color-mix(in srgb, var(--green) 18%, var(--bg-muted) 82%);
+    color: var(--text);
+}
+
+[data-theme="dark"] .ceny-app .calc-panel,
+[data-theme="dark"] .ceny-app .calc-section,
+[data-theme="dark"] .ceny-app .calc-info-card,
+[data-theme="dark"] .ceny-app .lista,
+[data-theme="dark"] .ceny-app .search_box,
+[data-theme="dark"] .ceny-app .ceny-empty-list,
+[data-theme="dark"] .ceny-app .ceny-study-row,
+[data-theme="dark"] .ceny-app .ceny-final-box {
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24) !important;
 }
 </style>
 
@@ -726,8 +851,6 @@
 
 <div class="calc-panel-stack">
 <div id="center_placeholder" class="ceny-center-placeholder">
-<h3>Wybierz profil</h3>
-<p>Po wskazaniu profilu w tym miejscu pojawi się lista badań z podziałem na biochemię, mocz i osobną morfologię. Kliknięcia działają wyłącznie w frontendzie.</p>
 </div>
 
 <div id="study_groups" class="ceny-study-groups" hidden>
@@ -780,7 +903,6 @@
 <div class="calc-result-card">
 <p class="calc-result-eyebrow">💰 Liczenie ceny profilu</p>
 <h3 class="calc-result-headline" id="summary_title">Cena końcowa: 0 zł</h3>
-<p class="calc-result-support">Podgląd działa lokalnie w przeglądarce. Do backendu trafia tylko zapis po kliknięciu przycisku na dole.</p>
 
 <div class="ceny-summary-meta">
 <div class="ceny-summary-row">

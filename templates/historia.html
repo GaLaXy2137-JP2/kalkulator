@@ -72,6 +72,7 @@
         radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 26%),
         radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 22%),
         radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.08), transparent 20%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 22%),
         linear-gradient(180deg, #f9fbff 0%, #edf4fc 48%, #e8f0fa 100%);
     border: 1px solid #dbe6f3;
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
@@ -96,11 +97,13 @@
 }
 
 .history-app::after {
-    width: 200px;
-    height: 200px;
-    bottom: -70px;
     left: -45px;
-    background: rgba(14, 165, 233, 0.06);
+    right: -45px;
+    height: 220px;
+    bottom: -78px;
+    background:
+        radial-gradient(circle at left bottom, rgba(14, 165, 233, 0.06) 0%, transparent 48%),
+        radial-gradient(circle at right bottom, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
 }
 
 .history-shell {
@@ -707,6 +710,235 @@
         font-size: 23px;
     }
 }
+
+.history-app {
+    background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--green) 14%, transparent) 0%, transparent 26%),
+        radial-gradient(circle at top right, color-mix(in srgb, var(--green) 10%, transparent) 0%, transparent 22%),
+        radial-gradient(circle at bottom left, color-mix(in srgb, var(--green) 8%, transparent) 0%, transparent 20%),
+        radial-gradient(circle at bottom right, color-mix(in srgb, var(--green) 10%, transparent) 0%, transparent 22%),
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 72%, var(--green-soft) 28%) 0%, color-mix(in srgb, var(--bg-panel) 72%, var(--bg-elevated) 28%) 100%);
+    border-color: var(--border);
+}
+
+.history-counter,
+.history-filter-btn.is-active,
+.history-open-btn,
+.calc-result-eyebrow {
+    background: var(--green);
+    border-color: var(--green);
+    color: #ffffff;
+}
+
+.history-open-btn:hover,
+.history-filter-btn.is-active:hover {
+    background: var(--green-strong);
+    border-color: var(--green-strong);
+}
+
+.history-filter-btn:hover,
+.history-sort-select:hover,
+.history-card:hover,
+.history-page-btn:hover {
+    border-color: var(--green-border);
+    background: var(--green-soft);
+}
+
+.history-page-btn,
+.history-top-pagination,
+.history-summary-card,
+.history-list-empty,
+.history-tag,
+.history-detail-block,
+.calc-info-card,
+.calc-breakdown-pill {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.history-card.is-active {
+    border-color: var(--green);
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 58%, var(--bg-elevated) 42%) 100%);
+    box-shadow: 0 20px 40px color-mix(in srgb, var(--green) 18%, transparent);
+}
+
+.history-module-badge.kalkulator,
+.history-module-badge.rozcienczenia,
+.history-module-badge.ceny,
+.calc-breakdown-pill {
+    background: var(--green-soft);
+    border-color: var(--green-border);
+    color: var(--green-strong);
+}
+
+.calc-result-card,
+.history-detail-empty,
+.calc-panel-highlight {
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 36%, var(--bg-elevated) 64%) 100%);
+    border-color: var(--green-border);
+}
+
+.history-card-title,
+.calc-panel-title,
+.history-detail-empty h3,
+.history-detail-block h3,
+.calc-info-card h3,
+.calc-result-headline,
+.history-detail-row strong,
+.history-page-btn,
+.history-sort-select {
+    color: var(--text);
+}
+
+.history-filter-label,
+.history-card-date,
+.history-detail-empty p,
+.history-detail-row span:first-child,
+.calc-result-support,
+.history-page-info,
+.history-summary-card p,
+.history-summary-card span {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .history-app .calc-panel,
+[data-theme="dark"] .history-app .history-summary-card,
+[data-theme="dark"] .history-app .history-card,
+[data-theme="dark"] .history-app .history-detail-block,
+[data-theme="dark"] .history-app .calc-info-card,
+[data-theme="dark"] .history-app .history-tag {
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24) !important;
+}
+
+[data-theme="dark"] .history-app {
+    box-shadow: 0 20px 44px rgba(2, 6, 23, 0.34) !important;
+}
+
+[data-theme="dark"] .history-app::before,
+[data-theme="dark"] .history-app::after {
+    filter: blur(12px);
+}
+
+[data-theme="dark"] .history-app::before {
+    background: color-mix(in srgb, var(--green) 18%, transparent);
+}
+
+[data-theme="dark"] .history-app::after {
+    background:
+        radial-gradient(circle at left bottom, color-mix(in srgb, var(--green-soft) 90%, transparent) 0%, transparent 48%),
+        radial-gradient(circle at right bottom, color-mix(in srgb, var(--green) 24%, transparent) 0%, transparent 50%);
+}
+
+[data-theme="dark"] .history-app .calc-panel,
+[data-theme="dark"] .history-app .history-summary-card,
+[data-theme="dark"] .history-app .history-top-pagination,
+[data-theme="dark"] .history-app .history-page-btn,
+[data-theme="dark"] .history-app .history-sort-select,
+[data-theme="dark"] .history-app .history-filter-btn,
+[data-theme="dark"] .history-app .history-list-empty,
+[data-theme="dark"] .history-app .history-tag,
+[data-theme="dark"] .history-app .history-detail-empty,
+[data-theme="dark"] .history-app .history-detail-block,
+[data-theme="dark"] .history-app .calc-result-card,
+[data-theme="dark"] .history-app .calc-info-card,
+[data-theme="dark"] .history-app .calc-breakdown-pill {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .history-app .history-card {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 94%, transparent) 0%, color-mix(in srgb, var(--bg-muted) 76%, var(--bg-elevated) 24%) 100%) !important;
+    border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .history-app .history-card:hover,
+[data-theme="dark"] .history-app .history-page-btn:hover,
+[data-theme="dark"] .history-app .history-sort-select:hover,
+[data-theme="dark"] .history-app .history-filter-btn:hover {
+    background: color-mix(in srgb, var(--green-soft) 26%, var(--bg-elevated) 74%) !important;
+    border-color: var(--green-border) !important;
+}
+
+[data-theme="dark"] .history-app .history-filter-btn,
+[data-theme="dark"] .history-app .history-page-btn,
+[data-theme="dark"] .history-app .history-sort-select {
+    color: var(--text) !important;
+    border-color: color-mix(in srgb, var(--border) 72%, #ffffff 28%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .history-app .history-sort-select {
+    font-weight: 700;
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 94%, transparent) 0%, color-mix(in srgb, var(--bg-muted) 82%, var(--bg-elevated) 18%) 100%) !important;
+}
+
+[data-theme="dark"] .history-app .history-sort-select option {
+    background: var(--bg-elevated);
+    color: var(--text);
+}
+
+[data-theme="dark"] .history-app .history-filter-btn:not(.is-active) {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 96%, transparent) 0%, color-mix(in srgb, var(--bg-muted) 74%, var(--bg-elevated) 26%) 100%) !important;
+}
+
+[data-theme="dark"] .history-app .history-filter-btn:not(.is-active):hover,
+[data-theme="dark"] .history-app .history-page-btn:hover,
+[data-theme="dark"] .history-app .history-sort-select:hover {
+    color: #f3fff6 !important;
+}
+
+[data-theme="dark"] .history-app .history-card.is-active,
+[data-theme="dark"] .history-app .history-filter-btn.is-active,
+[data-theme="dark"] .history-app .history-open-btn {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--green) 26%, var(--bg-elevated) 74%) 0%, color-mix(in srgb, var(--green-soft) 42%, var(--bg-elevated) 58%) 100%) !important;
+    border-color: var(--green-border) !important;
+}
+
+[data-theme="dark"] .history-app .history-filter-btn.is-active,
+[data-theme="dark"] .history-app .history-open-btn,
+[data-theme="dark"] .history-app .history-counter {
+    color: #f8fff9 !important;
+}
+
+[data-theme="dark"] .history-app .history-card-title,
+[data-theme="dark"] .history-app .history-card-summary,
+[data-theme="dark"] .history-app .history-summary-card strong,
+[data-theme="dark"] .history-app .history-detail-empty h3,
+[data-theme="dark"] .history-app .history-detail-block h3,
+[data-theme="dark"] .history-app .history-detail-row strong,
+[data-theme="dark"] .history-app .calc-panel-title,
+[data-theme="dark"] .history-app .history-page-btn,
+[data-theme="dark"] .history-app .history-sort-select {
+    color: var(--text) !important;
+}
+
+[data-theme="dark"] .history-app .history-card-date,
+[data-theme="dark"] .history-app .history-card-meta,
+[data-theme="dark"] .history-app .history-page-info,
+[data-theme="dark"] .history-app .history-summary-card p,
+[data-theme="dark"] .history-app .history-summary-card span,
+[data-theme="dark"] .history-app .history-list-empty,
+[data-theme="dark"] .history-app .history-detail-row span:first-child {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .history-app .history-card-summary,
+[data-theme="dark"] .history-app .history-module-badge,
+[data-theme="dark"] .history-app .calc-breakdown-pill {
+    color: #b7f7cd !important;
+}
+
+[data-theme="dark"] .history-app .history-module-badge,
+[data-theme="dark"] .history-app .calc-breakdown-pill,
+[data-theme="dark"] .history-app .history-counter {
+    background: color-mix(in srgb, var(--green-soft) 52%, var(--bg-elevated) 48%) !important;
+    border-color: var(--green-border) !important;
+}
+
+[data-theme="dark"] .history-app .history-list-empty {
+    border-style: dashed !important;
+}
 </style>
 
 <div class="container history-app">
@@ -809,7 +1041,6 @@
                     <div id="historyDetailPanel" class="calc-panel-stack history-scroll">
                         <div class="history-detail-empty">
                             <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
-                            <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
                         </div>
                     </div>
                 </div>
@@ -1006,19 +1237,47 @@ function getRangeMarkup(record) {
     return "";
 }
 
+function getHilValueLabel(kind, value) {
+    const normalizedValue = (value || "").toString().toLowerCase();
+
+    if (kind === "icterus") {
+        if (normalizedValue === "present") {
+            return "Obecna";
+        }
+
+        if (normalizedValue === "absent") {
+            return "Brak";
+        }
+    }
+
+    if (normalizedValue === "none") {
+        return "Brak";
+    }
+
+    if (normalizedValue === "mild") {
+        return "Łagodna";
+    }
+
+    if (normalizedValue === "high") {
+        return "Duża";
+    }
+
+    return value;
+}
+
 function getHilMarkup(record) {
     const entries = [];
 
     if (record.hemolysis && record.hemolysis !== "none") {
-        entries.push(`<div class="history-detail-row"><span>Hemoliza</span><strong>${escapeHtml(record.hemolysis)}</strong></div>`);
+        entries.push(`<div class="history-detail-row"><span>Hemoliza</span><strong>${escapeHtml(getHilValueLabel("hemolysis", record.hemolysis))}</strong></div>`);
     }
 
     if (record.lipemia && record.lipemia !== "none") {
-        entries.push(`<div class="history-detail-row"><span>Lipemia</span><strong>${escapeHtml(record.lipemia)}</strong></div>`);
+        entries.push(`<div class="history-detail-row"><span>Lipemia</span><strong>${escapeHtml(getHilValueLabel("lipemia", record.lipemia))}</strong></div>`);
     }
 
     if (record.icterus && record.icterus !== "absent") {
-        entries.push(`<div class="history-detail-row"><span>Icterus</span><strong>${escapeHtml(record.icterus)}</strong></div>`);
+        entries.push(`<div class="history-detail-row"><span>Ikteria</span><strong>${escapeHtml(getHilValueLabel("icterus", record.icterus))}</strong></div>`);
     }
 
     if (!entries.length) {
@@ -1078,7 +1337,8 @@ function getReopenUrl(record) {
             parametry: JSON.stringify(toArray(record.parametry)),
             hemolysis: record.hemolysis || "none",
             lipemia: record.lipemia || "none",
-            icterus: record.icterus || "absent"
+            icterus: record.icterus || "absent",
+            from_history: "1"
         });
         return `/?${params.toString()}`;
     }
@@ -1091,7 +1351,8 @@ function getReopenUrl(record) {
             parametry: JSON.stringify(toArray(record.parametry)),
             hemolysis: record.hemolysis || "none",
             lipemia: record.lipemia || "none",
-            icterus: record.icterus || "absent"
+            icterus: record.icterus || "absent",
+            from_history: "1"
         });
         return `/rozcienczenia?${params.toString()}`;
     }
@@ -1114,7 +1375,6 @@ function renderDetail(recordId) {
         historyDetailPanel.innerHTML = `
             <div class="history-detail-empty">
                 <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
-                <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
             </div>
         `;
         return;
@@ -1126,7 +1386,6 @@ function renderDetail(recordId) {
         historyDetailPanel.innerHTML = `
             <div class="history-detail-empty">
                 <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
-                <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
             </div>
         `;
         return;

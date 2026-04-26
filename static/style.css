@@ -114,7 +114,7 @@ HISTORIA — STABILNA + CZYTELNA 🔥
 }
 
 .historia_action button{
-    background:#2563eb;
+    background:var(--green);
     color:white;
     padding:6px 12px;
     border-radius:6px;
@@ -124,7 +124,7 @@ HISTORIA — STABILNA + CZYTELNA 🔥
 }
 
 .historia_action button:hover{
-    background:#1e4ed8;
+    background:var(--green-strong);
 }
 
 /* =========================
@@ -172,11 +172,11 @@ FILTRY
 }
 
 .filtr_btn:hover{
-    background:#dce6f3;
+    background:var(--green-soft);
 }
 
 .filtr_btn.aktywny{
-    background:#2563eb;
+    background:var(--green);
     color:white;
 }
 
@@ -258,9 +258,9 @@ RESZTA — NIE RUSZANA
 .sticky_panel {
 position: sticky;
 bottom: 0;
-background: white;
+background: var(--bg-elevated);
 padding: 14px 20px;
-border-top: 1px solid #e5e7eb;
+border-top: 1px solid var(--border);
 display: flex;
 justify-content: space-between;
 align-items: center;
@@ -302,7 +302,7 @@ text-decoration: underline;
 }
 
 .sticky_panel button {
-background: #2563eb;
+background: var(--green);
 color: white;
 padding: 10px 18px;
 border-radius: 8px;
@@ -312,7 +312,7 @@ font-weight: 600;
 }
 
 .sticky_panel button:hover {
-background: #1e4ed8;
+background: var(--green-strong);
 }
 
 .container {
@@ -345,7 +345,7 @@ margin-top: 20px;
 }
 .reset_box button {
 width: 100%;
-background: #2563eb;
+background: var(--green);
 color: white;
 padding: 12px;
 border-radius: 8px;
@@ -354,7 +354,7 @@ cursor: pointer;
 font-weight: 600;
 }
 .reset_box button:hover {
-background: #1e4ed8;
+background: var(--green-strong);
 }
 #parametry_box{
 margin-top:10px;
@@ -389,10 +389,10 @@ color:white !important;
 background:#c0392b !important;
 }
 .profil_lista {
-border: 1px solid #e5e7eb;
+border: 1px solid var(--border);
 border-radius: 8px;
 margin-top: 6px;
-background: white;
+background: var(--bg-elevated);
 max-height: 150px;
 overflow-y: auto;
 }
@@ -401,7 +401,7 @@ padding: 10px 12px;
 cursor: pointer;
 }
 .profil_option:hover {
-background: #f3f6fb;
+background: var(--green-soft);
 }
 /* =========================
 PROFIL SELECT (jak kalkulator)
@@ -425,7 +425,7 @@ left: 0;
 width: 100%;
 max-height: 180px;
 overflow-y: auto;
-background: white; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 50; 
+background: var(--bg-elevated); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); z-index: 50; 
 }
 /* 🔥 OPCJA */
 .profil_option{
@@ -434,7 +434,7 @@ cursor: pointer;
 font-size: 14px;
 }
 .profil_option:hover{
-background: #f3f6fb;
+background: var(--green-soft);
 }
 /* =========================
 TOP CONTROLS (profil + morfologia)
@@ -458,7 +458,7 @@ SWITCH MORFOLOGIA (NOWY)
 display: inline-flex;
 gap: 6px;
 margin-top: -10px;
-background: #f5f7fb;
+background: var(--bg-muted);
 padding: 4px;
 border-radius: 10px;
 width: fit-content;
@@ -475,11 +475,11 @@ transition: all 0.2s ease;
 }
 /* hover */
 .switch_morfologia button:hover {
-background: #e9eefc;
+background: var(--green-soft);
 }
 /* active */
 .switch_morfologia button.active {
-background: #2563eb;
+background: var(--green);
 color: white;
 }
 
@@ -508,7 +508,7 @@ min-width: 150px;
 .hil_switch {
 display: inline-flex;
 gap: 6px;
-background: #f5f7fb;
+background: var(--bg-muted);
 padding: 4px;
 border-radius: 10px;
 width: auto;
@@ -533,13 +533,13 @@ transition: all 0.2s ease;
 }
 
 .hil_switch button:hover {
-background: #e9eefc !important;
+background: var(--green-soft) !important;
 }
 
 .hil_switch button.active {
-background: #2563eb !important;
+background: var(--green) !important;
 color: white !important;
-box-shadow: 0 2px 6px rgba(37, 99, 235, 0.22);
+box-shadow: 0 2px 6px color-mix(in srgb, var(--green) 22%, transparent);
 }
 
 @media (max-width: 900px) {

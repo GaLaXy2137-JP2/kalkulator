@@ -7,12 +7,63 @@
 
 <link rel="stylesheet" href="/static/style.css?v=20260425-2">
 
+<script>
+(function () {
+	const savedTheme = localStorage.getItem("app-theme")
+	const preferredDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+	const theme = savedTheme || (preferredDark ? "dark" : "light")
+	document.documentElement.setAttribute("data-theme", theme)
+})()
+</script>
+
 <style>
+
+:root{
+--green:#16a34a;
+--green-strong:#15803d;
+--green-soft:#dcfce7;
+--green-border:#86efac;
+--green-shadow:rgba(22, 163, 74, 0.22);
+--bg:#f4f6f7;
+--bg-elevated:#ffffff;
+--bg-muted:#f8fafc;
+--bg-panel:#f0fdf4;
+--text:#0f172a;
+--text-muted:#64748b;
+--border:#dbe4ef;
+--border-soft:#e2e8f0;
+--overlay:rgba(15, 23, 42, 0.18);
+--topbar-bg:rgba(244, 246, 247, 0.92);
+--shadow-soft:0 10px 24px rgba(15, 23, 42, 0.08);
+--shadow-panel:0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="dark"]{
+--green:#22c55e;
+--green-strong:#16a34a;
+--green-soft:rgba(34, 197, 94, 0.16);
+--green-border:rgba(34, 197, 94, 0.34);
+--green-shadow:rgba(34, 197, 94, 0.22);
+--bg:#0b1220;
+--bg-elevated:#111b2e;
+--bg-muted:#0f172a;
+--bg-panel:#122033;
+--text:#e5eefb;
+--text-muted:#9fb0c8;
+--border:#24364f;
+--border-soft:#1e2b40;
+--overlay:rgba(2, 6, 23, 0.48);
+--topbar-bg:rgba(11, 18, 32, 0.88);
+--shadow-soft:0 12px 28px rgba(2, 6, 23, 0.42);
+--shadow-panel:0 16px 34px rgba(2, 6, 23, 0.34);
+}
 
 body{
 font-family: Arial;
-background:#f4f6f7;
+background:var(--bg);
+color:var(--text);
 margin:0;
+transition:background 0.2s ease, color 0.2s ease;
 }
 
 .wrapper{
@@ -25,14 +76,14 @@ top:0;
 left:0;
 bottom:0;
 width:min(320px, calc(100vw - 28px));
-background:linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 249, 255, 0.98) 100%);
-color:#0f172a;
+background:linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 92%, transparent) 0%, color-mix(in srgb, var(--bg-panel) 82%, var(--bg-elevated) 18%) 100%);
+color:var(--text);
 padding:84px 18px 18px;
 box-sizing:border-box;
 transform:translateX(-100%);
 transition:transform 0.25s ease;
 z-index:40;
-border-right:1px solid #dbe6f3;
+border-right:1px solid var(--border);
 box-shadow:22px 0 44px rgba(15, 23, 42, 0.16);
 backdrop-filter:blur(16px);
 }
@@ -47,14 +98,14 @@ font-size:16px;
 font-weight:800;
 letter-spacing:0.08em;
 text-transform:uppercase;
-color:#64748b;
+color:var(--text-muted);
 }
 
 .sidebar a{
 display:flex;
 align-items:center;
 justify-content:space-between;
-color:#0f172a;
+color:var(--text);
 text-decoration:none;
 padding:14px 16px;
 margin-bottom:10px;
@@ -67,17 +118,17 @@ transition:background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease
 }
 
 .sidebar a:hover{
-background:#eff6ff;
-border-color:#bfdbfe;
+background:color-mix(in srgb, var(--green-soft) 58%, var(--bg-elevated) 42%);
+border-color:var(--green-border);
 box-shadow:0 10px 22px rgba(148, 163, 184, 0.16);
 transform:translateX(2px);
 }
 
 .sidebar a.active{
-background:linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-border-color:#93c5fd;
-color:#1d4ed8;
-box-shadow:0 14px 28px rgba(37, 99, 235, 0.18);
+background:linear-gradient(180deg, color-mix(in srgb, var(--green-soft) 54%, var(--bg-elevated) 46%) 0%, color-mix(in srgb, var(--green-soft) 72%, var(--bg-elevated) 28%) 100%);
+border-color:var(--green-border);
+color:var(--green);
+box-shadow:0 14px 28px var(--green-shadow);
 }
 
 .sidebar_section{
@@ -100,14 +151,14 @@ font-size:12px;
 font-weight:800;
 letter-spacing:0.16em;
 text-transform:uppercase;
-color:#2563eb;
+color:var(--green);
 }
 
 .sidebar_note{
 margin:0;
 font-size:13px;
 line-height:1.6;
-color:#64748b;
+color:var(--text-muted);
 }
 
 .sidebar_nav{
@@ -130,9 +181,9 @@ min-width:28px;
 height:28px;
 padding:0 8px;
 border-radius:999px;
-background:#f8fafc;
-border:1px solid #e2e8f0;
-color:#64748b;
+background:var(--bg-muted);
+border:1px solid var(--border-soft);
+color:var(--text-muted);
 font-size:11px;
 font-weight:800;
 letter-spacing:0.08em;
@@ -140,9 +191,9 @@ text-transform:uppercase;
 }
 
 .sidebar a.active .sidebar_link_badge{
-background:#ffffff;
-border-color:#bfdbfe;
-color:#2563eb;
+background:var(--bg-elevated);
+border-color:var(--green-border);
+color:var(--green);
 }
 
 .sidebar_spacer{
@@ -164,11 +215,19 @@ height:72px;
 display:flex;
 align-items:center;
 gap:16px;
+justify-content:space-between;
 padding:0 20px;
 box-sizing:border-box;
-background:rgba(244, 246, 247, 0.92);
+background:var(--topbar-bg);
 backdrop-filter:blur(10px);
 z-index:30;
+}
+
+.topbar_start,
+.topbar_end{
+display:flex;
+align-items:center;
+gap:16px;
 }
 
 .menu_toggle{
@@ -179,22 +238,23 @@ width:48px;
 height:48px;
 padding:0;
 border-radius:14px;
-border:1px solid #dbe4ef;
-background:#ffffff;
-color:#0f172a;
-box-shadow:0 10px 24px rgba(15, 23, 42, 0.08);
+border:1px solid var(--border);
+background:var(--bg-elevated);
+color:var(--text);
+box-shadow:var(--shadow-soft);
 cursor:pointer;
 }
 
-.menu_toggle:hover{
-background:#f8fafc;
+.menu_toggle:hover,
+.theme_toggle:hover{
+background:var(--bg-muted);
 }
 
 .menu_toggle_bar{
 display:block;
 width:18px;
 height:2px;
-background:#0f172a;
+background:var(--text);
 border-radius:999px;
 position:relative;
 }
@@ -206,7 +266,7 @@ position:absolute;
 left:0;
 width:18px;
 height:2px;
-background:#0f172a;
+background:var(--text);
 border-radius:999px;
 }
 
@@ -223,13 +283,68 @@ font-size:14px;
 font-weight:700;
 letter-spacing:0.08em;
 text-transform:uppercase;
-color:#64748b;
+color:var(--text-muted);
+}
+
+.sr_only{
+position:absolute;
+width:1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip:rect(0, 0, 0, 0);
+white-space:nowrap;
+border:0;
+}
+
+.theme_toggle{
+position:relative;
+display:flex;
+align-items:center;
+gap:4px;
+width:132px;
+height:50px;
+padding:5px;
+border-radius:999px;
+border:1px solid var(--border);
+background:linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 92%, transparent) 0%, color-mix(in srgb, var(--bg-panel) 82%, var(--bg-elevated) 18%) 100%);
+color:var(--text);
+box-shadow:var(--shadow-soft);
+cursor:pointer;
+}
+
+.theme_toggle_option{
+flex:1 1 0;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+height:40px;
+border-radius:999px;
+font-size:18px;
+line-height:1;
+color:var(--text-muted);
+background:transparent;
+border:1px solid transparent;
+transition:color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme="light"] .theme_toggle_option.sun,
+[data-theme="dark"] .theme_toggle_option.moon{
+color:#f8fff9;
+background:linear-gradient(180deg, color-mix(in srgb, var(--green) 86%, white 14%) 0%, var(--green) 100%);
+border-color:color-mix(in srgb, var(--green) 54%, white 46%);
+box-shadow:0 10px 20px color-mix(in srgb, var(--green) 22%, transparent);
+}
+
+.theme_toggle:hover{
+border-color:var(--green-border);
 }
 
 .sidebar_backdrop{
 position:fixed;
 inset:0;
-background:rgba(15, 23, 42, 0.18);
+background:var(--overlay);
 opacity:0;
 pointer-events:none;
 transition:opacity 0.25s ease;
@@ -244,7 +359,7 @@ pointer-events:auto;
 /* GLOBALNE STYLE APLIKACJI */
 
 .container{
-background:white;
+background:var(--bg-elevated);
 padding:30px;
 border-radius:10px;
 width:700px;
@@ -265,11 +380,12 @@ padding:10px 12px !important;
 margin-top:5px;
 margin-bottom:15px;
 border-radius:8px !important;
-border:1px solid #d1d5db !important;
-background:#ffffff !important;
+border:1px solid var(--border) !important;
+background:var(--bg-elevated) !important;
 box-shadow:0 1px 2px rgba(15, 23, 42, 0.06) !important;
 font-size:14px;
 box-sizing:border-box;
+color:var(--text) !important;
 }
 
 input.historia_search.search_box{
@@ -282,7 +398,7 @@ height:32px;
 
 button{
 padding:12px;
-background:#3498db;
+background:var(--green);
 color:white;
 border:none;
 width:100%;
@@ -292,14 +408,14 @@ border-radius:5px;
 }
 
 button:hover{
-background:#2980b9;
+background:var(--green-strong);
 }
 
 .hil_switch{
 display:inline-flex !important;
 gap:6px !important;
 padding:4px !important;
-background:#f5f7fb !important;
+background:var(--bg-muted) !important;
 border-radius:10px !important;
 width:auto !important;
 flex-wrap:nowrap !important;
@@ -316,7 +432,7 @@ margin:0 !important;
 border:none !important;
 border-radius:8px !important;
 background:transparent !important;
-color:#475569 !important;
+color:var(--text-muted) !important;
 font-size:13px !important;
 font-weight:600 !important;
 line-height:1.2 !important;
@@ -326,11 +442,11 @@ flex:none !important;
 }
 
 .hil_switch button:hover{
-background:#e9eefc !important;
+background:color-mix(in srgb, var(--green-soft) 42%, var(--bg-elevated) 58%) !important;
 }
 
 .hil_switch button.active{
-background:#2563eb !important;
+background:var(--green) !important;
 color:#fff !important;
 }
 
@@ -349,9 +465,9 @@ width:auto !important;
 min-width:0;
 padding:5px 10px !important;
 margin:0;
-background:#f3f6fb !important;
-color:#4b5563 !important;
-border:1px solid #dbe3ef !important;
+background:var(--bg-muted) !important;
+color:var(--text-muted) !important;
+border:1px solid var(--border) !important;
 border-radius:999px !important;
 box-shadow:none !important;
 font-size:12px;
@@ -363,9 +479,9 @@ transition:background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .sekcja_naglowek .mini_btn:hover{
-background:#e8eef8 !important;
-color:#1f2937 !important;
-border-color:#c8d5e6 !important;
+background:color-mix(in srgb, var(--green-soft) 42%, var(--bg-elevated) 58%) !important;
+color:var(--text) !important;
+border-color:var(--green-border) !important;
 text-decoration:none;
 }
 
@@ -462,10 +578,19 @@ padding:0 16px;
 <div class="wrapper">
 
 <div class="topbar">
+<div class="topbar_start">
 <button type="button" class="menu_toggle" id="menu_toggle" aria-label="Pokaż moduły" aria-expanded="false" aria-controls="sidebar">
 <span class="menu_toggle_bar"></span>
 </button>
 <div class="topbar_title">Moduły</div>
+</div>
+<div class="topbar_end">
+<button type="button" class="theme_toggle" id="theme_toggle" aria-label="Przełącz motyw">
+<span class="sr_only">Przełącz motyw</span>
+<span class="theme_toggle_option moon" aria-hidden="true">☾</span>
+<span class="theme_toggle_option sun" aria-hidden="true">☀</span>
+</button>
+</div>
 </div>
 
 <div class="sidebar_backdrop" id="sidebar_backdrop"></div>
@@ -505,8 +630,17 @@ padding:0 16px;
 	const sidebar = document.getElementById("sidebar")
 	const toggle = document.getElementById("menu_toggle")
 	const backdrop = document.getElementById("sidebar_backdrop")
+	const themeToggle = document.getElementById("theme_toggle")
+	const root = document.documentElement
 
 	if (!sidebar || !toggle || !backdrop) return
+
+	function syncThemeButton() {
+		if (!themeToggle) return
+		const isDark = root.getAttribute("data-theme") === "dark"
+		themeToggle.setAttribute("aria-pressed", String(isDark))
+		themeToggle.setAttribute("aria-label", isDark ? "Przełącz na tryb jasny" : "Przełącz na tryb ciemny")
+	}
 
 	function setOpen(isOpen) {
 		sidebar.classList.toggle("open", isOpen)
@@ -533,6 +667,16 @@ padding:0 16px;
 			setOpen(false)
 		}
 	})
+
+	if (themeToggle) {
+		syncThemeButton()
+		themeToggle.addEventListener("click", function () {
+			const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark"
+			root.setAttribute("data-theme", nextTheme)
+			localStorage.setItem("app-theme", nextTheme)
+			syncThemeButton()
+		})
+	}
 })()
 </script>
 

@@ -122,6 +122,10 @@ def pobierz_hil_z_query(request: Request):
     }
 
 
+def czy_z_historii(request: Request):
+    return request.query_params.get("from_history") == "1"
+
+
 def parse_json_field(value, default):
     if value is None:
         return default
@@ -259,6 +263,7 @@ def strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
+    left_panel_locked = czy_z_historii(request)
 
     wynik = None
 
@@ -294,6 +299,7 @@ def strona(request: Request):
             "hemolysis": hil["hemolysis"],
             "lipemia": hil["lipemia"],
             "icterus": hil["icterus"],
+            "left_panel_locked": left_panel_locked,
         }
     ) 
   
@@ -374,6 +380,7 @@ def rozcienczenia_strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
+    left_panel_locked = czy_z_historii(request)
 
     wynik = None
 
@@ -412,6 +419,7 @@ def rozcienczenia_strona(request: Request):
             "hemolysis": hil["hemolysis"],
             "lipemia": hil["lipemia"],
             "icterus": hil["icterus"],
+            "left_panel_locked": left_panel_locked,
         }
     )  
 # =========================  

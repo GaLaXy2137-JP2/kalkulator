@@ -88,6 +88,7 @@ const profileList = {{ profile | tojson }}
 const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
+const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
 
 function zamknijListe(listaId){
 let lista = document.getElementById(listaId)
@@ -104,6 +105,7 @@ lista.dataset.open = "false"
 }
 
 function wypelnijListe(inputId, listaId, text = ""){
+if(leftPanelLocked) return
 let lista = document.getElementById(listaId)
 if(!lista) return
 
@@ -129,6 +131,7 @@ lista.dataset.open = lista.childElementCount ? "true" : "false"
 }
 
 function pokazListe(inputId, listaId){
+if(leftPanelLocked) return
 let lista = document.getElementById(listaId)
 if(!lista) return
 
@@ -142,6 +145,7 @@ wypelnijListe(inputId, listaId)
 }
 
 function filtruj(event, inputId, listaId){
+if(leftPanelLocked) return
 let input = document.getElementById(inputId)
 let text = input.value.toLowerCase()
 
@@ -152,6 +156,7 @@ renderParametry()
 }
 
 function pokazProfil2(){
+if(leftPanelLocked) return
 document.getElementById("profil2_slot").hidden = true
 document.getElementById("profil2_box").hidden = false
 document.getElementById("profil2_box").style.display = "flex"
@@ -161,6 +166,7 @@ updateClearButton("profil2_input")
 }
 
 function usunProfil2(){
+if(leftPanelLocked) return
 document.getElementById("profil2_input").value = ""
 const lista = document.getElementById("lista2")
 if(lista) lista.innerHTML = ""
@@ -182,6 +188,7 @@ button.style.display = input.value.trim() ? "inline-flex" : "none"
 }
 
 function clearProfileInput(inputId, listaId){
+if(leftPanelLocked) return
 const input = document.getElementById(inputId)
 const lista = document.getElementById(listaId)
 
@@ -236,6 +243,7 @@ zamknijWszystkieListy()
 }
 
 function toggleParametryBox(){
+if(leftPanelLocked) return
 let box = document.getElementById("parametry_box")
 let btn = document.getElementById("btn_parametry")
 
@@ -269,10 +277,13 @@ let btn = document.createElement("button")
 btn.type = "button"
 btn.innerText = p
 btn.className = "param_btn"
+btn.disabled = leftPanelLocked
 if(aktywneParametry.includes(p)){
 btn.classList.add("active")
 }
+if(!leftPanelLocked){
 btn.onclick = () => toggleParametr(p)
+}
 container.appendChild(btn)
 })
 }
@@ -329,6 +340,7 @@ selectedProfiles.flatMap(name => profileParamMap[name] || [])
 }
 
 function initHilSwitches(){
+if(leftPanelLocked) return
 document.querySelectorAll(".hil_switch").forEach(group => {
 const hiddenId = group.dataset.hiddenInput
 const hiddenInput = document.getElementById(hiddenId)
@@ -345,6 +357,7 @@ this.classList.add("active")
 }
 
 function toggleParametr(p){
+if(leftPanelLocked) return
 let input = document.getElementById("parametry_input")
 
 let current = input.value
@@ -369,7 +382,7 @@ function initSubmitButton(){
 const form = document.querySelector(".calc-form-card")
 const button = document.getElementById("calc_submit_btn")
 
-if(!form || !button || button.disabled) return
+if(!form || !button || button.disabled || leftPanelLocked) return
 
 form.addEventListener("submit", function(){
 button.disabled = true
@@ -441,6 +454,17 @@ renderParametry()
 .calc-panel-input {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.calc-panel-input.is-locked .calc-panel-stack,
+.calc-panel-input.is-locked .calc-panel-actions {
+    opacity: 0.74;
+}
+
+.calc-panel-input.is-locked button,
+.calc-panel-input.is-locked input,
+.calc-panel-input.is-locked select {
+    cursor: not-allowed !important;
 }
 
 .calc-panel-highlight {
@@ -716,13 +740,16 @@ renderParametry()
     height: 20px;
     display: none;
     align-items: center;
+    justify-content: center;
+    padding: 0 !important;
     border-radius: 999px !important;
     border: none !important;
     background: #e8eef8 !important;
     color: #1e3a8a !important;
     box-shadow: none !important;
-    font-size: 13px !important;
-    line-height: 1;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 20px;
     z-index: 2;
 }
 
@@ -878,6 +905,8 @@ renderParametry()
 .calc-submit-row .btn-primary {
     min-height: 42px;
     border-radius: 12px;
+    border: none !important;
+    outline: none !important;
 }
 
 .dilution-step-stack {
@@ -1022,13 +1051,153 @@ renderParametry()
         padding-bottom: 8px;
     }
 }
+
+.calc-app {
+    background: var(--bg-panel);
+}
+
+.calc-app .calc-panel,
+.calc-app .calc-section,
+.calc-app #parametry_box,
+.calc-app .dilution-step-card,
+.calc-app .dilution-success-card,
+.calc-app .dilution-empty,
+.calc-app .lista,
+.calc-app .search_box {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-soft) !important;
+    color: var(--text) !important;
+}
+
+.calc-app .calc-panel-highlight,
+.calc-app .dilution-step-card-highlight,
+.calc-app .dilution-success-card,
+.calc-app .dilution-empty {
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 36%, var(--bg-elevated) 64%) 100%);
+    border-color: var(--green-border);
+}
+
+.calc-app .calc-panel-title,
+.calc-app .calc-section-title,
+.calc-app .dilution-step-card h3,
+.calc-app .dilution-success-card h3,
+.calc-app .dilution-empty h3,
+.calc-app .calc-field label,
+.calc-app .lista div {
+    color: var(--text);
+}
+
+.calc-app .dilution-step-card p,
+.calc-app .dilution-success-card p,
+.calc-app .dilution-empty p,
+.calc-app .dilution-step-list,
+.calc-app .calc-field label {
+    color: var(--text-muted);
+}
+
+.calc-app .hil_group label {
+    color: color-mix(in srgb, var(--text) 82%, var(--green) 18%) !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    opacity: 1 !important;
+}
+
+.calc-app .search_box:focus {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent) !important;
+}
+
+.calc-app .hil_group {
+    border-color: var(--border);
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 26%, var(--bg-elevated) 74%) 100%);
+}
+
+.calc-app .hil_switch {
+    background: var(--bg-muted) !important;
+}
+
+.calc-app .hil_switch button,
+.calc-app .param_btn,
+.calc-app .btn-neutral,
+.calc-app .calc-clear-input,
+.calc-app .btn-secondary {
+    background: var(--bg-elevated) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+.calc-app .hil_switch button:hover,
+.calc-app .lista div:hover,
+.calc-app .param_btn:hover,
+.calc-app .btn-neutral:hover,
+.calc-app .btn-secondary:hover,
+.calc-app .calc-clear-input:hover,
+.calc-app .calc-clear-input:focus {
+    background: var(--green-soft) !important;
+    border-color: var(--green-border) !important;
+    color: var(--green) !important;
+}
+
+.calc-app .hil_switch button.active,
+.calc-app .btn-primary,
+.calc-app .param_btn.active,
+.calc-app .btn-success {
+    background: var(--green) !important;
+    border-color: var(--green) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--green) 24%, transparent);
+}
+
+.calc-app .btn-primary:hover,
+.calc-app .btn-success:hover {
+    background: var(--green-strong) !important;
+}
+
+.calc-app .btn-secondary,
+.calc-app .calc-clear-input,
+.calc-app .dilution-ratio,
+.calc-app .calc-result-eyebrow {
+    color: var(--green-strong) !important;
+    border-color: var(--green-border) !important;
+}
+
+.calc-app .calc-panel-actions {
+    background: var(--bg-elevated) !important;
+    box-shadow: 0 -12px 28px color-mix(in srgb, var(--bg-elevated) 92%, transparent) !important;
+}
+
+.calc-app .calc-submit-row .btn-primary {
+    box-shadow: 0 14px 28px color-mix(in srgb, var(--green) 24%, transparent) !important;
+}
+
+[data-theme="dark"] .calc-app .calc-panel,
+[data-theme="dark"] .calc-app .calc-section,
+[data-theme="dark"] .calc-app .dilution-step-card,
+[data-theme="dark"] .calc-app .dilution-success-card,
+[data-theme="dark"] .calc-app .dilution-empty,
+[data-theme="dark"] .calc-app #parametry_box,
+[data-theme="dark"] .calc-app .lista,
+[data-theme="dark"] .calc-app .search_box {
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24) !important;
+}
+
+[data-theme="dark"] .calc-app .calc-panel-actions {
+    background: var(--bg-elevated) !important;
+    box-shadow: 0 -14px 30px rgba(2, 6, 23, 0.38) !important;
+}
+
+[data-theme="dark"] .calc-app .hil_group label {
+    color: #dbe7f7 !important;
+    text-shadow: 0 0 0 transparent;
+}
 </style>
 
 <div class="container calc-app">
 <div class="calc-shell">
 <form method="post" class="calc-form-card">
 <div class="calc-column calc-column-input">
-<div class="calc-panel calc-panel-input">
+<div class="calc-panel calc-panel-input{% if left_panel_locked %} is-locked{% endif %}">
 <div class="calc-panel-heading">
 <p class="calc-panel-kicker">Panel 1</p>
 <h3 class="calc-panel-title">Dane i konfiguracja</h3>
@@ -1044,7 +1213,7 @@ renderParametry()
 </div>
 <div class="calc-field">
 <label for="sample_volume">Objętość próbki (µl)</label>
-<input type="number" id="sample_volume" class="search_box" name="objetosc" value="{{ objetosc or '' }}" required autocomplete="off">
+<input type="number" id="sample_volume" class="search_box" name="objetosc" value="{{ objetosc or '' }}" required autocomplete="off" {% if left_panel_locked %}disabled{% endif %}>
 </div>
 </section>
 
@@ -1063,8 +1232,8 @@ renderParametry()
 <label>Profil 1</label>
 </div>
 <div class="calc-input-wrap">
-<input type="text" name="profil1" id="profil1_input" class="search_box" value="{{ profil1 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil1_input','lista1')" onkeyup="filtruj(event,'profil1_input','lista1')" oninput="updateClearButton('profil1_input')">
-<button type="button" class="calc-clear-input" data-target="profil1_input" onclick="clearProfileInput('profil1_input','lista1')" aria-label="Wyczyść profil 1">&times;</button>
+<input type="text" name="profil1" id="profil1_input" class="search_box" value="{{ profil1 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil1_input','lista1')" onkeyup="filtruj(event,'profil1_input','lista1')" oninput="updateClearButton('profil1_input')" {% if left_panel_locked %}disabled{% endif %}>
+<button type="button" class="calc-clear-input" data-target="profil1_input" onclick="clearProfileInput('profil1_input','lista1')" aria-label="Wyczyść profil 1" {% if left_panel_locked %}disabled{% endif %}>&times;</button>
 </div>
 <div id="lista1" class="lista"></div>
 </div>
@@ -1078,7 +1247,7 @@ renderParametry()
 <label>Profil 2</label>
 </div>
 <div class="calc-input-wrap calc-input-button-wrap">
-<button type="button" id="btn_profil2" class="btn_add_profile btn-secondary" onclick="pokazProfil2()">+ Dodaj drugi profil</button>
+<button type="button" id="btn_profil2" class="btn_add_profile btn-secondary" onclick="pokazProfil2()" {% if left_panel_locked %}disabled{% endif %}>+ Dodaj drugi profil</button>
 </div>
 </div>
 </div>
@@ -1088,12 +1257,12 @@ renderParametry()
 <div class="calc-profile-field-head">
 <label>Profil 2</label>
 <div class="calc-profile-topbar">
-<button type="button" class="btn-secondary" onclick="usunProfil2()">Ukryj drugi profil</button>
+<button type="button" class="btn-secondary" onclick="usunProfil2()" {% if left_panel_locked %}disabled{% endif %}>Ukryj drugi profil</button>
 </div>
 </div>
 <div class="calc-input-wrap">
-<input type="text" name="profil2" id="profil2_input" class="search_box" value="{{ profil2 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil2_input','lista2')" onkeyup="filtruj(event,'profil2_input','lista2')" oninput="updateClearButton('profil2_input')">
-<button type="button" class="calc-clear-input" data-target="profil2_input" onclick="clearProfileInput('profil2_input','lista2')" aria-label="Wyczyść profil 2">&times;</button>
+<input type="text" name="profil2" id="profil2_input" class="search_box" value="{{ profil2 or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off" onclick="pokazListe('profil2_input','lista2')" onkeyup="filtruj(event,'profil2_input','lista2')" oninput="updateClearButton('profil2_input')" {% if left_panel_locked %}disabled{% endif %}>
+<button type="button" class="calc-clear-input" data-target="profil2_input" onclick="clearProfileInput('profil2_input','lista2')" aria-label="Wyczyść profil 2" {% if left_panel_locked %}disabled{% endif %}>&times;</button>
 </div>
 <div id="lista2" class="lista"></div>
 </div>
@@ -1108,7 +1277,7 @@ renderParametry()
 <h3 class="calc-section-title">Dodatkowe parametry</h3>
 <p class="calc-section-note">Dodaj pojedyncze badania poza profilami.</p>
 </div>
-<button type="button" id="btn_parametry" class="btn_add_profile btn-secondary" onclick="toggleParametryBox()">Wybierz parametry</button>
+<button type="button" id="btn_parametry" class="btn_add_profile btn-secondary" onclick="toggleParametryBox()" {% if left_panel_locked %}disabled{% endif %}>Wybierz parametry</button>
 <input type="hidden" id="parametry_input" name="parametry_input">
 <div id="parametry_box" style="display:none;"></div>
 </section>
@@ -1128,26 +1297,26 @@ renderParametry()
 <div class="hil_group">
 <label>HEMOLIZA</label>
 <div class="hil_switch" data-hidden-input="hemolysis_hidden">
-<button type="button" data-value="none" class="{% if (hemolysis or 'none') == 'none' %}active{% endif %}">Brak</button>
-<button type="button" data-value="mild" class="{% if hemolysis == 'mild' %}active{% endif %}">Łagodna</button>
-<button type="button" data-value="high" class="{% if hemolysis == 'high' %}active{% endif %}">Duża</button>
+<button type="button" data-value="none" class="{% if (hemolysis or 'none') == 'none' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Brak</button>
+<button type="button" data-value="mild" class="{% if hemolysis == 'mild' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Łagodna</button>
+<button type="button" data-value="high" class="{% if hemolysis == 'high' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Duża</button>
 </div>
 </div>
 
 <div class="hil_group">
 <label>LIPEMIA</label>
 <div class="hil_switch" data-hidden-input="lipemia_hidden">
-<button type="button" data-value="none" class="{% if (lipemia or 'none') == 'none' %}active{% endif %}">Brak</button>
-<button type="button" data-value="mild" class="{% if lipemia == 'mild' %}active{% endif %}">Łagodna</button>
-<button type="button" data-value="high" class="{% if lipemia == 'high' %}active{% endif %}">Duża</button>
+<button type="button" data-value="none" class="{% if (lipemia or 'none') == 'none' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Brak</button>
+<button type="button" data-value="mild" class="{% if lipemia == 'mild' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Łagodna</button>
+<button type="button" data-value="high" class="{% if lipemia == 'high' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Duża</button>
 </div>
 </div>
 
 <div class="hil_group">
 <label>IKTERIA</label>
 <div class="hil_switch" data-hidden-input="icterus_hidden">
-<button type="button" data-value="absent" class="{% if (icterus or 'absent') == 'absent' %}active{% endif %}">Brak</button>
-<button type="button" data-value="present" class="{% if icterus == 'present' %}active{% endif %}">Obecna</button>
+<button type="button" data-value="absent" class="{% if (icterus or 'absent') == 'absent' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Brak</button>
+<button type="button" data-value="present" class="{% if icterus == 'present' %}active{% endif %}" {% if left_panel_locked %}disabled{% endif %}>Obecna</button>
 </div>
 </div>
 </div>
@@ -1156,7 +1325,7 @@ renderParametry()
 
 <div class="calc-panel-actions">
 <div class="calc-submit-row">
-<button type="submit" id="calc_submit_btn" name="oblicz" class="btn-primary" {% if wynik %}disabled{% endif %}>{% if wynik %}Obliczono{% else %}Oblicz rozcieńczenia{% endif %}</button>
+<button type="submit" id="calc_submit_btn" name="oblicz" class="btn-primary" {% if wynik or left_panel_locked %}disabled{% endif %}>{% if wynik %}Obliczono{% else %}Oblicz rozcieńczenia{% endif %}</button>
 </div>
 </div>
 </div>
