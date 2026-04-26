@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import datetime
 BASE_DIR = Path(__file__).resolve().parent
 import json
 #from silnik.db import connection_pool
@@ -602,3 +603,8 @@ def ceny(request: Request):
             "cena_profilu": cena_profilu,
         }
     )
+
+
+@app.get("/ping")
+def ping():
+    return {"status": "ok", "time": datetime.now().isoformat()}
