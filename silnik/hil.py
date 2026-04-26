@@ -1,9 +1,13 @@
 import os
+import unicodedata
 
 
 NORMALIZED_NAMES = {
+    "cholesterol": "cholesterol",
     "cholesterol całkowity": "cholesterol",
+    "cholesterol calkowity": "cholesterol",
     "trójglicerydy": "triglycerides",
+    "trojglicerydy": "triglycerides",
     "albuminy": "albumin",
     "fosfor nieorganiczny": "phosphate",
     "magnez": "magnesium",
@@ -92,7 +96,16 @@ FORCE_HIL_MULTIPLIER = os.getenv("HIL_FORCE_MULTIPLIER")
 
 def _normalize_param(name):
     normalized = str(name).strip().lower()
-    return NORMALIZED_NAMES.get(normalized, normalized)
+    normalized_ascii = "".join(
+        char
+        for char in unicodedata.normalize("NFKD", normalized)
+        if not unicodedata.combining(char)
+    )
+    return NORMALIZED_NAMES.get(normalized, NORMALIZED_NAMES.get(normalized_ascii, normalized))
+
+
+def normalize_param_name(name):
+    return _normalize_param(name)
 
 
 def _normalize_choice(value, default):

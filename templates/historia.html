@@ -93,13 +93,13 @@ LISTA
     <div class="historia_action">
 
     {% if h.modul == "kalkulator" %}
-    <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or[]) | tojson | urlencode }}">
+    <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or[]) | tojson | urlencode }}&hemolysis={{ h.hemolysis or 'none' }}&lipemia={{ h.lipemia or 'none' }}&icterus={{ h.icterus or 'absent' }}">
         <button class="btn_przywroc">Przywróć</button>
     </a>
     {% endif %}
 
     {% if h.modul == "rozcienczenia" %}
-    <a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or []) | tojson | urlencode }}">
+    <a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or []) | tojson | urlencode }}&hemolysis={{ h.hemolysis or 'none' }}&lipemia={{ h.lipemia or 'none' }}&icterus={{ h.icterus or 'absent' }}">
         <button class="btn_przywroc">Przywróć</button>
     </a>
     {% endif %}

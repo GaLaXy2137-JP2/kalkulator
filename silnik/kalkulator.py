@@ -1,4 +1,4 @@
-from silnik.hil import get_adjusted_volume
+from silnik.hil import get_adjusted_volume, normalize_param_name
 
 
 # =========================
@@ -51,6 +51,20 @@ def zbuduj_liste_parametrow(profil1, profil2, parametry_wybrane, profile_map):
     return wynik
 
 
+def zbuduj_indeks_parametrow(parametry):
+    return {normalize_param_name(nazwa): nazwa for nazwa in parametry}
+
+
+def znajdz_parametr(nazwa_parametru, parametry, indeks_parametrow=None):
+    if nazwa_parametru in parametry:
+        return nazwa_parametru
+
+    if indeks_parametrow is None:
+        indeks_parametrow = zbuduj_indeks_parametrow(parametry)
+
+    return indeks_parametrow.get(normalize_param_name(nazwa_parametru))
+
+
 # =========================
 # OBJĘTOŚĆ PEŁNEGO PROFILU
 # =========================
@@ -59,18 +73,20 @@ def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, ict
 
     suma = 0
     ma_jony = False
+    indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
     for p in lista:
+        parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
 
-        if p not in parametry:
+        if not parametr_key:
             continue
 
-        if parametry[p]["jon"] == 1:
+        if parametry[parametr_key]["jon"] == 1:
             ma_jony = True
         else:
             suma += get_adjusted_volume(
-                parametry[p]["ul"],
-                p,
+                parametry[parametr_key]["ul"],
+                parametr_key,
                 hemolysis,
                 lipemia,
                 icterus,
@@ -91,8 +107,14 @@ def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, ict
 def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lipemia=None, icterus=None):
 
     robocza = objetosc - 50
+    indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
-    jony = [p for p in lista_parametrow if p in parametry and parametry[p]["jon"] == 1]
+    jony = []
+    for p in lista_parametrow:
+        parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
+        if parametr_key and parametry[parametr_key]["jon"] == 1:
+            jony.append(parametr_key)
+
     liczba_jonow = len(jony)
 
     if liczba_jonow > 0 and robocza >= 20:
@@ -103,14 +125,15 @@ def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lip
 
     param_ul = [
         get_adjusted_volume(
-            parametry[p]["ul"],
-            p,
+            parametry[parametr_key]["ul"],
+            parametr_key,
             hemolysis,
             lipemia,
             icterus,
         )
         for p in lista_parametrow
-        if p in parametry and parametry[p]["jon"] == 0
+        for parametr_key in [znajdz_parametr(p, parametry, indeks_parametrow)]
+        if parametr_key and parametry[parametr_key]["jon"] == 0
     ]
 
     if robocza <= 0 or not param_ul:
