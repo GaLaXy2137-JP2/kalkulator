@@ -1,275 +1,1332 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div class="container">
+{% set history_records = historia %}
 
-<h2>Historia obliczeń ({{ historia|length }})</h2>
+{% macro module_label(modul) -%}
+{% if modul == "kalkulator" %}
+🧪 Kalkulator
+{% elif modul == "rozcienczenia" %}
+💧 Rozcieńczenia
+{% elif modul == "ceny" %}
+💰 Ceny
+{% else %}
+{{ modul or "Moduł" }}
+{% endif %}
+{%- endmacro %}
 
-<!-- =========================
-FILTRY
-========================= -->
+{% macro record_profile(h) -%}
+{{ h.profil1 or (h.wynik.profil if h.wynik and h.wynik.profil else "Parametry") }}
+{%- endmacro %}
 
-<div class="historia_header">
-    <div class="historia_filtry">
-        <button class="filtr_btn aktywny" data-filtr="all">Wszystko</button>
-        <button class="filtr_btn" data-filtr="kalkulator">Kalkulator</button>
-        <button class="filtr_btn" data-filtr="rozcienczenia">Rozcieńczenia</button>
-        <button class="filtr_btn" data-filtr="ceny">Ceny</button>
-    </div>
-</div>
-
-<div class="historia_topbar">
-
-    <div class="search_wrapper">
-        <input type="text" class="historia_search search_box" placeholder="Szukaj profilu / daty...">
-        <span id="clear_search">✕</span>
-    </div>
-
-    <select id="historia_data_filter">
-        <option value="">Wszystkie daty</option>
-
-        {% set daty = historia | map(attribute='data') | list | unique %}
-        {% for d in daty %}
-        <option value="{{ d }}">{{ d }}</option>
-        {% endfor %}
-    </select>
-
-</div>
-
-<!-- =========================
-LISTA
-========================= -->
-
-<div id="historia_lista">
-
-{% for h in historia %}
-
-<div class="historia_item"
-     data-modul="{{ h.modul | lower }}"
-     data-data="{{ h.data }}"
-     data-profil="{{ (h.profil1 or 'parametry') | lower }}">
-
-    <!-- LEWA -->
-    <div class="historia_left">
-
-        <!-- DATA -->
-        <div class="historia_data">
-            <div class="data_dzien">{{ h.data }}</div>
-            <div class="data_godzina">{{ h.godzina }}</div>
-        </div>
-
-        <!-- ŚRODEK -->
-        <div class="historia_main">
-
-            <!-- MODUŁ -->
-            <span class="modul {{ h.modul }}">
-                {{ h.modul }}
-            </span>
-
-            <!-- TYTUŁ -->
-            <div class="historia_tytul">
-                {{ h.profil1 or "Parametry" }}
-            </div>
-
-            <!-- OPIS -->
-            <div class="historia_opis">
-
-                {% if h.objetosc and h.objetosc != "0" %}
-                    {{ h.objetosc }} µl •
-                {% endif %}
-
-                {% if h.profil2 %}
-                    {{ h.profil2 }} •
-                {% endif %}
-
-                kliknij aby zobaczyć szczegóły
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- PRAWA -->
-    <div class="historia_action">
-
-    {% if h.modul == "kalkulator" %}
-    <a href="/?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or[]) | tojson | urlencode }}&hemolysis={{ h.hemolysis or 'none' }}&lipemia={{ h.lipemia or 'none' }}&icterus={{ h.icterus or 'absent' }}">
-        <button class="btn_przywroc">Przywróć</button>
-    </a>
+{% macro result_summary(h) -%}
+{% if h.modul == "kalkulator" and h.wynik %}
+    {% if h.wynik.komunikat %}
+        {{ h.wynik.komunikat }}
+    {% elif h.wynik.sr_bez_gldh %}
+        {{ h.wynik.sr_bez_gldh }}
+    {% elif h.parametry %}
+        {{ h.parametry | length }} badań
+    {% else %}
+        Brak podsumowania
     {% endif %}
-
-    {% if h.modul == "rozcienczenia" %}
-    <a href="/rozcienczenia?objetosc={{ h.objetosc }}&profil1={{ h.profil1 }}&profil2={{ h.profil2 }}&parametry={{ (h.parametry or []) | tojson | urlencode }}&hemolysis={{ h.hemolysis or 'none' }}&lipemia={{ h.lipemia or 'none' }}&icterus={{ h.icterus or 'absent' }}">
-        <button class="btn_przywroc">Przywróć</button>
-    </a>
+{% elif h.modul == "rozcienczenia" and h.wynik %}
+    {% if h.wynik.df %}
+        DF 1:{{ h.wynik.df }}
+    {% elif h.wynik.pelny_profil %}
+        Pełny profil
+    {% elif h.parametry %}
+        {{ h.parametry | length }} badań
+    {% else %}
+        Plan rozcieńczeń
     {% endif %}
-
-    {% if h.modul == "ceny" %}
-<a href="/ceny?profil={{ h.profil1 }}
-&parametry={{ (h.parametry or []) | join(',') }}
-&morfologia={{ h.wynik.morfologia }}">
-        <button class="btn_przywroc">Przywróć</button>
-    </a>
+{% elif h.modul == "ceny" and h.wynik %}
+    {% if h.wynik.ilosc_parametrow %}
+        {{ h.wynik.ilosc_parametrow }} badań
+    {% elif h.wynik.parametry_wykonane %}
+        {{ h.wynik.parametry_wykonane | length }} badań
+    {% elif h.parametry %}
+        {{ h.parametry | length }} badań
+    {% else %}
+        Wycena profilu
     {% endif %}
+{% elif h.parametry %}
+    {{ h.parametry | length }} badań
+{% else %}
+    Brak podsumowania
+{% endif %}
+{%- endmacro %}
 
-</div>
-
-    <!-- SZCZEGÓŁY -->
-    <div class="historia_details">
-
-    {% if h.modul == "kalkulator" %}
-        <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
-
-        {% if h.profil1 %}
-            <div><b>Profil 1:</b> {{ h.profil1 }}</div>
-        {% endif %}
-
-        {% if h.profil2 %}
-            <div><b>Profil 2:</b> {{ h.profil2 }}</div>
-        {% endif %}
-
-        {% if h.parametry %}
-            <div><b>Parametry:</b> {{ h.parametry | length }}</div>
-        {% endif %}
-
-        <div><b>Hemoliza:</b> {{ h.hemolysis or "" }}</div>
-        <div><b>Lipemia:</b> {{ h.lipemia or "" }}</div>
-        <div><b>Icterus:</b> {{ h.icterus or "" }}</div>
-    {% endif %}
-
-    {% if h.modul == "rozcienczenia" %}
-        <div><b>Objętość:</b> {{ h.objetosc }} µl</div>
-
-        {% if h.profil1 %}
-            <div><b>Profil:</b> {{ h.profil1 }}</div>
-        {% endif %}
-
-        {% if h.parametry %}
-            <div><b>Parametry:</b> {{ h.parametry | length }}</div>
-        {% endif %}
-
-        <div><b>Hemoliza:</b> {{ h.hemolysis or "" }}</div>
-        <div><b>Lipemia:</b> {{ h.lipemia or "" }}</div>
-        <div><b>Icterus:</b> {{ h.icterus or "" }}</div>
-    {% endif %}
-
-    {% if h.modul == "ceny" and h.wynik %}
-
-        <div><b>Profil:</b> {{ h.wynik.profil }}</div>
-        <div><b>Morfologia:</b> {{ h.wynik.morfologia }}</div>
-
-        <div><b>Wykonane parametry:</b></div>
-        <ul style="margin:5px 0 10px 15px;">
-            {% for p in h.wynik.parametry_wykonane %}
-            <li>{{ p }}</li>
-            {% endfor %}
-        </ul>
-
-        <div><b>Ilość badań:</b> {{ h.wynik.ilosc_parametrow }}</div>
-        <div><b>Wykonano:</b> {{ h.wynik.wykonane }}</div>
-        <div><b>Procent:</b> {{ h.wynik.procent }} %</div>
-
-        <div><b>Cena:</b> {{ h.wynik.cena_koncowa }} zł</div>
-
-    {% endif %}
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-</div>
-
-<!-- =========================
-JS
-========================= -->
-
-<script>
-
-// 🔥 ROZWIJANIE
-document.querySelectorAll(".historia_item").forEach(item => {
-
-    item.addEventListener("click", function(e){
-
-        if(e.target.closest("a") || e.target.closest("button")) return
-
-        this.classList.toggle("open")
-    })
-
-})
-
-// 🔥 FILTRY
-const buttons = document.querySelectorAll(".filtr_btn")
-const items = document.querySelectorAll(".historia_item")
-
-buttons.forEach(btn => {
-
-    btn.addEventListener("click", function(){
-
-        buttons.forEach(b => b.classList.remove("aktywny"))
-        this.classList.add("aktywny")
-
-        filtruj() // 🔥 zamiast starej logiki
-
-    })
-
-})
-
-// 🔥 SEARCH
-const searchInput = document.querySelector(".historia_search")
-const dateFilter = document.getElementById("historia_data_filter")
-
-function filtruj(){
-
-    const searchVal = searchInput.value.toLowerCase()
-    const selectedDate = dateFilter.value
-
-    items.forEach(item => {
-
-        const modul = item.dataset.modul
-        const data = item.dataset.data
-        const profil = item.dataset.profil || ""
-
-        const activeFilter = document.querySelector(".filtr_btn.aktywny").dataset.filtr
-
-        // filtr modułu
-        let modulOK = (activeFilter === "all" || modul === activeFilter)
-
-        // search tylko profil + data
-        let searchOK =
-            data.toLowerCase().includes(searchVal) ||
-            profil.includes(searchVal)
-
-        // filtr daty
-        let dateOK = (!selectedDate || data === selectedDate)
-
-        if(modulOK && searchOK && dateOK){
-            item.style.display = "flex"
-        } else {
-            item.style.display = "none"
-        }
-
-    })
+<style>
+.history-app {
+    width: 100%;
+    max-width: none;
+    margin-top: 4px;
+    margin-bottom: 0;
+    height: calc(100vh - 122px);
+    padding: 12px 16px 8px !important;
+    border-radius: 28px !important;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 22%),
+        radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.08), transparent 20%),
+        linear-gradient(180deg, #f9fbff 0%, #edf4fc 48%, #e8f0fa 100%);
+    border: 1px solid #dbe6f3;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
+    box-sizing: border-box;
 }
 
-// eventy
-searchInput.addEventListener("input", filtruj)
-dateFilter.addEventListener("change", filtruj)
+.history-app::before,
+.history-app::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(8px);
+}
 
-const clearBtn = document.getElementById("clear_search")
+.history-app::before {
+    width: 240px;
+    height: 240px;
+    top: -70px;
+    right: -40px;
+    background: rgba(59, 130, 246, 0.08);
+}
 
-searchInput.addEventListener("input", () => {
-    clearBtn.style.display = searchInput.value ? "block" : "none"
-})
+.history-app::after {
+    width: 200px;
+    height: 200px;
+    bottom: -70px;
+    left: -45px;
+    background: rgba(14, 165, 233, 0.06);
+}
 
-clearBtn.addEventListener("click", () => {
-    searchInput.value = ""
-    clearBtn.style.display = "none"
-    filtruj()
-})
+.history-shell {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+}
+
+.history-header-tools {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.history-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.history-top-pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #dbe6f3;
+    backdrop-filter: blur(10px);
+}
+
+.history-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+}
+
+.calc-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(219, 228, 239, 0.92);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+    backdrop-filter: blur(12px);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.calc-panel-highlight {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 255, 0.98) 100%);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+}
+
+.calc-panel-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.calc-panel-kicker {
+    display: none;
+}
+
+.calc-panel-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.calc-panel-note {
+    display: none;
+}
+
+.calc-panel-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+}
+
+.history-panel .calc-panel,
+.history-panel-center .calc-panel,
+.history-panel-right .calc-panel {
+    border-radius: 20px;
+}
+
+.history-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.history-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-filter-label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.history-filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.history-filter-btn,
+.history-sort-select,
+.history-open-btn {
+    border: 1px solid #dbe4ef;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 14px;
+    transition: 0.18s ease;
+}
+
+.history-filter-btn {
+    width: auto;
+    min-width: 0;
+    padding: 9px 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.history-filter-btn:hover,
+.history-sort-select:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.history-filter-btn.is-active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.22);
+}
+
+.history-sort-select {
+    width: 100%;
+    padding: 10px 12px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.history-summary-card {
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.history-summary-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+    color: #0f172a;
+}
+
+.history-summary-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #64748b;
+}
+
+.history-list-wrap {
+    min-height: 0;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-page-info {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.history-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-page-btn {
+    width: auto;
+    min-width: 0;
+    padding: 8px 12px;
+    border: 1px solid #dbe4ef;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.history-page-btn:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.history-page-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    background: #f8fafc;
+}
+
+.history-list-empty {
+    display: none;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.history-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.history-card:hover {
+    transform: translateY(-1px);
+    border-color: #93c5fd;
+    background: #f8fbff;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+}
+
+.history-card.is-active {
+    border-color: #2563eb;
+    background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.18);
+}
+
+.history-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-card-date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 86px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.history-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.history-module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.history-module-badge.kalkulator {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.history-module-badge.rozcienczenia {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.history-module-badge.ceny {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.history-card-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.history-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.history-card-summary {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e3a8a;
+}
+
+.history-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.history-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #dbe4ef;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.history-detail-empty {
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: inset 0 0 0 1px #dbeafe;
+}
+
+.history-detail-empty h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.history-detail-empty p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #64748b;
+    max-width: 34ch;
+}
+
+.calc-result-card {
+    margin-top: 4px;
+    padding: 22px 20px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #dbeafe;
+    box-shadow: 0 22px 42px rgba(37, 99, 235, 0.12);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.calc-result-eyebrow {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #2563eb;
+}
+
+.calc-result-headline {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.calc-result-support {
+    margin: 0 auto;
+    max-width: 52ch;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.calc-result-breakdown {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.calc-breakdown-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a8a;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.calc-info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.calc-info-card,
+.history-detail-block {
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.calc-info-card h3,
+.history-detail-block h3 {
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.calc-range-text,
+.history-detail-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.history-detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.history-detail-row span:first-child {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.history-detail-row strong {
+    text-align: right;
+    color: #0f172a;
+}
+
+.history-open-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.history-open-btn:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.history-detail-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (min-width: 1024px) {
+    .history-workspace {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.82fr) minmax(340px, 1fr) minmax(320px, 0.96fr);
+        gap: 12px;
+        align-items: stretch;
+        height: 100%;
+    }
+
+    .history-panel,
+    .history-panel-center,
+    .history-panel-right {
+        min-height: 0;
+        height: calc(100% - 40px);
+        align-self: start;
+    }
+
+    .history-panel .calc-panel,
+    .history-panel-center .calc-panel,
+    .history-panel-right .calc-panel {
+        height: 100%;
+        min-height: 0;
+    }
+
+    .history-scroll {
+        overflow: auto;
+        padding-right: 4px;
+        padding-bottom: 10px;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 1023px) {
+    .history-header {
+        justify-content: flex-start;
+    }
+
+    .history-header-tools {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    .history-app {
+        margin-top: 2px;
+        margin-bottom: 0;
+        height: calc(100vh - 120px);
+        padding: 10px 12px 8px !important;
+        border-radius: 22px !important;
+    }
+
+    .history-card {
+        padding: 14px;
+    }
+
+    .history-card-top,
+    .history-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .history-detail-row strong {
+        text-align: left;
+    }
+
+    .calc-result-headline {
+        font-size: 23px;
+    }
+}
+</style>
+
+<div class="container history-app">
+    <div class="history-shell">
+        <div class="history-header">
+            <div class="history-counter">{{ history_records | length }} rekordów</div>
+            <div class="history-header-tools">
+                <div class="history-top-pagination">
+                    <div id="historyPageInfoTop" class="history-page-info">Strona 1 z 1</div>
+                    <div class="history-pagination">
+                        <button type="button" class="history-page-btn history-page-control" data-direction="prev">Poprzednia</button>
+                        <button type="button" class="history-page-btn history-page-control" data-direction="next">Następna</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-workspace">
+            <aside class="history-panel">
+                <div class="calc-panel">
+                    <div class="calc-panel-heading">
+                        <p class="calc-panel-kicker">Panel 1</p>
+                        <h3 class="calc-panel-title">Filtry i sortowanie</h3>
+                        <p class="calc-panel-note">Frontend-only. Zmiana widoku nie wykonuje żadnych requestów do backendu.</p>
+                    </div>
+
+                    <div class="calc-panel-stack history-controls">
+                        <section class="history-filter-group">
+                            <p class="history-filter-label">Moduł</p>
+                            <div class="history-filter-list" id="historyModuleFilters">
+                                <button type="button" class="history-filter-btn is-active" data-filter="all" aria-pressed="true">Wszystkie</button>
+                                <button type="button" class="history-filter-btn" data-filter="kalkulator" aria-pressed="false">Kalkulator</button>
+                                <button type="button" class="history-filter-btn" data-filter="rozcienczenia" aria-pressed="false">Rozcieńczenia</button>
+                                <button type="button" class="history-filter-btn" data-filter="ceny" aria-pressed="false">Ceny</button>
+                            </div>
+                        </section>
+
+                        <section class="history-filter-group">
+                            <label class="history-filter-label" for="historySortSelect">Sortowanie</label>
+                            <select id="historySortSelect" class="history-sort-select">
+                                <option value="newest">Najnowsze</option>
+                                <option value="oldest">Najstarsze</option>
+                            </select>
+                        </section>
+
+                        <section class="history-summary-card">
+                            <strong id="historyVisibleCount">Widoczne rekordy: {{ [history_records | length, 10] | min }}</strong>
+                        </section>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="history-panel-center">
+                <div class="calc-panel calc-panel-highlight">
+                    <div class="calc-panel-heading">
+                        <p class="calc-panel-kicker">Panel 2</p>
+                        <h3 class="calc-panel-title">Lista rekordów</h3>
+                        <p class="calc-panel-note">Kliknij rekord, aby przejść do szczegółów bez reloadu.</p>
+                    </div>
+
+                    <div class="calc-panel-stack history-list-wrap history-scroll">
+                        <div id="historyList" class="history-list">
+                            {% for h in history_records %}
+                            <button
+                                type="button"
+                                class="history-card"
+                                data-record-id="{{ loop.index0 }}"
+                                data-module="{{ h.modul | lower }}"
+                                data-sort-key="{{ h.data }}T{{ h.godzina or '00:00' }}"
+                            >
+                                <div class="history-card-top">
+                                    <div class="history-card-main">
+                                        <span class="history-module-badge {{ h.modul | lower }}">{{ module_label(h.modul | lower) }}</span>
+                                        <h3 class="history-card-title">{{ record_profile(h) }}</h3>
+                                    </div>
+                                    <div class="history-card-date">
+                                        <span>{{ h.data }}</span>
+                                        <span>{{ h.godzina or "--:--" }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="history-card-summary">{{ result_summary(h) }}</div>
+                            </button>
+                            {% endfor %}
+                        </div>
+
+                        <div id="historyListEmpty" class="history-list-empty">Brak rekordów pasujących do wybranych filtrów.</div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="history-panel-right">
+                <div class="calc-panel">
+                    <div class="calc-panel-heading">
+                        <p class="calc-panel-kicker">Panel 3</p>
+                        <h3 class="calc-panel-title">Szczegóły rekordu</h3>
+                        <p class="calc-panel-note">Panel podglądu działa jak widok wiadomości w Gmailu lub Notion.</p>
+                    </div>
+
+                    <div id="historyDetailPanel" class="calc-panel-stack history-scroll">
+                        <div class="history-detail-empty">
+                            <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
+                            <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script>
+const historyRecords = {{ history_records | tojson | safe }};
+
+const historyState = {
+    activeFilter: "all",
+    activeSort: "newest",
+    activeRecordId: null,
+    currentPage: 1,
+    pageSize: 10
+};
+
+const moduleFilters = document.querySelectorAll(".history-filter-btn");
+const sortSelect = document.getElementById("historySortSelect");
+const historyList = document.getElementById("historyList");
+const historyCards = Array.from(document.querySelectorAll(".history-card"));
+const historyListEmpty = document.getElementById("historyListEmpty");
+const historyDetailPanel = document.getElementById("historyDetailPanel");
+const historyVisibleCount = document.getElementById("historyVisibleCount");
+const historyPageInfos = Array.from(document.querySelectorAll(".history-page-info"));
+const historyPaginationControls = Array.from(document.querySelectorAll(".history-page-control"));
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function toArray(value) {
+    return Array.isArray(value) ? value.filter(Boolean) : [];
+}
+
+function getModuleMeta(moduleName) {
+    if (moduleName === "kalkulator") {
+        return { label: "🧪 Kalkulator", className: "kalkulator" };
+    }
+
+    if (moduleName === "rozcienczenia") {
+        return { label: "💧 Rozcieńczenia", className: "rozcienczenia" };
+    }
+
+    if (moduleName === "ceny") {
+        return { label: "💰 Ceny", className: "ceny" };
+    }
+
+    return { label: moduleName || "Moduł", className: "" };
+}
+
+function getRecordProfile(record) {
+    return record.profil1 || record.wynik?.profil || "Parametry";
+}
+
+function getResultHeadline(record) {
+    const result = record.wynik || {};
+
+    if (record.modul === "kalkulator") {
+        if (result.komunikat) {
+            return result.komunikat;
+        }
+
+        if (result.sr_bez_gldh) {
+            return `Można wykonać: ${result.sr_bez_gldh}`;
+        }
+    }
+
+    if (record.modul === "rozcienczenia") {
+        if (result.df) {
+            return `Rozcieńczenie 1:${result.df}`;
+        }
+
+        if (result.pelny_profil) {
+            return "Pełny profil bez rozcieńczenia";
+        }
+    }
+
+    if (record.modul === "ceny") {
+        if (result.cena_koncowa !== undefined && result.cena_koncowa !== null && result.cena_koncowa !== "") {
+            return `${result.cena_koncowa} zł`;
+        }
+
+        if (result.ilosc_parametrow) {
+            return `${result.ilosc_parametrow} badań`;
+        }
+    }
+
+    const params = toArray(record.parametry);
+    if (params.length) {
+        return `${params.length} badań`;
+    }
+
+    return "Brak podsumowania";
+}
+
+function getResultSupport(record) {
+    const result = record.wynik || {};
+
+    if (record.modul === "kalkulator") {
+        if (result.komunikat) {
+            return "Zapisany komunikat z kalkulatora dla tej konfiguracji próbki i profili.";
+        }
+
+        if (result.sr_z_gldh) {
+            return "Szybkie porównanie wariantu z GLDH i bez GLDH dla zapisanej próbki.";
+        }
+
+        return "Podsumowanie zapisane podczas kalkulacji objętości próbki.";
+    }
+
+    if (record.modul === "rozcienczenia") {
+        if (result.df) {
+            return `Bazowa objętość do rozcieńczenia: ${result.baza || "-"} µl.`;
+        }
+
+        return "Zapisane podsumowanie rozcieńczeń dla wybranego profilu i parametrów.";
+    }
+
+    if (record.modul === "ceny") {
+        if (result.procent !== undefined && result.procent !== null && result.procent !== "") {
+            return `Realizacja panelu: ${result.procent}% wykonanych parametrów.`;
+        }
+
+        return "Podsumowanie wyceny zapisane w historii cen.";
+    }
+
+    return "Szczegóły wybranego rekordu z historii.";
+}
+
+function getRangeMarkup(record) {
+    const result = record.wynik || {};
+
+    if (record.modul === "kalkulator") {
+        if (result.z_gldh || result.bez_gldh) {
+            const rows = [];
+
+            if (result.z_gldh) {
+                rows.push(`<div class="history-detail-row"><span>Z GLDH</span><strong>${escapeHtml(result.z_gldh)}</strong></div>`);
+            }
+
+            if (result.bez_gldh) {
+                rows.push(`<div class="history-detail-row"><span>Bez GLDH</span><strong>${escapeHtml(result.bez_gldh)}</strong></div>`);
+            }
+
+            return `
+                <div class="calc-info-card">
+                    <h3>Zakres</h3>
+                    <div class="history-detail-grid">${rows.join("")}</div>
+                </div>
+            `;
+        }
+
+        return "";
+    }
+
+    if (record.modul === "rozcienczenia" && result.df) {
+        const diluent = result.baza && result.df ? (Number(result.df) * Number(result.baza)) - Number(result.baza) : null;
+        const extraRow = Number.isFinite(diluent)
+            ? `<div class="history-detail-row"><span>Rozcieńczalnik</span><strong>${escapeHtml(diluent)} µl</strong></div>`
+            : "";
+
+        return `
+            <div class="calc-info-card">
+                <h3>Zakres</h3>
+                <div class="history-detail-grid">
+                    <div class="history-detail-row"><span>Współczynnik</span><strong>1:${escapeHtml(result.df)}</strong></div>
+                    <div class="history-detail-row"><span>Baza próbki</span><strong>${escapeHtml(result.baza || "-")} µl</strong></div>
+                    ${extraRow}
+                </div>
+            </div>
+        `;
+    }
+
+    if (record.modul === "ceny" && result.procent !== undefined && result.procent !== null && result.procent !== "") {
+        return `
+            <div class="calc-info-card">
+                <h3>Zakres</h3>
+                <div class="history-detail-grid">
+                    <div class="history-detail-row"><span>Wykonano</span><strong>${escapeHtml(result.wykonane || "-")}</strong></div>
+                    <div class="history-detail-row"><span>Pokrycie</span><strong>${escapeHtml(result.procent)}%</strong></div>
+                </div>
+            </div>
+        `;
+    }
+
+    return "";
+}
+
+function getHilMarkup(record) {
+    const entries = [];
+
+    if (record.hemolysis && record.hemolysis !== "none") {
+        entries.push(`<div class="history-detail-row"><span>Hemoliza</span><strong>${escapeHtml(record.hemolysis)}</strong></div>`);
+    }
+
+    if (record.lipemia && record.lipemia !== "none") {
+        entries.push(`<div class="history-detail-row"><span>Lipemia</span><strong>${escapeHtml(record.lipemia)}</strong></div>`);
+    }
+
+    if (record.icterus && record.icterus !== "absent") {
+        entries.push(`<div class="history-detail-row"><span>Icterus</span><strong>${escapeHtml(record.icterus)}</strong></div>`);
+    }
+
+    if (!entries.length) {
+        return "";
+    }
+
+    return `
+        <div class="history-detail-block">
+            <h3>HIL</h3>
+            <div class="history-detail-grid">${entries.join("")}</div>
+        </div>
+    `;
+}
+
+function getParamsMarkup(record) {
+    const params = toArray(record.parametry);
+
+    if (!params.length) {
+        return '<span class="history-tag">Brak dodatkowych parametrów</span>';
+    }
+
+    return params
+        .map((param) => `<span class="history-tag">${escapeHtml(param)}</span>`)
+        .join("");
+}
+
+function getMetadataMarkup(record) {
+    const rows = [];
+    const dateTime = [record.data, record.godzina].filter(Boolean).join(" • ");
+
+    rows.push(`<div class="history-detail-row"><span>Data i godzina</span><strong>${escapeHtml(dateTime || "-")}</strong></div>`);
+    rows.push(`<div class="history-detail-row"><span>Moduł</span><strong>${escapeHtml(getModuleMeta(record.modul).label)}</strong></div>`);
+    rows.push(`<div class="history-detail-row"><span>Profil</span><strong>${escapeHtml(getRecordProfile(record))}</strong></div>`);
+
+    if (record.profil2) {
+        rows.push(`<div class="history-detail-row"><span>Profil 2</span><strong>${escapeHtml(record.profil2)}</strong></div>`);
+    }
+
+    rows.push(`<div class="history-detail-row"><span>Objętość</span><strong>${escapeHtml(record.objetosc || "-")} µl</strong></div>`);
+
+    if (record.modul === "ceny") {
+        const result = record.wynik || {};
+        if (result.morfologia !== undefined) {
+            rows.push(`<div class="history-detail-row"><span>Morfologia</span><strong>${escapeHtml(result.morfologia)}</strong></div>`);
+        }
+    }
+
+    return rows.join("");
+}
+
+function getReopenUrl(record) {
+    if (record.modul === "kalkulator") {
+        const params = new URLSearchParams({
+            objetosc: record.objetosc || "",
+            profil1: record.profil1 || "",
+            profil2: record.profil2 || "",
+            parametry: JSON.stringify(toArray(record.parametry)),
+            hemolysis: record.hemolysis || "none",
+            lipemia: record.lipemia || "none",
+            icterus: record.icterus || "absent"
+        });
+        return `/?${params.toString()}`;
+    }
+
+    if (record.modul === "rozcienczenia") {
+        const params = new URLSearchParams({
+            objetosc: record.objetosc || "",
+            profil1: record.profil1 || "",
+            profil2: record.profil2 || "",
+            parametry: JSON.stringify(toArray(record.parametry)),
+            hemolysis: record.hemolysis || "none",
+            lipemia: record.lipemia || "none",
+            icterus: record.icterus || "absent"
+        });
+        return `/rozcienczenia?${params.toString()}`;
+    }
+
+    if (record.modul === "ceny") {
+        const result = record.wynik || {};
+        const params = new URLSearchParams({
+            profil: record.profil1 || result.profil || "",
+            parametry: toArray(record.parametry).join(","),
+            morfologia: result.morfologia ?? ""
+        });
+        return `/ceny?${params.toString()}`;
+    }
+
+    return "#";
+}
+
+function renderDetail(recordId) {
+    if (recordId === null || recordId === undefined || recordId === "") {
+        historyDetailPanel.innerHTML = `
+            <div class="history-detail-empty">
+                <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
+                <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const record = historyRecords[Number(recordId)];
+
+    if (!record) {
+        historyDetailPanel.innerHTML = `
+            <div class="history-detail-empty">
+                <h3>Wybierz rekord, aby zobaczyć szczegóły</h3>
+                <p>Po zaznaczeniu wpisu zobaczysz pełne dane: moduł, profil, objętość, parametry, wynik, zakres i dostępny HIL.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const moduleMeta = getModuleMeta(record.modul);
+    const result = record.wynik || {};
+    const breakdown = [];
+
+    if (record.modul === "kalkulator" && result.sr_z_gldh) {
+        breakdown.push(`<div class="calc-breakdown-pill">Z GLDH: ${escapeHtml(result.sr_z_gldh)}</div>`);
+        breakdown.push(`<div class="calc-breakdown-pill">Bez GLDH: ${escapeHtml(result.sr_bez_gldh || "-")}</div>`);
+    } else if (record.modul === "ceny") {
+        if (result.ilosc_parametrow) {
+            breakdown.push(`<div class="calc-breakdown-pill">${escapeHtml(result.ilosc_parametrow)} badań</div>`);
+        }
+        if (result.procent !== undefined && result.procent !== null && result.procent !== "") {
+            breakdown.push(`<div class="calc-breakdown-pill">${escapeHtml(result.procent)}% realizacji</div>`);
+        }
+    } else if (record.modul === "rozcienczenia" && result.df) {
+        breakdown.push(`<div class="calc-breakdown-pill">DF 1:${escapeHtml(result.df)}</div>`);
+        if (result.baza) {
+            breakdown.push(`<div class="calc-breakdown-pill">Baza ${escapeHtml(result.baza)} µl</div>`);
+        }
+    } else {
+        const params = toArray(record.parametry);
+        if (params.length) {
+            breakdown.push(`<div class="calc-breakdown-pill">${escapeHtml(params.length)} badań</div>`);
+        }
+    }
+
+    historyDetailPanel.innerHTML = `
+        <div class="history-module-badge ${escapeHtml(moduleMeta.className)}">${escapeHtml(moduleMeta.label)}</div>
+        <div class="history-detail-block">
+            <h3>Szczegóły podstawowe</h3>
+            <div class="history-detail-grid">${getMetadataMarkup(record)}</div>
+        </div>
+        <div class="history-detail-block">
+            <h3>Parametry</h3>
+            <div class="history-tags">${getParamsMarkup(record)}</div>
+        </div>
+        <div class="calc-result-card">
+            <p class="calc-result-eyebrow">Wynik</p>
+            <h3 class="calc-result-headline">${escapeHtml(getResultHeadline(record))}</h3>
+            <p class="calc-result-support">${escapeHtml(getResultSupport(record))}</p>
+            <div class="calc-result-breakdown">${breakdown.join("")}</div>
+        </div>
+        <div class="calc-info-grid">
+            ${getRangeMarkup(record)}
+            ${getHilMarkup(record)}
+        </div>
+        <div class="history-detail-actions">
+            <a class="history-open-btn" href="${escapeHtml(getReopenUrl(record))}">🔁 Otwórz ponownie</a>
+        </div>
+    `;
+}
+
+function syncActiveCard() {
+    historyCards.forEach((card) => {
+        const isActive = card.dataset.recordId === historyState.activeRecordId;
+        card.classList.toggle("is-active", isActive);
+        card.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+}
+
+function sortCards() {
+    const direction = historyState.activeSort === "oldest" ? 1 : -1;
+    const sortedCards = [...historyCards].sort((left, right) => {
+        const leftValue = Date.parse(left.dataset.sortKey) || 0;
+        const rightValue = Date.parse(right.dataset.sortKey) || 0;
+        return (leftValue - rightValue) * direction;
+    });
+
+    sortedCards.forEach((card) => historyList.appendChild(card));
+
+    return sortedCards;
+}
+
+function updatePagination(totalVisible) {
+    const totalPages = Math.max(1, Math.ceil(totalVisible / historyState.pageSize));
+    historyState.currentPage = Math.min(historyState.currentPage, totalPages);
+
+    if (!totalVisible) {
+        historyState.currentPage = 1;
+    }
+
+    const pageLabel = totalVisible
+        ? `Strona ${historyState.currentPage} z ${totalPages}`
+        : "Strona 0 z 0";
+
+    historyPageInfos.forEach((element) => {
+        element.textContent = pageLabel;
+    });
+
+    historyPaginationControls.forEach((button) => {
+        const isPrev = button.dataset.direction === "prev";
+        button.disabled = !totalVisible || (isPrev ? historyState.currentPage <= 1 : historyState.currentPage >= totalPages);
+    });
+
+    return totalPages;
+}
+
+function applyFilters() {
+    const sortedCards = sortCards();
+    const filteredCards = [];
+
+    sortedCards.forEach((card) => {
+        const matchesModule = historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter;
+        if (matchesModule) {
+            filteredCards.push(card);
+        }
+
+        card.style.display = "none";
+    });
+
+    const totalMatchingCount = filteredCards.length;
+    const totalPages = updatePagination(totalMatchingCount);
+    const startIndex = (historyState.currentPage - 1) * historyState.pageSize;
+    const endIndex = startIndex + historyState.pageSize;
+    let pageVisibleCount = 0;
+
+    filteredCards.forEach((card, index) => {
+        const isVisibleOnPage = index >= startIndex && index < endIndex;
+        card.style.display = isVisibleOnPage ? "flex" : "none";
+
+        if (isVisibleOnPage) {
+            pageVisibleCount += 1;
+        }
+    });
+
+    historyVisibleCount.textContent = `Widoczne rekordy: ${pageVisibleCount}`;
+    historyListEmpty.style.display = totalMatchingCount ? "none" : "block";
+
+    const activeCard = historyCards.find((card) => card.dataset.recordId === historyState.activeRecordId && card.style.display !== "none");
+
+    if (!activeCard) {
+        historyState.activeRecordId = null;
+        syncActiveCard();
+        renderDetail(null);
+        return;
+    }
+
+    syncActiveCard();
+    renderDetail(historyState.activeRecordId);
+}
+
+moduleFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+        historyState.activeFilter = button.dataset.filter;
+        historyState.currentPage = 1;
+
+        moduleFilters.forEach((item) => {
+            const active = item === button;
+            item.classList.toggle("is-active", active);
+            item.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+
+        applyFilters();
+    });
+});
+
+sortSelect.addEventListener("change", (event) => {
+    historyState.activeSort = event.target.value;
+    historyState.currentPage = 1;
+    applyFilters();
+});
+
+historyPaginationControls.forEach((button) => {
+    button.addEventListener("click", () => {
+        const visibleCards = historyCards.filter((card) => historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter);
+        const totalPages = Math.max(1, Math.ceil(visibleCards.length / historyState.pageSize));
+
+        if (button.dataset.direction === "prev") {
+            if (historyState.currentPage <= 1) {
+                return;
+            }
+
+            historyState.currentPage -= 1;
+            applyFilters();
+            return;
+        }
+
+        if (historyState.currentPage >= totalPages) {
+            return;
+        }
+
+        historyState.currentPage += 1;
+        applyFilters();
+    });
+});
+
+historyCards.forEach((card) => {
+    card.addEventListener("click", () => {
+        historyState.activeRecordId = card.dataset.recordId;
+        syncActiveCard();
+        renderDetail(historyState.activeRecordId);
+    });
+});
+
+applyFilters();
 </script>
 
 {% endblock %}

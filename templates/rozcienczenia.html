@@ -243,11 +243,11 @@ let isVisible = box.style.display === "block"
 
 if(isVisible){
 box.style.display = "none"
-btn.innerText = "+ Dodaj dodatkowe parametry"
+    btn.innerText = "Wybierz parametry"
 btn.classList.remove("hide")
 } else {
 box.style.display = "block"
-btn.innerText = "− Ukryj dodatkowe parametry"
+btn.innerText = "Ukryj parametry"
 btn.classList.add("hide")
 renderParametry()
 }
@@ -394,7 +394,7 @@ const btn = document.getElementById("btn_parametry")
 
 input.value = parametryWybrane.join(", ")
 box.style.display = "block"
-btn.innerText = "− Ukryj dodatkowe parametry"
+btn.innerText = "Ukryj parametry"
 btn.classList.add("hide")
 renderParametry()
 }
@@ -1108,7 +1108,7 @@ renderParametry()
 <h3 class="calc-section-title">Dodatkowe parametry</h3>
 <p class="calc-section-note">Dodaj pojedyncze badania poza profilami.</p>
 </div>
-<button type="button" id="btn_parametry" class="btn_add_profile btn-secondary" onclick="toggleParametryBox()">+ Dodaj dodatkowe parametry</button>
+<button type="button" id="btn_parametry" class="btn_add_profile btn-secondary" onclick="toggleParametryBox()">Wybierz parametry</button>
 <input type="hidden" id="parametry_input" name="parametry_input">
 <div id="parametry_box" style="display:none;"></div>
 </section>

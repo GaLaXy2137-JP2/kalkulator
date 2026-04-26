@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 import json
+from decimal import Decimal
 #from silnik.db import connection_pool
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form  
@@ -135,6 +136,22 @@ def parse_json_field(value, default):
             return default
 
     return default
+
+
+def normalize_json_value(value):
+    if isinstance(value, Decimal):
+        return int(value) if value == value.to_integral_value() else float(value)
+
+    if isinstance(value, dict):
+        return {key: normalize_json_value(item) for key, item in value.items()}
+
+    if isinstance(value, list):
+        return [normalize_json_value(item) for item in value]
+
+    if isinstance(value, tuple):
+        return [normalize_json_value(item) for item in value]
+
+    return value
   
 # =========================  
 # PARAMETRY Z PROFILI  
@@ -503,7 +520,7 @@ def historia(request: Request):
                 if isinstance(wynik_value, dict):
                     hil_meta = wynik_value.pop("_hil", {}) or {}
 
-                dane.append({
+                dane.append(normalize_json_value({
                     "data": str(r[0]),
                     "godzina": str(r[1])[:5] if r[1] else "",
                     "modul": r[2],
@@ -515,12 +532,12 @@ def historia(request: Request):
                     "hemolysis": r[8] if len(r) > 8 and r[8] is not None else hil_meta.get("hemolysis", ""),
                     "lipemia": r[9] if len(r) > 9 and r[9] is not None else hil_meta.get("lipemia", ""),
                     "icterus": r[10] if len(r) > 10 and r[10] is not None else hil_meta.get("icterus", ""),
-                })
+                }))
 
             except Exception as row_error:
                 print(f"[historia] row parse error: {type(row_error).__name__}: {row_error}")
 
-                dane.append({
+                dane.append(normalize_json_value({
                     "data": str(r[0]) if len(r) > 0 else "",
                     "godzina": str(r[1])[:5] if len(r) > 1 and r[1] else "",
                     "modul": r[2] if len(r) > 2 else "",
@@ -532,7 +549,7 @@ def historia(request: Request):
                     "hemolysis": r[8] if len(r) > 8 and r[8] is not None else "",
                     "lipemia": r[9] if len(r) > 9 and r[9] is not None else "",
                     "icterus": r[10] if len(r) > 10 and r[10] is not None else "",
-                })
+                }))
 
         return templates.TemplateResponse(
             request=request,

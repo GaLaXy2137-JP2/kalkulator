@@ -24,15 +24,17 @@ position:fixed;
 top:0;
 left:0;
 bottom:0;
-width:260px;
-background:#2c3e50;
-color:white;
-padding:88px 20px 20px;
+width:min(320px, calc(100vw - 28px));
+background:linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 249, 255, 0.98) 100%);
+color:#0f172a;
+padding:84px 18px 18px;
 box-sizing:border-box;
 transform:translateX(-100%);
 transition:transform 0.25s ease;
 z-index:40;
-box-shadow:18px 0 36px rgba(15, 23, 42, 0.24);
+border-right:1px solid #dbe6f3;
+box-shadow:22px 0 44px rgba(15, 23, 42, 0.16);
+backdrop-filter:blur(16px);
 }
 
 .sidebar.open{
@@ -40,20 +42,111 @@ transform:translateX(0);
 }
 
 .sidebar h2{
-margin-top:0;
+margin:0;
+font-size:16px;
+font-weight:800;
+letter-spacing:0.08em;
+text-transform:uppercase;
+color:#64748b;
 }
 
 .sidebar a{
-display:block;
-color:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+color:#0f172a;
 text-decoration:none;
-padding:10px;
-margin-bottom:8px;
-border-radius:5px;
+padding:14px 16px;
+margin-bottom:10px;
+border-radius:16px;
+border:1px solid transparent;
+font-size:17px;
+font-weight:700;
+line-height:1.25;
+transition:background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .sidebar a:hover{
-background:#34495e;
+background:#eff6ff;
+border-color:#bfdbfe;
+box-shadow:0 10px 22px rgba(148, 163, 184, 0.16);
+transform:translateX(2px);
+}
+
+.sidebar a.active{
+background:linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+border-color:#93c5fd;
+color:#1d4ed8;
+box-shadow:0 14px 28px rgba(37, 99, 235, 0.18);
+}
+
+.sidebar_section{
+display:flex;
+flex-direction:column;
+gap:16px;
+height:100%;
+}
+
+.sidebar_brand{
+display:flex;
+flex-direction:column;
+gap:8px;
+padding:14px 14px 4px;
+}
+
+.sidebar_kicker{
+margin:0;
+font-size:12px;
+font-weight:800;
+letter-spacing:0.16em;
+text-transform:uppercase;
+color:#2563eb;
+}
+
+.sidebar_note{
+margin:0;
+font-size:13px;
+line-height:1.6;
+color:#64748b;
+}
+
+.sidebar_nav{
+display:flex;
+flex-direction:column;
+gap:4px;
+}
+
+.sidebar_link_label{
+display:inline-flex;
+align-items:center;
+gap:10px;
+}
+
+.sidebar_link_badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:28px;
+height:28px;
+padding:0 8px;
+border-radius:999px;
+background:#f8fafc;
+border:1px solid #e2e8f0;
+color:#64748b;
+font-size:11px;
+font-weight:800;
+letter-spacing:0.08em;
+text-transform:uppercase;
+}
+
+.sidebar a.active .sidebar_link_badge{
+background:#ffffff;
+border-color:#bfdbfe;
+color:#2563eb;
+}
+
+.sidebar_spacer{
+flex:1;
 }
 
 .content{
@@ -136,7 +229,7 @@ color:#64748b;
 .sidebar_backdrop{
 position:fixed;
 inset:0;
-background:rgba(15, 23, 42, 0.28);
+background:rgba(15, 23, 42, 0.18);
 opacity:0;
 pointer-events:none;
 transition:opacity 0.25s ease;
@@ -378,14 +471,22 @@ padding:0 16px;
 <div class="sidebar_backdrop" id="sidebar_backdrop"></div>
 
 <div class="sidebar" id="sidebar">
-
+<div class="sidebar_section">
+<div class="sidebar_brand">
+<p class="sidebar_kicker">Nawigacja</p>
 <h2>Moduły</h2>
+<p class="sidebar_note">Szybkie przełączanie między kalkulatorem, rozcieńczeniami, cenami i historią.</p>
+</div>
 
-<a href="/">Kalkulator</a>
-<a href="/rozcienczenia">Rozcieńczenia</a>
-<a href="/ceny">Ceny</a>
-<a href="/historia">Historia</a>
+<nav class="sidebar_nav" aria-label="Moduły">
+<a href="/" class="{% if request.url.path == '/' %}active{% endif %}"><span class="sidebar_link_label">Kalkulator</span><span class="sidebar_link_badge">01</span></a>
+<a href="/rozcienczenia" class="{% if request.url.path.startswith('/rozcienczenia') %}active{% endif %}"><span class="sidebar_link_label">Rozcieńczenia</span><span class="sidebar_link_badge">02</span></a>
+<a href="/ceny" class="{% if request.url.path.startswith('/ceny') %}active{% endif %}"><span class="sidebar_link_label">Ceny</span><span class="sidebar_link_badge">03</span></a>
+<a href="/historia" class="{% if request.url.path.startswith('/historia') %}active{% endif %}"><span class="sidebar_link_label">Historia</span><span class="sidebar_link_badge">04</span></a>
+</nav>
 
+<div class="sidebar_spacer"></div>
+</div>
 </div>
 
 <div class="content">
