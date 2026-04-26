@@ -605,6 +605,8 @@ def ceny(request: Request):
     )
 
 
-@app.get("/ping")
-def ping():
-    return {"status": "ok", "time": datetime.now().isoformat()}
+@app.api_route("/ping", methods=["GET", "HEAD"])
+def ping(request: Request):
+    return {
+        "status": "ok"
+    }
