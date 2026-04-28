@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 import json
+from urllib.parse import urlencode
 from decimal import Decimal
 #from silnik.db import connection_pool
 from dotenv import load_dotenv
@@ -156,6 +157,33 @@ def normalize_json_value(value):
         return [normalize_json_value(item) for item in value]
 
     return value
+
+
+def build_edit_query(base_path, objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus):
+    query = {"edit": "1"}
+
+    if objetosc not in (None, ""):
+        query["objetosc"] = str(objetosc)
+
+    if profil1:
+        query["profil1"] = profil1
+
+    if profil2:
+        query["profil2"] = profil2
+
+    if parametry_wybrane:
+        query["parametry"] = json.dumps(parametry_wybrane, ensure_ascii=False)
+
+    if hemolysis:
+        query["hemolysis"] = hemolysis
+
+    if lipemia:
+        query["lipemia"] = lipemia
+
+    if icterus:
+        query["icterus"] = icterus
+
+    return f"{base_path}?{urlencode(query)}"
   
 # =========================  
 # PARAMETRY Z PROFILI  
@@ -263,7 +291,9 @@ def strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
-    left_panel_locked = czy_z_historii(request)
+    from_history = czy_z_historii(request)
+    edit_mode = from_history or request.query_params.get("edit") == "1"
+    left_panel_locked = False
 
     wynik = None
 
@@ -287,6 +317,16 @@ def strona(request: Request):
         request=request,
         name="kalkulator.html",
         context={
+            "edit_url": build_edit_query(
+                "/",
+                objetosc,
+                profil1,
+                profil2,
+                parametry_wybrane,
+                hil["hemolysis"],
+                hil["lipemia"],
+                hil["icterus"],
+            ),
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -300,6 +340,7 @@ def strona(request: Request):
             "lipemia": hil["lipemia"],
             "icterus": hil["icterus"],
             "left_panel_locked": left_panel_locked,
+            "edit_mode": edit_mode,
         }
     ) 
   
@@ -325,6 +366,17 @@ def oblicz(
         parametry_wybrane = []  
   
     wynik = policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus)  
+
+    edit_url = build_edit_query(
+        "/",
+        objetosc,
+        profil1,
+        profil2,
+        parametry_wybrane,
+        hemolysis,
+        lipemia,
+        icterus,
+    )
   
     zapisz_historia_db(
     "kalkulator",
@@ -342,6 +394,7 @@ def oblicz(
         request=request,
         name="kalkulator.html",  
         context={  
+            "edit_url": edit_url,
             "request": request,  
             "profile": lista_profili(),  
             "profile_param_map": profile,
@@ -354,6 +407,7 @@ def oblicz(
             "hemolysis": hemolysis,
             "lipemia": lipemia,
             "icterus": icterus,
+            "edit_mode": False,
         }  
     )  
   
@@ -380,7 +434,9 @@ def rozcienczenia_strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
-    left_panel_locked = czy_z_historii(request)
+    from_history = czy_z_historii(request)
+    edit_mode = from_history or request.query_params.get("edit") == "1"
+    left_panel_locked = False
 
     wynik = None
 
@@ -407,6 +463,16 @@ def rozcienczenia_strona(request: Request):
         request=request,
         name="rozcienczenia.html",
         context={
+            "edit_url": build_edit_query(
+                "/rozcienczenia",
+                objetosc,
+                profil1,
+                profil2,
+                parametry_wybrane,
+                hil["hemolysis"],
+                hil["lipemia"],
+                hil["icterus"],
+            ),
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -420,6 +486,7 @@ def rozcienczenia_strona(request: Request):
             "lipemia": hil["lipemia"],
             "icterus": hil["icterus"],
             "left_panel_locked": left_panel_locked,
+            "edit_mode": edit_mode,
         }
     )  
 # =========================  
@@ -470,10 +537,22 @@ def oblicz_rozcienczenia(
     icterus=icterus,
 )
 
+    edit_url = build_edit_query(
+        "/rozcienczenia",
+        objetosc,
+        profil1,
+        profil2,
+        parametry_wybrane,
+        hemolysis,
+        lipemia,
+        icterus,
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="rozcienczenia.html",
         context={
+            "edit_url": edit_url,
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
@@ -486,6 +565,7 @@ def oblicz_rozcienczenia(
             "hemolysis": hemolysis,
             "lipemia": lipemia,
             "icterus": icterus,
+            "edit_mode": False,
         }
     )
 # =========================

@@ -229,6 +229,49 @@
     gap: 6px;
 }
 
+.ceny-app #morfologia_switch {
+    --seg-pad: 8px;
+    position: relative;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    width: 100%;
+    padding: var(--seg-pad);
+    min-height: 72px;
+    align-items: stretch;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #f3f6fb 0%, #edf2f8 100%);
+    border: 1px solid #dbe4ef;
+    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.ceny-app #morfologia_switch::before {
+    content: "";
+    position: absolute;
+    top: var(--seg-pad);
+    bottom: var(--seg-pad);
+    left: var(--seg-pad);
+    width: calc((100% - (var(--seg-pad) * 2)) / 3);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f9fffb 0%, #ddf8e4 100%);
+    border: 1px solid rgba(22, 163, 74, 0.22);
+    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    transform: translateX(0%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.ceny-app #morfologia_switch[data-active-index="1"]::before {
+    transform: translateX(100%);
+}
+
+.ceny-app #morfologia_switch[data-active-index="2"]::before {
+    transform: translateX(200%);
+}
+
 .ceny-app button {
     border: none;
     border-radius: 12px;
@@ -250,15 +293,68 @@
     padding: 8px 12px;
 }
 
+.ceny-app #morfologia_switch button {
+    position: relative;
+    z-index: 1;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    justify-self: stretch;
+    align-self: stretch;
+    width: 100% !important;
+    min-width: 0;
+    height: 100%;
+    min-height: 56px;
+    padding: 0 12px;
+    margin: 0;
+    border-radius: 18px;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #1e293b !important;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    transform: none !important;
+    transition: color 0.22s ease, letter-spacing 0.22s ease, transform 0.22s ease, opacity 0.22s ease, text-shadow 0.22s ease, background 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
 .ceny-app .hil_switch button:hover {
     background: #dbeafe;
     color: #1d4ed8;
+}
+
+.ceny-app #morfologia_switch button:hover {
+    background: transparent !important;
+    color: color-mix(in srgb, #0f172a 82%, #16a34a 18%) !important;
+}
+
+.ceny-app #morfologia_switch button:not(.active) {
+    color: color-mix(in srgb, var(--text) 84%, #475569 16%) !important;
+    opacity: 0.92;
 }
 
 .ceny-app .hil_switch button.active {
     background: #dbeafe;
     color: #1d4ed8;
     box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
+}
+
+.ceny-app #morfologia_switch button.active {
+    background: transparent !important;
+    color: #16a34a !important;
+    box-shadow: none !important;
+    letter-spacing: 0.01em;
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .ceny-app .hil_switch button:disabled {
@@ -765,6 +861,39 @@
     border-color: var(--green-border) !important;
 }
 
+.ceny-app #morfologia_switch {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-muted) 88%, #eef3f8 12%) 0%, color-mix(in srgb, var(--bg-muted) 94%, #e4ebf3 6%) 100%) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    border-radius: 22px;
+}
+
+.ceny-app #morfologia_switch::before {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 78%, var(--green-soft) 22%) 0%, color-mix(in srgb, var(--green-soft) 74%, #dcfce7 26%) 100%) !important;
+    border-color: color-mix(in srgb, var(--green-border) 82%, rgba(15, 23, 42, 0.08) 18%) !important;
+}
+
+.ceny-app #morfologia_switch button,
+.ceny-app #morfologia_switch button:hover {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text) !important;
+    transform: none !important;
+}
+
+.ceny-app #morfologia_switch button:not(.active),
+.ceny-app #morfologia_switch button:not(.active):hover {
+    color: color-mix(in srgb, var(--text) 84%, #475569 16%) !important;
+}
+
+.ceny-app #morfologia_switch button.active,
+.ceny-app #morfologia_switch button.active:hover {
+    color: var(--green) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
 .ceny-app .ceny-final-box {
     background: color-mix(in srgb, var(--green) 18%, var(--bg-muted) 82%);
     color: var(--text);
@@ -1111,8 +1240,10 @@
         const profileName = getSelectedProfile()
         const enabled = profileHasMorfologia(profileName)
         const activeValue = enabled ? morfologiaHidden.value : "brak"
+        const activeIndex = activeValue === "podstawowa" ? "1" : activeValue === "rozszerzona" ? "2" : "0"
 
         morfologiaSection.hidden = !enabled
+        morfologiaSwitch.dataset.activeIndex = activeIndex
 
         morfologiaSwitch.querySelectorAll("button").forEach(button => {
             const isDefault = button.dataset.value === "brak"

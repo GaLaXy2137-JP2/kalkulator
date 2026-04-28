@@ -8,6 +8,7 @@ const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
+const editMode = {{ edit_mode | default(false) | tojson | safe }}
 
 
 // =========================
@@ -909,6 +910,11 @@ document.addEventListener("DOMContentLoaded", function(){
     transform: none;
 }
 
+.calc-app button:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+}
+
 .btn-primary {
     width: 100%;
     background: #2563eb !important;
@@ -918,10 +924,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
 .btn-primary.is-disabled,
 .btn-primary:disabled {
-    background: #cbd5e1 !important;
+    background: linear-gradient(180deg, #dbe4ef 0%, #cbd5e1 100%) !important;
     color: #475569 !important;
-    box-shadow: none;
-    cursor: default;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.2) !important;
+    cursor: not-allowed;
+    filter: saturate(0.65);
 }
 
 .btn-primary:hover {
@@ -930,9 +937,41 @@ document.addEventListener("DOMContentLoaded", function(){
 
 .btn-primary.is-disabled:hover,
 .btn-primary:disabled:hover {
-    background: #cbd5e1 !important;
+    background: linear-gradient(180deg, #dbe4ef 0%, #cbd5e1 100%) !important;
     color: #475569 !important;
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.2) !important;
+}
+
+.btn-secondary:disabled,
+.btn-neutral:disabled,
+.calc-reset-link.is-disabled .btn-neutral,
+.calc-reset-link.is-disabled .btn-secondary {
+    background: repeating-linear-gradient(
+        -45deg,
+        #f8fafc,
+        #f8fafc 10px,
+        #eef2f7 10px,
+        #eef2f7 20px
+    ) !important;
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 0 0 1px rgba(203, 213, 225, 0.35) !important;
+    text-shadow: none !important;
+}
+
+.btn-secondary:disabled:hover,
+.btn-neutral:disabled:hover,
+.calc-reset-link.is-disabled .btn-neutral:hover,
+.calc-reset-link.is-disabled .btn-secondary:hover {
+    background: repeating-linear-gradient(
+        -45deg,
+        #f8fafc,
+        #f8fafc 10px,
+        #eef2f7 10px,
+        #eef2f7 20px
+    ) !important;
+    border-color: #cbd5e1 !important;
+    transform: none;
 }
 
 .btn-secondary {
@@ -1242,6 +1281,19 @@ document.addEventListener("DOMContentLoaded", function(){
     text-decoration: none;
 }
 
+.calc-reset-link.is-disabled {
+    pointer-events: none;
+}
+
+.calc-secondary-action {
+    display: block;
+    margin-top: 12px;
+}
+
+.calc-secondary-action .btn-neutral {
+    width: 100%;
+}
+
 @media (max-width: 900px) {
     .calc-app {
         margin-top: -8px;
@@ -1515,6 +1567,36 @@ document.addEventListener("DOMContentLoaded", function(){
     box-shadow: 0 14px 28px color-mix(in srgb, var(--green) 24%, transparent) !important;
 }
 
+.calc-app .calc-submit-row .btn-primary:disabled,
+.calc-app .calc-submit-row .btn-primary.is-disabled {
+    background: repeating-linear-gradient(
+        -45deg,
+        #d8e1ea,
+        #d8e1ea 12px,
+        #c8d2de 12px,
+        #c8d2de 24px
+    ) !important;
+    color: #526274 !important;
+    border: 1px solid #b7c4d3 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 0 1px rgba(148, 163, 184, 0.18) !important;
+    letter-spacing: 0.01em;
+    filter: grayscale(0.15);
+}
+
+.calc-app .calc-submit-row .btn-primary:disabled:hover,
+.calc-app .calc-submit-row .btn-primary.is-disabled:hover {
+    background: repeating-linear-gradient(
+        -45deg,
+        #d8e1ea,
+        #d8e1ea 12px,
+        #c8d2de 12px,
+        #c8d2de 24px
+    ) !important;
+    color: #526274 !important;
+    border-color: #b7c4d3 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 0 1px rgba(148, 163, 184, 0.18) !important;
+}
+
 [data-theme="dark"] .calc-app .calc-panel,
 [data-theme="dark"] .calc-app .calc-section,
 [data-theme="dark"] .calc-app .calc-info-card,
@@ -1549,7 +1631,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <div class="calc-panel-heading">
 <p class="calc-panel-kicker">Panel 1</p>
 <h3 class="calc-panel-title">Dane i konfiguracja</h3>
-<p class="calc-panel-note">Wszystkie dane wejściowe potrzebne do obliczeń: jakość próbki, objętość, profile i dodatkowe parametry.</p>
+<p class="calc-panel-note">Wszystkie dane wejściowe potrzebne do obliczeń: jakość próbki, objętość, profile i pojedyncze parametry.</p>
 </div>
 
 <div class="calc-panel-stack">
@@ -1623,7 +1705,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <section class="calc-section">
 <div class="calc-section-heading">
 <p class="calc-section-kicker">Dodatkowe</p>
-<h3 class="calc-section-title">Dodatkowe parametry</h3>
+<h3 class="calc-section-title">Pojedyncze parametry</h3>
 <p class="calc-section-note">Dodaj pojedyncze badania poza profilami. Aktywne pozycje są wyraźnie zaznaczone.</p>
 </div>
 
@@ -1676,7 +1758,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 <div class="calc-panel-actions">
 <div class="calc-submit-row">
-<button type="submit" id="calc_submit_btn" name="oblicz" class="btn-primary" {% if wynik or left_panel_locked %}disabled{% endif %}>{% if wynik %}Obliczono{% else %}Oblicz{% endif %}</button>
+<button type="submit" id="calc_submit_btn" name="oblicz" class="btn-primary" {% if left_panel_locked or (wynik and not edit_mode) %}disabled{% endif %}>{% if wynik and not edit_mode %}Obliczono{% else %}Oblicz{% endif %}</button>
 </div>
 </div>
 </div>
@@ -1714,8 +1796,11 @@ document.addEventListener("DOMContentLoaded", function(){
 Szacowana objętość wymagana dla bieżącego zestawu badań: {{ wynik.potrzebne_martwa_objetosc_ul | round(0) | int }} µL martwej objętości{% if wynik.potrzebne_jonogram_ul %} + {{ wynik.potrzebne_jonogram_ul | round(0) | int }} µL na jonogram{% endif %} + {{ wynik.potrzebne_parametry_ul | round(0) | int }} µL na parametry = {{ wynik.potrzebne_ul | round(0) | int }} µL.
 </p>
 {% endif %}
-<a href="/" class="calc-reset-link">
-<button type="button" class="btn-neutral">Nowe obliczenie</button>
+<a href="/" class="calc-reset-link{% if edit_mode %} is-disabled{% endif %}">
+<button type="button" class="btn-neutral" {% if edit_mode %}disabled{% endif %}>Nowe obliczenie</button>
+</a>
+<a href="{{ edit_url }}" class="calc-reset-link calc-secondary-action{% if edit_mode %} is-disabled{% endif %}">
+<button type="button" class="btn-neutral" {% if edit_mode %}disabled{% endif %}>Edytuj wybór</button>
 </a>
 {% else %}
 <h3 class="calc-result-headline">Można wykonać: {{ wynik.sr_bez_gldh }}</h3>
@@ -1782,14 +1867,12 @@ Bez GLDH: {{ wynik.bez_gldh }}
 <div class="calc-panel-heading">
 <p class="calc-panel-kicker">Panel 3</p>
 <h3 class="calc-panel-title">Komunikat do CRM</h3>
-<p class="calc-panel-note">Zawsze widoczny panel do przekazania gotowego komunikatu i szybkiego rozpoczęcia nowego obliczenia.</p>
 </div>
 
 {% if wynik and not wynik.komunikat %}
 <div class="calc-crm-card">
 <div class="calc-crm-header">
-<h3 class="calc-crm-title">Komunikat do CRM</h3>
-<p class="calc-crm-note">Gotowa wiadomość do szybkiego przekazania wyniku i dalszych kroków.</p>
+
 </div>
 
 <div id="crm_text" class="calc-crm-text">
@@ -1797,18 +1880,21 @@ Hej
 Za mało materiału na pełny profil.
 {% if wynik.sr_z_gldh %}
 Można wykonać:
-* {{ wynik.sr_z_gldh }} z GLDH
-* {{ wynik.sr_bez_gldh }} bez GLDH
+* {{ wynik.sr_z_gldh }} parametrów z GLDH
+* {{ wynik.sr_bez_gldh }} parametrów bez GLDH
 {% else %}
-Można wykonać {{ wynik.sr_bez_gldh }}.
+Można wykonać {{ wynik.sr_bez_gldh }} parametrów.
 {% endif %}
-Proszę o informację które badania lekarz wybiera oraz o ich kolejność.
+Proszę o informację, które parametry lekarz wybiera oraz o ich kolejności.
 </div>
 
 <button id="crm_btn" type="button" onclick="kopiujCRM()" class="copy btn-success">Kopiuj komunikat do CRM</button>
 
-<a href="/" class="calc-reset-link">
-<button type="button" class="btn-neutral">Nowe obliczenie</button>
+<a href="/" class="calc-reset-link{% if edit_mode %} is-disabled{% endif %}">
+<button type="button" class="btn-neutral" {% if edit_mode %}disabled{% endif %}>Nowe obliczenie</button>
+</a>
+<a href="{{ edit_url }}" class="calc-reset-link calc-secondary-action{% if edit_mode %} is-disabled{% endif %}">
+<button type="button" class="btn-neutral" {% if edit_mode %}disabled{% endif %}>Edytuj wybór</button>
 </a>
 </div>
 {% else %}
