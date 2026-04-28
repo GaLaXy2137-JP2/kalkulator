@@ -1,5 +1,8 @@
 from math import ceil
 
+from silnik.hil import get_adjusted_volume
+from silnik.kalkulator import zbuduj_indeks_parametrow, znajdz_parametr
+
 DEBUG = True
 
 # =========================
@@ -16,10 +19,11 @@ JONY = ["Chlorki", "Potas", "Sód"]
 # SILNIK ROZCIEŃCZEŃ
 # =========================
 
-def policz_rozcienczenia(objetosc, lista_parametrow, parametry):
+def policz_rozcienczenia(objetosc, lista_parametrow, parametry, hemolysis=None, lipemia=None, icterus=None):
+    indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
     # 🔥 TYLKO PROSTY FILTR (bez magii)
-    lista_parametrow = [p for p in lista_parametrow if p in parametry]
+    lista_parametrow = [p for p in lista_parametrow if znajdz_parametr(p, parametry, indeks_parametrow)]
 
     wynik = {
         "robocza": 0,
@@ -72,11 +76,30 @@ def policz_rozcienczenia(objetosc, lista_parametrow, parametry):
             })
 
         for p in lista_parametrow:
+            parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
 
-            if parametry[p]["rozc"] == 1:
-                roz.append({"nazwa": p, "ul": parametry[p]["ul"]})
+            if parametry[parametr_key]["rozc"] == 1:
+                roz.append({
+                    "nazwa": p,
+                    "ul": get_adjusted_volume(
+                        parametry[parametr_key]["ul"],
+                        parametr_key,
+                        hemolysis,
+                        lipemia,
+                        icterus,
+                    ),
+                })
             else:
-                nieroz.append({"nazwa": p, "ul": parametry[p]["ul"]})
+                nieroz.append({
+                    "nazwa": p,
+                    "ul": get_adjusted_volume(
+                        parametry[parametr_key]["ul"],
+                        parametr_key,
+                        hemolysis,
+                        lipemia,
+                        icterus,
+                    ),
+                })
 
         wynik["nierozcienczalne"] = nieroz
         wynik["do_rozcienczenia"] = roz
@@ -116,8 +139,18 @@ def policz_rozcienczenia(objetosc, lista_parametrow, parametry):
         })
 
     for p in lista_parametrow:
-        if parametry[p]["rozc"] == 0:
-            nieroz.append({"nazwa": p, "ul": parametry[p]["ul"]})
+        parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
+        if parametry[parametr_key]["rozc"] == 0:
+            nieroz.append({
+                "nazwa": p,
+                "ul": get_adjusted_volume(
+                    parametry[parametr_key]["ul"],
+                    parametr_key,
+                    hemolysis,
+                    lipemia,
+                    icterus,
+                ),
+            })
 
     nieroz.sort(key=lambda x: x["ul"])
     wynik["nierozcienczalne"] = nieroz
@@ -154,9 +187,19 @@ def policz_rozcienczenia(objetosc, lista_parametrow, parametry):
     # =========================
 
     roz = [
-        {"nazwa": p, "ul": parametry[p]["ul"]}
+        {
+            "nazwa": p,
+            "ul": get_adjusted_volume(
+                parametry[parametr_key]["ul"],
+                parametr_key,
+                hemolysis,
+                lipemia,
+                icterus,
+            ),
+        }
         for p in lista_parametrow
-        if parametry[p]["rozc"] == 1
+        for parametr_key in [znajdz_parametr(p, parametry, indeks_parametrow)]
+        if parametr_key and parametry[parametr_key]["rozc"] == 1
     ]
 
     roz.sort(key=lambda x: x["ul"])

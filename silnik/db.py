@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from psycopg2 import pool
 import psycopg2
@@ -36,11 +36,80 @@ else:
     print("[db.py] ERROR: DATABASE_URL missing")
 
 
+def pobierz_kolumny_historia(cur):
+    cur.execute(
+        """
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'historia'
+        """
+    )
+    return {row[0] for row in cur.fetchall()}
+
+
+def mapuj_kolumny_hil(dostepne_kolumny):
+    if "hemolysis" in dostepne_kolumny:
+        hemolysis_column = "hemolysis"
+    elif "hemolysys" in dostepne_kolumny:
+        hemolysis_column = "hemolysys"
+    else:
+        hemolysis_column = None
+
+    return {
+        "hemolysis": hemolysis_column,
+        "lipemia": "lipemia" if "lipemia" in dostepne_kolumny else None,
+        "icterus": "icterus" if "icterus" in dostepne_kolumny else None,
+    }
+
+
+def dolacz_hil_do_wyniku(wynik, hemolysis=None, lipemia=None, icterus=None):
+    if isinstance(wynik, dict):
+        payload = dict(wynik)
+    elif wynik is None:
+        payload = {}
+    else:
+        payload = {"value": wynik}
+
+    payload["_hil"] = {
+        "hemolysis": hemolysis or "",
+        "lipemia": lipemia or "",
+        "icterus": icterus or "",
+    }
+    return payload
+
+
+def zbuduj_select_historii(dostepne_kolumny):
+    hil_kolumny = mapuj_kolumny_hil(dostepne_kolumny)
+
+    select_hil = []
+    for nazwa in ("hemolysis", "lipemia", "icterus"):
+        kolumna = hil_kolumny[nazwa]
+        if kolumna:
+            select_hil.append(f"{kolumna} AS {nazwa}")
+        else:
+            select_hil.append(f"NULL AS {nazwa}")
+
+    return """
+        SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, {hil_select}
+        FROM historia
+        ORDER BY data DESC, godzina DESC
+        LIMIT 100
+    """.format(hil_select=", ".join(select_hil))
+
+
+def pobierz_biezacy_czas():
+    try:
+        return datetime.now(ZoneInfo("Europe/Warsaw"))
+    except ZoneInfoNotFoundError:
+        print("[db.py] WARNING: Europe/Warsaw timezone missing, using local system time")
+        return datetime.now()
+
+
 # =========================
 # ZAPIS HISTORII
 # =========================
 
-def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None):
+def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None, hemolysis=None, lipemia=None, icterus=None):
 
     conn = None
     cur = None
@@ -54,27 +123,42 @@ def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None,
         conn = connection_pool.getconn()
         cur = conn.cursor()
 
-        now = datetime.now(ZoneInfo("Europe/Warsaw"))
+        now = pobierz_biezacy_czas()
         data = now.date()
         godzina = now.time().replace(tzinfo=None, microsecond=0)
 
-        parametry_json = json.dumps(parametry) if parametry else json.dumps([])
-        wynik_json = json.dumps(wynik) if wynik else json.dumps({})
+        dostepne_kolumny = pobierz_kolumny_historia(cur)
+        hil_kolumny = mapuj_kolumny_hil(dostepne_kolumny)
 
-        cur.execute("""
-            INSERT INTO historia
-            (data, godzina, modul, objetosc, profil1, profil2, parametry, wynik)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            data,
-            godzina,
-            modul,
-            objetosc,
-            profil1,
-            profil2,
-            parametry_json,
-            wynik_json
-        ))
+        parametry_json = json.dumps(parametry) if parametry else json.dumps([])
+        brakuje_kolumn_hil = any(kolumna is None for kolumna in hil_kolumny.values())
+        wynik_payload = dolacz_hil_do_wyniku(wynik, hemolysis, lipemia, icterus) if brakuje_kolumn_hil else (wynik if wynik else {})
+        wynik_json = json.dumps(wynik_payload)
+
+        kolumny = ["data", "godzina", "modul", "objetosc", "profil1", "profil2", "parametry", "wynik"]
+        wartosci = [data, godzina, modul, objetosc, profil1, profil2, parametry_json, wynik_json]
+
+        wartosci_hil = {
+            "hemolysis": hemolysis,
+            "lipemia": lipemia,
+            "icterus": icterus,
+        }
+
+        for nazwa in ("hemolysis", "lipemia", "icterus"):
+            kolumna = hil_kolumny[nazwa]
+            if kolumna:
+                kolumny.append(kolumna)
+                wartosci.append(wartosci_hil[nazwa])
+
+        placeholders = ", ".join(["%s"] * len(kolumny))
+        cur.execute(
+            f"""
+                INSERT INTO historia
+                ({", ".join(kolumny)})
+                VALUES ({placeholders})
+            """,
+            tuple(wartosci),
+        )
 
         conn.commit()
 

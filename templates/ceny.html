@@ -1,453 +1,1635 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div class="container">
+<script id="ceny-page-data" type="application/json">
+{{ {
+    'profileList': profile,
+    'profileParamMap': profile_param_map,
+    'profileMorfMap': profile_morf_map,
+    'cenyProfiliMap': ceny_profili_map,
+    'cenyMorfMap': ceny_morf_map,
+    'parametryCeny': parametry_ceny,
+    'initialProfile': wybrany_profil or '',
+    'initialMorfologia': morfologia or 'brak',
+    'initialWykonane': wykonane or [],
+    'saved': zapisano
+} | tojson | safe }}
+</script>
 
-<h2>Liczenie ceny profilu</h2>
+<style>
+.calc-app.ceny-app {
+    width: 100%;
+    max-width: none;
+    margin-top: -24px;
+    padding: 14px 16px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07) !important;
+    box-sizing: border-box;
+}
 
-<form method="get" action="/ceny">
+.ceny-app .calc-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-<input type="hidden" name="morfologia" id="morfologia_hidden" value="{{ morfologia }}">
-<input type="hidden" id="parametry_input" name="parametry" value="{{ (wykonane or []) | join(', ') }}">
+.ceny-app .calc-form-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+}
 
-<div class="top_controls">
-{% if not wynik %}
-    <div class="profil_wrapper">
-        <label>Profil</label>
+.ceny-app .calc-column {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+}
 
-        <div id="profil_box">
-            <input 
-                type="text"
-                id="profil_input"
-                name="profil"
-                class="input search_box"
-                placeholder="Wpisz nazwę profilu..."
-                value="{{ wybrany_profil or '' }}"
-                autocomplete="off"
-            >
-            <div id="profil_lista" class="profil_lista"></div>
-        </div>
-    </div>
-    {% endif %}
-    {% if wybrany_profil and ma_morfologie and not wynik %}
+.ceny-app .calc-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    padding: 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
 
-    <div class="morfologia_wrapper">
+.ceny-app .calc-panel-highlight {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.12);
+}
 
-        <label>Morfologia</label>
+.ceny-app .calc-panel-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-        <div class="switch_morfologia">
+.ceny-app .calc-panel-kicker,
+.ceny-app .calc-panel-note,
+.ceny-app .calc-section-kicker,
+.ceny-app .calc-section-note {
+    display: none;
+}
 
-            <button type="button" data-value="brak"
-                class="{% if morfologia == 'brak' %}active{% endif %}">
-                Brak
-            </button>
+.ceny-app .calc-panel-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
 
-            <button type="button" data-value="podstawowa"
-                class="{% if morfologia == 'podstawowa' %}active{% endif %}">
-                Podstawowa
-            </button>
+.ceny-app .calc-panel-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-            <button type="button" data-value="rozszerzona"
-                class="{% if morfologia == 'rozszerzona' %}active{% endif %}">
-                Rozszerzona
-            </button>
+.ceny-app .calc-section {
+    padding: 14px;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-        </div>
+.ceny-app .calc-section-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
 
-    </div>
+.ceny-app .calc-section-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}
 
-    {% endif %}
+.ceny-app .calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
 
+.ceny-app .calc-field label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #334155;
+}
+
+.ceny-app .search_box {
+    margin: 0 !important;
+    min-height: 38px;
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+
+.ceny-app .search_box:focus {
+    outline: none;
+    border-color: #60a5fa !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+}
+
+.ceny-app .calc-input-wrap {
+    position: relative;
+}
+
+.ceny-app .calc-input-wrap .search_box {
+    width: 100%;
+    padding-right: 36px !important;
+    box-sizing: border-box;
+}
+
+.ceny-app .calc-clear-input {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.ceny-app .calc-clear-input:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.ceny-app .calc-clear-input[hidden] {
+    display: none;
+}
+
+.ceny-app .lista {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+    z-index: 20;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.ceny-app .lista[hidden] {
+    display: none;
+}
+
+.ceny-app .lista div {
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #1e293b;
+    cursor: pointer;
+}
+
+.ceny-app .lista div:hover {
+    background: #eff6ff;
+}
+
+.ceny-app .hil_group {
+    display: grid;
+    gap: 8px;
+}
+
+.ceny-app .hil_group label {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #334155;
+}
+
+.ceny-app .hil_switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ceny-app #morfologia_switch {
+    --seg-pad: 8px;
+    position: relative;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    width: 100%;
+    padding: var(--seg-pad);
+    min-height: 72px;
+    align-items: stretch;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #f3f6fb 0%, #edf2f8 100%);
+    border: 1px solid #dbe4ef;
+    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.ceny-app #morfologia_switch::before {
+    content: "";
+    position: absolute;
+    top: var(--seg-pad);
+    bottom: var(--seg-pad);
+    left: var(--seg-pad);
+    width: calc((100% - (var(--seg-pad) * 2)) / 3);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f9fffb 0%, #ddf8e4 100%);
+    border: 1px solid rgba(22, 163, 74, 0.22);
+    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    transform: translateX(0%);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.ceny-app #morfologia_switch[data-active-index="1"]::before {
+    transform: translateX(100%);
+}
+
+.ceny-app #morfologia_switch[data-active-index="2"]::before {
+    transform: translateX(200%);
+}
+
+.ceny-app button {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.ceny-app button:hover {
+    transform: translateY(-1px);
+}
+
+.ceny-app .hil_switch button {
+    background: #e2e8f0;
+    color: #334155;
+    box-shadow: none;
+    padding: 8px 12px;
+}
+
+.ceny-app #morfologia_switch button {
+    position: relative;
+    z-index: 1;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    justify-self: stretch;
+    align-self: stretch;
+    width: 100% !important;
+    min-width: 0;
+    height: 100%;
+    min-height: 56px;
+    padding: 0 12px;
+    margin: 0;
+    border-radius: 18px;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #1e293b !important;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    transform: none !important;
+    transition: color 0.22s ease, letter-spacing 0.22s ease, transform 0.22s ease, opacity 0.22s ease, text-shadow 0.22s ease, background 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
+.ceny-app .hil_switch button:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ceny-app #morfologia_switch button:hover {
+    background: transparent !important;
+    color: color-mix(in srgb, #0f172a 82%, #16a34a 18%) !important;
+}
+
+.ceny-app #morfologia_switch button:not(.active) {
+    color: color-mix(in srgb, var(--text) 84%, #475569 16%) !important;
+    opacity: 0.92;
+}
+
+.ceny-app .hil_switch button.active {
+    background: #dbeafe;
+    color: #1d4ed8;
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
+}
+
+.ceny-app #morfologia_switch button.active {
+    background: transparent !important;
+    color: #16a34a !important;
+    box-shadow: none !important;
+    letter-spacing: 0.01em;
+    opacity: 1;
+    transform: translateY(0);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.ceny-app .hil_switch button:disabled {
+    cursor: not-allowed;
+    background: #e5e7eb;
+    color: #94a3b8;
+    transform: none;
+}
+
+.ceny-app .ceny-profile-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ceny-app .ceny-profile-meta[hidden] {
+    display: none;
+}
+
+.ceny-app .ceny-center-placeholder,
+.ceny-app .calc-result-placeholder {
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: inset 0 0 0 1px #dbeafe;
+}
+
+.ceny-app .ceny-center-placeholder h3,
+.ceny-app .calc-result-placeholder h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.ceny-app .ceny-center-placeholder p,
+.ceny-app .calc-result-placeholder p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #64748b;
+}
+
+.ceny-app .ceny-study-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ceny-app .ceny-study-groups[hidden] {
+    display: none;
+}
+
+.ceny-app .ceny-study-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ceny-app .ceny-study-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.ceny-app .ceny-study-header-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.ceny-app .ceny-section-toggle {
+    padding: 4px 7px;
+    border-radius: 9px;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    align-self: center;
+}
+
+.ceny-app .ceny-section-toggle:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ceny-app .ceny-study-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.ceny-app .ceny-study-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: #475569;
+    background: #e2e8f0;
+    border-radius: 999px;
+    padding: 3px 7px;
+}
+
+.ceny-app .ceny-study-group[hidden] {
+    display: none;
+}
+
+.ceny-app .calc-section[hidden] {
+    display: none;
+}
+
+.ceny-app .ceny-study-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 6px;
+}
+
+.ceny-app .ceny-study-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: none;
+    text-wrap: balance;
+}
+
+.ceny-app .ceny-study-row:hover {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.ceny-app .ceny-study-row.active {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+
+.ceny-app .ceny-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ceny-app .calc-result-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: inset 0 0 0 1px rgba(191, 219, 254, 0.7);
+}
+
+.ceny-app .calc-result-eyebrow {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #2563eb;
+}
+
+.ceny-app .calc-result-headline {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #0f172a;
+}
+
+.ceny-app .calc-result-support {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #475569;
+}
+
+.ceny-app .ceny-summary-meta {
+    display: grid;
+    gap: 10px;
+}
+
+.ceny-app .ceny-summary-row {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    font-size: 14px;
+}
+
+.ceny-app .ceny-summary-label {
+    color: #475569;
+    font-weight: 700;
+}
+
+.ceny-app .ceny-summary-value {
+        width: 100%;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #0f172a;
+}
+
+.ceny-app .ceny-summary-list li {
+    line-height: 1.4;
+}
+
+.ceny-app .calc-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ceny-app .calc-info-card {
+    padding: 14px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ceny-app .calc-info-card h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.ceny-app .calc-range-text {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.ceny-app .ceny-final-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+    border-radius: 18px;
+    background: #0f172a;
+    color: #ffffff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+}
+
+.ceny-app .ceny-final-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.ceny-app .ceny-final-price {
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.ceny-app .ceny-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.ceny-app .ceny-actions .btn-neutral {
+    background: #eef2f7;
+    color: #475569;
+    box-shadow: inset 0 0 0 1px #dbe3ef;
+}
+
+.ceny-app .ceny-actions .btn-neutral:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.ceny-app .btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 14px 24px rgba(37, 99, 235, 0.22);
+}
+
+.ceny-app .btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.ceny-app .btn-neutral {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.ceny-app .btn-secondary {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ceny-app button:disabled {
+    background: color-mix(in srgb, var(--bg-elevated) 72%, var(--border) 28%) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.ceny-app .btn-primary:disabled,
+.ceny-app .btn-secondary:disabled {
+    background: color-mix(in srgb, var(--bg-elevated) 78%, var(--bg-muted) 22%) !important;
+    color: var(--text-muted) !important;
+    border-color: var(--border) !important;
+}
+
+[data-theme="dark"] .ceny-app .btn-primary:disabled,
+[data-theme="dark"] .ceny-app .btn-secondary:disabled {
+    background: color-mix(in srgb, var(--bg-elevated) 82%, #dbeafe 18%) !important;
+    color: #9fb0c8 !important;
+    border-color: rgba(148, 163, 184, 0.24) !important;
+}
+
+.ceny-app .ceny-save-banner {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 14px;
+    font-weight: 700;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.ceny-app .ceny-save-banner.is-hiding {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+.ceny-app .ceny-save-banner[hidden] {
+    display: none;
+}
+
+.ceny-app .ceny-empty-list {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 13px;
+    box-shadow: inset 0 0 0 1px #e2e8f0;
+}
+
+@media (min-width: 1100px) {
+    .ceny-app .calc-form-card {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.96fr) minmax(360px, 1.08fr) minmax(320px, 0.92fr);
+        gap: 14px;
+        align-items: stretch;
+        width: 100%;
+    }
+}
+
+@media (max-width: 760px) {
+    .ceny-app .calc-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ceny-app .ceny-summary-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .ceny-app .ceny-study-row {
+        width: 100%;
+    }
+
+    .ceny-app .ceny-study-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ceny-app .ceny-study-header {
+        grid-template-columns: 1fr;
+    }
+
+    .ceny-app .ceny-section-toggle {
+        justify-self: start;
+    }
+}
+
+.ceny-app {
+    background: var(--bg-panel);
+}
+
+.ceny-app .calc-panel,
+.ceny-app .calc-section,
+.ceny-app .calc-info-card,
+.ceny-app .lista,
+.ceny-app .search_box,
+.ceny-app .ceny-empty-list,
+.ceny-app .ceny-study-row,
+.ceny-app .calc-result-placeholder,
+.ceny-app .ceny-center-placeholder {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-soft) !important;
+    color: var(--text) !important;
+}
+
+.ceny-app .calc-panel-highlight,
+.ceny-app .calc-result-card,
+.ceny-app .ceny-center-placeholder,
+.ceny-app .calc-result-placeholder {
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 36%, var(--bg-elevated) 64%) 100%) !important;
+}
+
+.ceny-app .calc-panel-title,
+.ceny-app .calc-section-title,
+.ceny-app .calc-result-headline,
+.ceny-app .ceny-study-title,
+.ceny-app .calc-range-text,
+.ceny-app .ceny-summary-value,
+.ceny-app .calc-info-card h3,
+.ceny-app .calc-field label,
+.ceny-app .lista div {
+    color: var(--text) !important;
+}
+
+.ceny-app .ceny-center-placeholder p,
+.ceny-app .calc-result-placeholder p,
+.ceny-app .calc-result-support,
+.ceny-app .ceny-summary-label,
+.ceny-app .ceny-study-count,
+.ceny-app .ceny-empty-list,
+.ceny-app .calc-info-card h3,
+.ceny-app .calc-clear-input,
+.ceny-app .ceny-final-label {
+    color: var(--text-muted) !important;
+}
+
+.ceny-app .search_box:focus {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent) !important;
+}
+
+.ceny-app .hil_switch button,
+.ceny-app .ceny-section-toggle,
+.ceny-app .btn-neutral,
+.ceny-app .calc-clear-input {
+    background: var(--bg-elevated) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+
+.ceny-app .hil_switch button.active,
+.ceny-app .ceny-profile-meta,
+.ceny-app .ceny-study-row.active,
+.ceny-app .btn-secondary,
+.ceny-app .calc-result-eyebrow {
+    background: var(--green-soft) !important;
+    color: var(--green) !important;
+    border-color: var(--green-border) !important;
+}
+
+.ceny-app .btn-primary {
+    background: var(--green) !important;
+    color: #ffffff !important;
+    box-shadow: 0 14px 24px color-mix(in srgb, var(--green) 24%, transparent) !important;
+}
+
+.ceny-app .btn-primary:hover {
+    background: var(--green-strong) !important;
+}
+
+.ceny-app .hil_switch button:hover,
+.ceny-app .ceny-section-toggle:hover,
+.ceny-app .ceny-study-row:hover,
+.ceny-app .lista div:hover,
+.ceny-app .btn-neutral:hover,
+.ceny-app .calc-clear-input:hover {
+    background: var(--green-soft) !important;
+    color: var(--green) !important;
+    border-color: var(--green-border) !important;
+}
+
+.ceny-app #morfologia_switch {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-muted) 88%, #eef3f8 12%) 0%, color-mix(in srgb, var(--bg-muted) 94%, #e4ebf3 6%) 100%) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    border-radius: 22px;
+}
+
+.ceny-app #morfologia_switch::before {
+    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 78%, var(--green-soft) 22%) 0%, color-mix(in srgb, var(--green-soft) 74%, #dcfce7 26%) 100%) !important;
+    border-color: color-mix(in srgb, var(--green-border) 82%, rgba(15, 23, 42, 0.08) 18%) !important;
+}
+
+.ceny-app #morfologia_switch button,
+.ceny-app #morfologia_switch button:hover {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--text) !important;
+    transform: none !important;
+}
+
+.ceny-app #morfologia_switch button:not(.active),
+.ceny-app #morfologia_switch button:not(.active):hover {
+    color: color-mix(in srgb, var(--text) 84%, #475569 16%) !important;
+}
+
+.ceny-app #morfologia_switch button.active,
+.ceny-app #morfologia_switch button.active:hover {
+    color: var(--green) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.ceny-app .ceny-final-box {
+    background: color-mix(in srgb, var(--green) 18%, var(--bg-muted) 82%);
+    color: var(--text);
+}
+
+[data-theme="dark"] .ceny-app .calc-panel,
+[data-theme="dark"] .ceny-app .calc-section,
+[data-theme="dark"] .ceny-app .calc-info-card,
+[data-theme="dark"] .ceny-app .lista,
+[data-theme="dark"] .ceny-app .search_box,
+[data-theme="dark"] .ceny-app .ceny-empty-list,
+[data-theme="dark"] .ceny-app .ceny-study-row,
+[data-theme="dark"] .ceny-app .ceny-final-box {
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24) !important;
+}
+</style>
+
+<div class="container calc-app ceny-app">
+<form method="post" action="/ceny" class="calc-shell">
+<input type="hidden" name="profil" id="profil_hidden" value="{{ wybrany_profil or '' }}">
+<input type="hidden" name="morfologia" id="morfologia_hidden" value="{{ morfologia or 'brak' }}">
+<input type="hidden" name="wykonane_json" id="wykonane_json" value='{{ (wykonane or []) | tojson | safe }}'>
+
+<div class="calc-form-card">
+<div class="calc-column calc-column-input">
+<div class="calc-panel calc-panel-input">
+<div class="calc-panel-heading">
+<p class="calc-panel-kicker">Panel 1</p>
+<h3 class="calc-panel-title">Dane wejściowe</h3>
+<p class="calc-panel-note">Wybierz profil, ustaw morfologię i oznacz badania do wykonania.</p>
 </div>
 
-{% if wybrany_profil and sekcje and not wynik %}
-
-<h3>Wykonane badania</h3>
-
-<p id="profil_counter" style="margin-bottom:15px;font-weight:600">
-Profil wykonany: 
-<span id="total_count">0</span>/<span id="total_all">0</span> 
-(<span id="total_percent">0</span>%)
-</p>
-
-<h4 class="sekcja_naglowek">
-    <span>Biochemia (<span id="bio_count">0</span>/{{ sekcje.biochemia|length }})</span>
-    <button type="button" class="mini_btn" data-toggle-all="biochemia" onclick="event.preventDefault(); toggleAll('biochemia')">
-        Zaznacz wszystko
-    </button>
-</h4>
-
-<div id="parametry_box" data-section="biochemia">
-{% for p in sekcje.biochemia %}
-<button type="button" class="param_btn {% if wykonane and p in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('{{p}}')">
-    {{p}}
-</button>
-{% endfor %}
+<div class="calc-panel-stack">
+<section class="calc-section">
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Profil</p>
+<h3 class="calc-section-title">Profil</h3>
+<p class="calc-section-note">Wybierz profil bez przeładowania strony. Lista badań i panel ceny odświeżą się od razu.</p>
 </div>
 
-{% if sekcje.mocz %}
-<h4 class="sekcja_naglowek">
-    <span>Mocz (<span id="mocz_count">0</span>/{{ sekcje.mocz|length }})</span>
-    <button type="button" class="mini_btn" data-toggle-all="mocz" onclick="event.preventDefault(); toggleAll('mocz')">
-        Zaznacz wszystko
-    </button>
-</h4>
-
-<div id="parametry_box" data-section="mocz">
-{% for p in sekcje.mocz %}
-<button type="button" class="param_btn {% if wykonane and p in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('{{p}}')">
-    {{p}}
-</button>
-{% endfor %}
+<div class="calc-field">
+<label for="profil_input">Wyszukaj profil</label>
+<div class="calc-input-wrap">
+<input type="text" id="profil_input" class="search_box" value="{{ wybrany_profil or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off">
+<button type="button" id="profil_clear" class="calc-clear-input" aria-label="Wyczyść profil">&times;</button>
 </div>
-{% endif %}
-
-{% if ma_morfologie and morfologia != "brak" %}
-<h4 class="sekcja_naglowek">
-    <span>Morfologia (<span id="morfo_count">0</span>/1)</span>
-    <button type="button" class="mini_btn" data-toggle-all="morfologia" onclick="event.preventDefault(); toggleAll('morfologia')">
-        Zaznacz wszystko
-    </button>
-</h4>
-
-<div id="parametry_box" data-section="morfologia">
-{% if morfologia == "podstawowa" %}
-<button type="button" class="param_btn {% if wykonane and 'Morfologia' in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('Morfologia')">
-    Morfologia
-</button>
-{% endif %}
-
-{% if morfologia == "rozszerzona" %}
-<button type="button" class="param_btn {% if wykonane and 'Morfologia rozszerzona' in wykonane %}active{% endif %}" onclick="event.preventDefault(); toggleParametr('Morfologia rozszerzona')">
-    Morfologia rozszerzona
-</button>
-{% endif %}
-</div>
-{% endif %}
-
-<br>
-
-<div class="sticky_panel">
-
-    <div class="sticky_info">
-        <span id="sticky_text">0/0 (0%)</span>
-
-        <span id="live_cena" style="margin-left:15px;font-weight:600">
-            0.00 zł
-        </span>
-    </div>
-
-    <button type="submit" name="oblicz">
-        Oblicz cenę
-    </button>
-
+<div id="profil_lista" class="lista" hidden></div>
 </div>
 
-{% endif %}
+<div id="ceny_profile_meta" class="ceny-profile-meta" hidden>
+<span id="profile_tests_meta">0 badań w profilu</span>
+<span id="profile_morph_meta">Morfologia: brak</span>
+</div>
+</section>
 
+<section id="morfologia_section" class="calc-section" {% if not ma_morfologie %}hidden{% endif %}>
+<div class="calc-section-heading">
+<p class="calc-section-kicker">Morfologia</p>
+<h3 class="calc-section-title">Morfologia</h3>
+<p class="calc-section-note">Dostępna tylko dla profili, które ją obsługują.</p>
+</div>
+
+<div class="hil_group">
+<label>Zakres morfologii</label>
+<div class="hil_switch" id="morfologia_switch">
+<button type="button" data-value="brak">Brak</button>
+<button type="button" data-value="podstawowa">Podstawowa</button>
+<button type="button" data-value="rozszerzona">Rozszerzona</button>
+</div>
+</div>
+</section>
+
+</div>
+</div>
+</div>
+
+<div class="calc-column calc-column-center">
+<div class="calc-panel">
+<div class="calc-panel-heading">
+<p class="calc-panel-kicker">Panel 2</p>
+<h3 class="calc-panel-title">Lista badań</h3>
+<p class="calc-panel-note">Przyciski działają wyłącznie w frontendzie. Prawy panel pokazuje wynik na żywo.</p>
+</div>
+
+<div class="calc-panel-stack">
+<div id="center_placeholder" class="ceny-center-placeholder">
+</div>
+
+<div id="study_groups" class="ceny-study-groups" hidden>
+<section class="ceny-study-group" data-section-group="biochemia">
+<div class="ceny-study-header">
+<div class="ceny-study-header-main">
+<h3 class="ceny-study-title">Biochemia</h3>
+<span id="bio_count" class="ceny-study-count">0/0</span>
+</div>
+<button type="button" class="ceny-section-toggle" data-toggle-section="biochemia">Zaznacz wszystko</button>
+</div>
+<div id="biochemia_list" class="ceny-study-list"></div>
+</section>
+
+<section id="mocz_group" class="ceny-study-group" data-section-group="mocz" hidden>
+<div class="ceny-study-header">
+<div class="ceny-study-header-main">
+<h3 class="ceny-study-title">Mocz</h3>
+<span id="mocz_count" class="ceny-study-count">0/0</span>
+</div>
+<button type="button" class="ceny-section-toggle" data-toggle-section="mocz">Zaznacz wszystko</button>
+</div>
+<div id="mocz_list" class="ceny-study-list"></div>
+</section>
+
+<section id="morfologia_group" class="ceny-study-group" data-section-group="morfologia" hidden>
+<div class="ceny-study-header">
+<div class="ceny-study-header-main">
+<h3 class="ceny-study-title">Morfologia</h3>
+<span id="morfologia_count" class="ceny-study-count">0/0</span>
+</div>
+<button type="button" class="ceny-section-toggle" data-toggle-section="morfologia">Zaznacz wszystko</button>
+</div>
+<div id="morfologia_list" class="ceny-study-list"></div>
+</section>
+</div>
+</div>
+</div>
+</div>
+
+<div class="calc-column calc-column-results">
+<div class="calc-panel calc-panel-highlight">
+<div class="calc-panel-heading">
+<p class="calc-panel-kicker">Panel 3</p>
+<h3 class="calc-panel-title">Wynik</h3>
+<p class="calc-panel-note">Live preview ceny profilu na podstawie zaznaczonych badań, bez dodatkowych requestów.</p>
+</div>
+
+<div class="calc-panel-stack ceny-summary-card">
+<div class="calc-result-card">
+<p class="calc-result-eyebrow">💰 Liczenie ceny profilu</p>
+<h3 class="calc-result-headline" id="summary_title">Cena końcowa: 0 zł</h3>
+
+<div class="ceny-summary-meta">
+<div class="ceny-summary-row">
+<span class="ceny-summary-label">Profil:</span>
+<span class="ceny-summary-value" id="summary_profile">-</span>
+</div>
+
+<div class="ceny-summary-row">
+<span class="ceny-summary-label">Morfologia:</span>
+<span class="ceny-summary-value" id="summary_morfologia">Brak</span>
+</div>
+</div>
+
+<div class="calc-info-grid">
+<div class="calc-info-card">
+<h3>Cena z cennika</h3>
+<div class="calc-range-text" id="stat_cennik">0 zł</div>
+</div>
+
+<div class="calc-info-card">
+<h3>Ilość badań (profil)</h3>
+<div class="calc-range-text" id="stat_ilosc">0</div>
+</div>
+
+<div class="calc-info-card">
+<h3>Wykonano</h3>
+<div class="calc-range-text" id="stat_wykonano">0</div>
+</div>
+
+<div class="calc-info-card">
+<h3>Procent</h3>
+<div class="calc-range-text" id="stat_procent">0%</div>
+</div>
+</div>
+
+<div class="ceny-final-box">
+<span class="ceny-final-label">Cena końcowa</span>
+<span id="final_price" class="ceny-final-price">0 zł</span>
+</div>
+
+<div class="ceny-actions">
+<button type="button" id="reset_btn" class="btn-neutral">Zacznij od nowa</button>
+<button type="button" id="copy_price_btn" class="btn-secondary" disabled>📋 Kopiuj cenę</button>
+<button type="submit" id="save_btn" name="action" value="save" class="btn-primary" disabled>💾 Zapisz do historii</button>
+</div>
+
+<div id="save_banner" class="ceny-save-banner" {% if not zapisano %}hidden{% endif %}>💾 Zapisano do historii.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </form>
-
-{% if wynik %}
-
-<hr>
-
-<h3>Wynik</h3>
-
-<p><b>Profil:</b> {{ wynik.profil }}</p>
-<p><b>Morfologia:</b> {{ wynik.morfologia }}</p>
-
-<p><b>Wykonane parametry:</b></p>
-<ul>
-{% for p in wynik.parametry_wykonane %}
-    <li>{{ p }}</li>
-{% endfor %}
-</ul>
-
-<p>Cena z cennika: {{ wynik.cena_profilu }} zł</p>
-<p>Ilość badań (profil): {{ wynik.ilosc_parametrow }}</p>
-<p>Wykonano: {{ wynik.wykonane }}</p>
-<p>Procent: {{ wynik.procent }} %</p>
-
-<div class="wynik_box">
-
-<h2 id="cena_koncowa">
-Cena końcowa: {{ wynik.cena_koncowa }} zł
-</h2>
-
-<button type="button" onclick="kopiujCene()" class="copy_btn" id="copy_btn">
-📋 Kopiuj cenę
-</button>
-
-</div>
-
-<br>
-
-<a href="/ceny">
-<button>Nowe liczenie</button>
-</a>
-
-{% endif %}
-
 </div>
 
 <script>
+(function() {
+    const pageDataNode = document.getElementById("ceny-page-data")
+    const pageData = pageDataNode ? JSON.parse(pageDataNode.textContent) : {}
 
-const parametry = {{ parametry_ceny | tojson | safe }}
-const cenaProfilu = {{ cena_profilu | default(0) }}
-const profileList = {{ profile | tojson }};
-// =========================
-// TOGGLE
-// =========================
+    const profileList = Array.isArray(pageData.profileList) ? pageData.profileList : []
+    const profileParamMap = pageData.profileParamMap || {}
+    const profileMorfMap = pageData.profileMorfMap || {}
+    const cenyProfiliMap = pageData.cenyProfiliMap || {}
+    const cenyMorfMap = pageData.cenyMorfMap || {}
+    const parametryCeny = pageData.parametryCeny || {}
+    const initialProfile = pageData.initialProfile || ""
+    const initialMorfologia = pageData.initialMorfologia || "brak"
+    const initialWykonane = Array.isArray(pageData.initialWykonane) ? pageData.initialWykonane : []
 
-function toggleParametr(p){
+    const BADANIA_MOCZU = new Set([
+        "Stosunek; białko / kreatynina w moczu",
+        "Badanie osadu moczu",
+        "Badanie moczu podstawowe"
+    ])
 
-    let input = document.getElementById("parametry_input")
+    const currencyFormatter = new Intl.NumberFormat("pl-PL", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    })
 
-    let current = input.value
-        ? input.value.split(",").map(x => x.trim())
-        : []
+    const percentFormatter = new Intl.NumberFormat("pl-PL", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1
+    })
 
-    let btns = document.querySelectorAll(".param_btn")
-    let clickedBtn = Array.from(btns).find(b => b.innerText === p)
+    const profilInput = document.getElementById("profil_input")
+    const profilHidden = document.getElementById("profil_hidden")
+    const profilLista = document.getElementById("profil_lista")
+    const profilClear = document.getElementById("profil_clear")
+    const morfologiaSection = document.getElementById("morfologia_section")
+    const morfologiaHidden = document.getElementById("morfologia_hidden")
+    const morfologiaSwitch = document.getElementById("morfologia_switch")
+    const wykonaneJsonInput = document.getElementById("wykonane_json")
+    const centerPlaceholder = document.getElementById("center_placeholder")
+    const studyGroups = document.getElementById("study_groups")
+    const biochemiaList = document.getElementById("biochemia_list")
+    const moczGroup = document.getElementById("mocz_group")
+    const moczList = document.getElementById("mocz_list")
+    const bioCount = document.getElementById("bio_count")
+    const moczCount = document.getElementById("mocz_count")
+    const morfologiaGroup = document.getElementById("morfologia_group")
+    const morfologiaList = document.getElementById("morfologia_list")
+    const morfologiaCount = document.getElementById("morfologia_count")
+    const profileMeta = document.getElementById("ceny_profile_meta")
+    const profileTestsMeta = document.getElementById("profile_tests_meta")
+    const profileMorphMeta = document.getElementById("profile_morph_meta")
+    const summaryTitle = document.getElementById("summary_title")
+    const summaryProfile = document.getElementById("summary_profile")
+    const summaryMorfologia = document.getElementById("summary_morfologia")
+    const statCennik = document.getElementById("stat_cennik")
+    const statIlosc = document.getElementById("stat_ilosc")
+    const statWykonano = document.getElementById("stat_wykonano")
+    const statProcent = document.getElementById("stat_procent")
+    const finalPrice = document.getElementById("final_price")
+    const resetBtn = document.getElementById("reset_btn")
+    const copyPriceBtn = document.getElementById("copy_price_btn")
+    const saveBtn = document.getElementById("save_btn")
+    const saveBanner = document.getElementById("save_banner")
 
-    if(current.includes(p)){
-        current = current.filter(x => x !== p)
-        if(clickedBtn) clickedBtn.classList.remove("active")
-    } else {
-        current.push(p)
-        if(clickedBtn) clickedBtn.classList.add("active")
+    const MORFOLOGIA_PARAM_NAMES = ["Morfologia", "Morfologia rozszerzona"]
+    let selectedCheckboxParams = new Set(initialWykonane)
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;")
     }
 
-    input.value = current.join(", ")
-
-    updateCounters()
-    policzCeneLive()
-}
-
-function toggleAll(section) {
-
-    const kontenerSekcji = document.querySelector(`[data-section="${section}"]`)
-
-    if (!kontenerSekcji) return
-
-    const przyciski = Array.from(kontenerSekcji.querySelectorAll(".param_btn"))
-
-    if (przyciski.length === 0) return
-
-    const wszystkoZaznaczone = przyciski.every(btn => btn.classList.contains("active"))
-
-    przyciski.forEach(btn => {
-        const nazwa = btn.innerText.trim()
-        const zaznaczony = btn.classList.contains("active")
-
-        if (wszystkoZaznaczone && zaznaczony) {
-            toggleParametr(nazwa)
-        } else if (!wszystkoZaznaczone && !zaznaczony) {
-            toggleParametr(nazwa)
+    function parsePrice(value) {
+        if (value === null || value === undefined || value === "" || value === "???") {
+            return null
         }
-    })
 
-    updateCounters()
-    policzCeneLive()
-}
-
-function updateToggleAllLabels(){
-
-    const buttons = document.querySelectorAll("[data-toggle-all]")
-
-    buttons.forEach(button => {
-        const section = button.dataset.toggleAll
-        const kontenerSekcji = document.querySelector(`[data-section="${section}"]`)
-
-        if (!kontenerSekcji) return
-
-        const przyciski = Array.from(kontenerSekcji.querySelectorAll(".param_btn"))
-
-        if (przyciski.length === 0) return
-
-        const wszystkoZaznaczone = przyciski.every(btn => btn.classList.contains("active"))
-
-        button.textContent = wszystkoZaznaczone
-            ? "Odznacz wszystko"
-            : "Zaznacz wszystko"
-    })
-}
-
-// =========================
-// LICZNIKI
-// =========================
-
-function updateCounters(){
-
-    const all = document.querySelectorAll(".param_btn")
-    const active = document.querySelectorAll(".param_btn.active")
-
-    const totalAll = all.length
-    const totalChecked = active.length
-
-    let percent = totalAll > 0 ? Math.round((totalChecked / totalAll) * 100) : 0
-
-    // sticky (już masz)
-    document.getElementById("sticky_text").textContent =
-        totalChecked + "/" + totalAll + " (" + percent + "%)"
-
-    // 🔥 GÓRNY LICZNIK
-    document.getElementById("total_count").textContent = totalChecked
-    document.getElementById("total_all").textContent = totalAll
-    document.getElementById("total_percent").textContent = percent
-
-    // 🔥 BIOCHEMIA
-    const bioAll = document.querySelectorAll(".param_btn")
-    const bioActive = document.querySelectorAll(".param_btn.active")
-
-    if(document.getElementById("bio_count")){
-        document.getElementById("bio_count").textContent = bioActive.length
+        const parsed = Number.parseFloat(String(value).replace(",", "."))
+        return Number.isFinite(parsed) ? parsed : null
     }
 
-    // 🔥 MOCZ (tylko jeśli istnieje)
-    if(document.getElementById("mocz_count")){
-        const moczActive = Array.from(document.querySelectorAll(".param_btn.active"))
-            .filter(btn => btn.closest("div").previousElementSibling?.innerText.includes("Mocz"))
-        document.getElementById("mocz_count").textContent = moczActive.length
+    function formatPrice(value) {
+        return `${currencyFormatter.format(value)} zł`
     }
 
-    // 🔥 MORFOLOGIA
-    if(document.getElementById("morfo_count")){
-        const morfoActive = Array.from(document.querySelectorAll(".param_btn.active"))
-            .filter(btn => btn.innerText.toLowerCase().includes("morfologia"))
-        document.getElementById("morfo_count").textContent = morfoActive.length
+    function formatPercent(value) {
+        return `${percentFormatter.format(value)}%`
     }
 
-    updateToggleAllLabels()
-}
-// =========================
-// LIVE CENA
-// =========================
+    function getSelectedProfile() {
+        return profilHidden.value.trim()
+    }
 
-function policzCeneLive(){
+    function profileHasMorfologia(profileName) {
+        return Number(profileMorfMap[profileName] || 0) === 1
+    }
 
-    let all = Array.from(document.querySelectorAll(".param_btn"))
-        .map(b => b.innerText.trim())
+    function getProfileParams(profileName) {
+        return Array.isArray(profileParamMap[profileName]) ? profileParamMap[profileName] : []
+    }
 
-    let wykonane = Array.from(document.querySelectorAll(".param_btn.active"))
-        .map(b => b.innerText.trim())
+    function getMorphologyParamName(morfologia) {
+        if (morfologia === "podstawowa") return "Morfologia"
+        if (morfologia === "rozszerzona") return "Morfologia rozszerzona"
+        return null
+    }
 
-    let procent = all.length > 0 ? wykonane.length / all.length : 0
+    function clearMorphologySelections() {
+        MORFOLOGIA_PARAM_NAMES.forEach(param => selectedCheckboxParams.delete(param))
+    }
 
-    let cena = 0
+    function splitStudies(params) {
+        return params.reduce((acc, param) => {
+            if (BADANIA_MOCZU.has(param)) {
+                acc.mocz.push(param)
+            } else {
+                acc.biochemia.push(param)
+            }
+            return acc
+        }, { biochemia: [], mocz: [] })
+    }
 
-    if(procent < 0.5){
+    function labelForMorfologia(value) {
+        if (value === "podstawowa") return "Podstawowa"
+        if (value === "rozszerzona") return "Rozszerzona"
+        return "Brak"
+    }
 
-        wykonane.forEach(p => {
-            let d = parametry[p]
-            if(d && d.dodaj !== "???"){
-                cena += parseFloat(d.dodaj)
+    function renderProfileMeta() {
+        const profileName = getSelectedProfile()
+
+        if (!profileName) {
+            profileMeta.hidden = true
+            return
+        }
+
+        const params = getProfileParams(profileName)
+        profileTestsMeta.textContent = `${params.length} badań w profilu`
+        profileMorphMeta.textContent = profileHasMorfologia(profileName)
+            ? `Morfologia: ${labelForMorfologia(morfologiaHidden.value)}`
+            : "Morfologia: brak"
+        profileMeta.hidden = false
+    }
+
+    function updateMorfologiaButtons() {
+        const profileName = getSelectedProfile()
+        const enabled = profileHasMorfologia(profileName)
+        const activeValue = enabled ? morfologiaHidden.value : "brak"
+        const activeIndex = activeValue === "podstawowa" ? "1" : activeValue === "rozszerzona" ? "2" : "0"
+
+        morfologiaSection.hidden = !enabled
+        morfologiaSwitch.dataset.activeIndex = activeIndex
+
+        morfologiaSwitch.querySelectorAll("button").forEach(button => {
+            const isDefault = button.dataset.value === "brak"
+            button.disabled = !enabled && !isDefault
+            button.classList.toggle("active", button.dataset.value === activeValue)
+        })
+
+        renderProfileMeta()
+    }
+
+    function renderStudyRows(container, params, checkedParams) {
+        if (!params.length) {
+            container.innerHTML = '<div class="ceny-empty-list">Brak badań w tej sekcji.</div>'
+            return 0
+        }
+
+        container.innerHTML = params.map(param => {
+            const activeClass = checkedParams.has(param) ? " active" : ""
+
+            return `
+                <button type="button" class="ceny-study-row${activeClass}" data-param="${escapeHtml(param)}">${escapeHtml(param)}</button>
+            `
+        }).join("")
+
+        return params.filter(param => checkedParams.has(param)).length
+    }
+
+    function updateSectionToggleLabel(sectionName, params) {
+        const button = document.querySelector(`[data-toggle-section="${sectionName}"]`)
+        if (!button) return
+
+        if (!params.length) {
+            button.hidden = true
+            return
+        }
+
+        button.hidden = false
+        const allSelected = params.every(param => selectedCheckboxParams.has(param))
+        button.textContent = allSelected ? "Odznacz wszystko" : "Zaznacz wszystko"
+    }
+
+    function renderStudyGroups() {
+        const profileName = getSelectedProfile()
+
+        if (!profileName) {
+            centerPlaceholder.hidden = false
+            studyGroups.hidden = true
+            biochemiaList.innerHTML = ""
+            moczList.innerHTML = ""
+            morfologiaList.innerHTML = ""
+            bioCount.textContent = "0/0"
+            moczCount.textContent = "0/0"
+            morfologiaCount.textContent = "0/0"
+            moczGroup.hidden = true
+            morfologiaGroup.hidden = true
+            return
+        }
+
+        const params = getProfileParams(profileName)
+        const sections = splitStudies(params)
+        const morphParam = getMorphologyParamName(morfologiaHidden.value)
+        const morphParams = morphParam ? [morphParam] : []
+
+        centerPlaceholder.hidden = true
+        studyGroups.hidden = false
+
+        const bioDone = renderStudyRows(biochemiaList, sections.biochemia, selectedCheckboxParams)
+        const moczDone = sections.mocz.length ? renderStudyRows(moczList, sections.mocz, selectedCheckboxParams) : 0
+        const morphDone = morphParams.length ? renderStudyRows(morfologiaList, morphParams, selectedCheckboxParams) : 0
+
+        bioCount.textContent = `${bioDone}/${sections.biochemia.length}`
+        moczCount.textContent = `${moczDone}/${sections.mocz.length}`
+        morfologiaCount.textContent = `${morphDone}/${morphParams.length}`
+        moczGroup.hidden = sections.mocz.length === 0
+        morfologiaGroup.hidden = morphParams.length === 0
+
+        if (!sections.mocz.length) {
+            moczList.innerHTML = ""
+        }
+
+        if (!morphParams.length) {
+            morfologiaList.innerHTML = ""
+        }
+
+        updateSectionToggleLabel("biochemia", sections.biochemia)
+        updateSectionToggleLabel("mocz", sections.mocz)
+        updateSectionToggleLabel("morfologia", morphParams)
+    }
+
+    function toggleSection(sectionName) {
+        const profileName = getSelectedProfile()
+        if (!profileName) return
+
+        const profileParams = getProfileParams(profileName)
+        const splitParams = splitStudies(profileParams)
+
+        let sectionParams = []
+        if (sectionName === "biochemia") {
+            sectionParams = splitParams.biochemia
+        } else if (sectionName === "mocz") {
+            sectionParams = splitParams.mocz
+        } else if (sectionName === "morfologia") {
+            const morphParam = getMorphologyParamName(morfologiaHidden.value)
+            sectionParams = morphParam ? [morphParam] : []
+        }
+
+        if (!sectionParams.length) return
+
+        const allSelected = sectionParams.every(param => selectedCheckboxParams.has(param))
+        sectionParams.forEach(param => {
+            if (allSelected) {
+                selectedCheckboxParams.delete(param)
+            } else {
+                selectedCheckboxParams.add(param)
             }
         })
 
-    } else {
+        saveBanner.hidden = true
+        renderStudyGroups()
+        updatePreview()
+    }
 
-        cena = cenaProfilu
+    function setProfile(profileName) {
+        const normalized = profileList.includes(profileName) ? profileName : ""
+        profilHidden.value = normalized
+        profilInput.value = normalized
 
-        all.forEach(p => {
-            if(!wykonane.includes(p)){
-                let d = parametry[p]
-                if(d && d.odejmij !== "???"){
-                    cena -= parseFloat(d.odejmij)
+        const validParams = new Set(getProfileParams(normalized))
+        selectedCheckboxParams = new Set([...selectedCheckboxParams].filter(param => validParams.has(param) || MORFOLOGIA_PARAM_NAMES.includes(param)))
+
+        if (!profileHasMorfologia(normalized)) {
+            morfologiaHidden.value = "brak"
+            clearMorphologySelections()
+        }
+
+        renderProfileMeta()
+        updateMorfologiaButtons()
+        renderStudyGroups()
+        updatePreview()
+        toggleClearButtons()
+    }
+
+    function renderProfileSuggestions(filteredProfiles) {
+        profilLista.innerHTML = ""
+
+        if (!filteredProfiles.length) {
+            profilLista.hidden = true
+            return
+        }
+
+        filteredProfiles.slice(0, 20).forEach(profileName => {
+            const option = document.createElement("div")
+            option.textContent = profileName
+            option.addEventListener("click", () => {
+                profilLista.hidden = true
+                setProfile(profileName)
+            })
+            profilLista.appendChild(option)
+        })
+
+        profilLista.hidden = false
+    }
+
+    function buildComputation() {
+        const profileName = getSelectedProfile()
+        const baseProfileParams = getProfileParams(profileName)
+        const morphValue = profileHasMorfologia(profileName) ? morfologiaHidden.value : "brak"
+        const morphParam = getMorphologyParamName(morphValue)
+        const allProfileParams = morphParam ? [...baseProfileParams, morphParam] : [...baseProfileParams]
+        const performedParams = allProfileParams.filter(param => selectedCheckboxParams.has(param))
+        const totalCount = allProfileParams.length
+        const doneCount = performedParams.length
+        const percent = totalCount > 0 ? Math.round((doneCount / totalCount) * 1000) / 10 : 0
+        let cennik = parsePrice(cenyProfiliMap[profileName]) || 0
+
+        if (morphValue !== "brak") {
+            cennik += parsePrice(cenyMorfMap[morphValue]) || 0
+        }
+
+        let final = 0
+
+        if (totalCount === 0) {
+            final = 0
+        } else if (doneCount / totalCount < 0.5) {
+            performedParams.forEach(param => {
+                const data = parametryCeny[param]
+                const addPrice = data ? parsePrice(data.dodaj) : null
+                if (addPrice !== null) {
+                    final += addPrice
                 }
-            }
-        })
-    }
-
-    document.getElementById("live_cena").textContent =
-        cena.toFixed(2) + " zł"
-}
-// =========================
-// INIT
-// =========================
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateCounters()
-    policzCeneLive()
-})
-const inputProfil = document.getElementById("profil_input")
-const listaProfil = document.getElementById("profil_lista")
-
-if(inputProfil){
-
-function pokazListe(filtrowane){
-
-    listaProfil.innerHTML = ""
-
-    filtrowane.slice(0, 20).forEach(p => {
-
-        const div = document.createElement("div")
-        div.className = "profil_option"
-        div.textContent = p
-
-        div.onclick = () => {
-            inputProfil.value = p
-            listaProfil.innerHTML = ""
-            inputProfil.form.submit()
+            })
+        } else {
+            final = cennik
+            allProfileParams.forEach(param => {
+                if (performedParams.includes(param)) return
+                const data = parametryCeny[param]
+                const subtractPrice = data ? parsePrice(data.odejmij) : null
+                if (subtractPrice !== null) {
+                    final -= subtractPrice
+                }
+            })
         }
 
-        listaProfil.appendChild(div)
-    })
-}
-
-// klik → pokaż wszystko
-inputProfil.addEventListener("focus", () => {
-    pokazListe(profileList)
-})
-
-// wpisywanie → filtr
-inputProfil.addEventListener("input", function(){
-
-    const value = this.value.toLowerCase()
-
-    const filtered = profileList.filter(p => 
-        p.toLowerCase().includes(value)
-    )
-
-    pokazListe(filtered)
-})
-
-// klik poza → zamknij
-document.addEventListener("click", (e) => {
-    if(!document.getElementById("profil_box").contains(e.target)){
-        listaProfil.innerHTML = ""
+        return {
+            profileName,
+            morphValue,
+            performedParams,
+            totalCount,
+            doneCount,
+            percent,
+            cennik,
+            final: Math.round(final * 100) / 100
+        }
     }
-})
 
-}
-document.addEventListener("DOMContentLoaded", () => {
+    function updatePreview() {
+        const computation = buildComputation()
+        const hasProfile = Boolean(computation.profileName)
 
-    const buttons = document.querySelectorAll(".switch_morfologia button")
+        wykonaneJsonInput.value = JSON.stringify(computation.performedParams)
 
-    buttons.forEach(btn => {
+        summaryProfile.textContent = hasProfile ? computation.profileName : "-"
+        summaryMorfologia.textContent = labelForMorfologia(computation.morphValue)
 
-        btn.addEventListener("click", function(){
+        statCennik.textContent = formatPrice(computation.cennik)
+        statIlosc.textContent = String(computation.totalCount)
+        statWykonano.textContent = String(computation.doneCount)
+        statProcent.textContent = formatPercent(computation.percent)
 
-            // usuń active
-            buttons.forEach(b => b.classList.remove("active"))
+        summaryTitle.textContent = `Cena końcowa: ${formatPrice(computation.final)}`
+        finalPrice.textContent = formatPrice(computation.final)
 
-            // dodaj active
-            this.classList.add("active")
+        copyPriceBtn.disabled = !hasProfile
+        saveBtn.disabled = !hasProfile
 
-            // ustaw hidden
-            const hidden = document.getElementById("morfologia_hidden")
-            if(hidden){
-                hidden.value = this.dataset.value
-            }
+        if (!hasProfile) {
+            saveBanner.hidden = true
+            saveBanner.classList.remove("is-hiding")
+        }
+    }
 
-            // 🔥 KLUCZ – przeładuj stronę
-            this.closest("form").submit()
+    function hideSaveBanner() {
+        if (saveBanner.hidden) return
 
-        })
+        saveBanner.classList.add("is-hiding")
+        window.setTimeout(() => {
+            saveBanner.hidden = true
+            saveBanner.classList.remove("is-hiding")
+        }, 220)
+    }
 
+    function scheduleSaveBannerHide() {
+        if (saveBanner.hidden) return
+        window.setTimeout(hideSaveBanner, 4000)
+    }
+
+    function toggleClearButtons() {
+        profilClear.hidden = !profilInput.value
+    }
+
+    function clearProfile() {
+        selectedCheckboxParams = new Set()
+        saveBanner.hidden = true
+        saveBanner.classList.remove("is-hiding")
+        setProfile("")
+        morfologiaHidden.value = "brak"
+        updateMorfologiaButtons()
+        updatePreview()
+    }
+
+    profilInput.addEventListener("focus", () => {
+        renderProfileSuggestions(profileList)
     })
 
-})
+    profilInput.addEventListener("input", event => {
+        const query = event.target.value.trim().toLowerCase()
+        const matches = profileList.filter(profileName => profileName.toLowerCase().includes(query))
+        profilHidden.value = ""
+        renderProfileSuggestions(matches)
+        toggleClearButtons()
+        saveBanner.hidden = true
+    })
+
+    profilInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault()
+            const matches = profileList.filter(profileName => profileName.toLowerCase().includes(profilInput.value.trim().toLowerCase()))
+            if (matches.length) {
+                setProfile(matches[0])
+                profilLista.hidden = true
+            }
+        }
+    })
+
+    profilInput.addEventListener("blur", () => {
+        window.setTimeout(() => {
+            const exact = profileList.find(profileName => profileName.toLowerCase() === profilInput.value.trim().toLowerCase())
+            if (exact) {
+                setProfile(exact)
+            } else if (!getSelectedProfile()) {
+                profilInput.value = ""
+            }
+            profilLista.hidden = true
+            toggleClearButtons()
+        }, 120)
+    })
+
+    profilClear.addEventListener("click", () => {
+        clearProfile()
+    })
+
+    resetBtn.addEventListener("click", () => {
+        clearProfile()
+        profilInput.value = ""
+        profilHidden.value = ""
+        profilLista.hidden = true
+    })
+
+    morfologiaSwitch.addEventListener("click", event => {
+        const button = event.target.closest("button[data-value]")
+        if (!button || button.disabled) return
+
+        clearMorphologySelections()
+        morfologiaHidden.value = button.dataset.value
+        saveBanner.hidden = true
+        updateMorfologiaButtons()
+        renderStudyGroups()
+        updatePreview()
+    })
+
+    studyGroups.addEventListener("click", event => {
+        const sectionButton = event.target.closest("[data-toggle-section]")
+        if (sectionButton) {
+            toggleSection(sectionButton.dataset.toggleSection)
+            return
+        }
+
+        const toggleButton = event.target.closest(".ceny-study-row[data-param]")
+        if (!toggleButton) return
+
+        const param = toggleButton.dataset.param
+        if (selectedCheckboxParams.has(param)) {
+            selectedCheckboxParams.delete(param)
+        } else {
+            selectedCheckboxParams.add(param)
+        }
+
+        saveBanner.hidden = true
+        renderStudyGroups()
+        updatePreview()
+    })
+
+    copyPriceBtn.addEventListener("click", async () => {
+        const value = finalPrice.textContent.trim()
+        if (!value || copyPriceBtn.disabled) return
+
+        try {
+            await navigator.clipboard.writeText(value)
+            copyPriceBtn.textContent = "Skopiowano cenę"
+            window.setTimeout(() => {
+                copyPriceBtn.textContent = "📋 Kopiuj cenę"
+            }, 1400)
+        } catch (error) {
+            copyPriceBtn.textContent = "Błąd kopiowania"
+            window.setTimeout(() => {
+                copyPriceBtn.textContent = "📋 Kopiuj cenę"
+            }, 1400)
+        }
+    })
+
+    document.addEventListener("click", event => {
+        if (!event.target.closest(".calc-input-wrap") && !event.target.closest(".lista")) {
+            profilLista.hidden = true
+        }
+    })
+
+    profilClear.hidden = true
+    scheduleSaveBannerHide()
+    setProfile(initialProfile)
+    morfologiaHidden.value = initialMorfologia
+    updateMorfologiaButtons()
+    renderStudyGroups()
+    syncQuickParamInput()
+    updatePreview()
+    toggleClearButtons()
+})();
 </script>
 
 {% endblock %}

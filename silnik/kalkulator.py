@@ -1,3 +1,6 @@
+from silnik.hil import get_adjusted_volume, normalize_param_name
+
+
 # =========================
 # ODMIANA LICZEBNIKA
 # =========================
@@ -48,43 +51,88 @@ def zbuduj_liste_parametrow(profil1, profil2, parametry_wybrane, profile_map):
     return wynik
 
 
+def zbuduj_indeks_parametrow(parametry):
+    return {normalize_param_name(nazwa): nazwa for nazwa in parametry}
+
+
+def znajdz_parametr(nazwa_parametru, parametry, indeks_parametrow=None):
+    if nazwa_parametru in parametry:
+        return nazwa_parametru
+
+    if indeks_parametrow is None:
+        indeks_parametrow = zbuduj_indeks_parametrow(parametry)
+
+    return indeks_parametrow.get(normalize_param_name(nazwa_parametru))
+
+
 # =========================
 # OBJĘTOŚĆ PEŁNEGO PROFILU
 # =========================
 
-def objetosc_pelnego_profilu(lista, parametry):
+def objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, icterus=None):
 
-    suma = 0
+    breakdown = rozbij_objetosc_pelnego_profilu(
+        lista,
+        parametry,
+        hemolysis,
+        lipemia,
+        icterus,
+    )
+
+    return breakdown["suma"]
+
+
+def rozbij_objetosc_pelnego_profilu(lista, parametry, hemolysis=None, lipemia=None, icterus=None):
+
+    parametry_ul = 0
     ma_jony = False
+    indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
     for p in lista:
+        parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
 
-        if p not in parametry:
+        if not parametr_key:
             continue
 
-        if parametry[p]["jon"] == 1:
+        if parametry[parametr_key]["jon"] == 1:
             ma_jony = True
         else:
-            suma += parametry[p]["ul"]
+            parametry_ul += get_adjusted_volume(
+                parametry[parametr_key]["ul"],
+                parametr_key,
+                hemolysis,
+                lipemia,
+                icterus,
+            )
 
-    suma += 50
+    martwa_objetosc_ul = 50
+    jonogram_ul = 20 if ma_jony else 0
+    suma = martwa_objetosc_ul + jonogram_ul + parametry_ul
 
-    if ma_jony:
-        suma += 20
-
-    return suma
+    return {
+        "martwa_objetosc_ul": martwa_objetosc_ul,
+        "jonogram_ul": jonogram_ul,
+        "parametry_ul": parametry_ul,
+        "suma": suma,
+    }
 
 
 # =========================
 # SILNIK LICZENIA (Excel)
 # =========================
 
-def licz_zakres_excel(objetosc, lista_parametrow, parametry):
+def licz_zakres_excel(objetosc, lista_parametrow, parametry, hemolysis=None, lipemia=None, icterus=None):
 
     robocza = objetosc - 50
+    indeks_parametrow = zbuduj_indeks_parametrow(parametry)
 
-    jony = [p for p in lista_parametrow if p in parametry and parametry[p]["jon"] == 1]
-    liczba_jonow = len(jony)
+    jony = []
+    for p in lista_parametrow:
+        parametr_key = znajdz_parametr(p, parametry, indeks_parametrow)
+        if parametr_key and parametry[parametr_key]["jon"] == 1:
+            jony.append(parametr_key)
+
+    liczba_jonow = 1 if len(jony) > 0 else 0
 
     if liczba_jonow > 0 and robocza >= 20:
         robocza -= 20
@@ -93,13 +141,29 @@ def licz_zakres_excel(objetosc, lista_parametrow, parametry):
         jonogram_mozliwy = False
 
     param_ul = [
-        parametry[p]["ul"]
+        get_adjusted_volume(
+            parametry[parametr_key]["ul"],
+            parametr_key,
+            hemolysis,
+            lipemia,
+            icterus,
+        )
         for p in lista_parametrow
-        if p in parametry and parametry[p]["jon"] == 0
+        for parametr_key in [znajdz_parametr(p, parametry, indeks_parametrow)]
+        if parametr_key and parametry[parametr_key]["jon"] == 0
     ]
+    if robocza <= 0:
+        if jonogram_mozliwy:
+            return (liczba_jonow, liczba_jonow)
+        else:
+            return (0, 0)
 
-    if robocza <= 0 or not param_ul:
-        return (0,0)
+    # jeśli nie ma parametrów BIO
+    if not param_ul:
+        if jonogram_mozliwy:
+            return (liczba_jonow, liczba_jonow)
+        else:
+            return (0, 0)
 
     # MAX (od najmniejszych)
     suma = 0
