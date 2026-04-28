@@ -58,6 +58,22 @@
 {%- endmacro %}
 
 <style>
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.wrapper,
+.content {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.content {
+    padding-bottom: 12px;
+}
+
 .history-app {
     width: 100%;
     max-width: none;
@@ -380,6 +396,21 @@
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
+.history-card-bottom {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-card-index {
+    flex: 0 0 auto;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
 .history-card:hover {
     transform: translateY(-1px);
     border-color: #93c5fd;
@@ -462,6 +493,8 @@
 }
 
 .history-card-summary {
+    flex: 1;
+    min-width: 0;
     font-size: 14px;
     font-weight: 700;
     color: #1e3a8a;
@@ -944,7 +977,7 @@
 <div class="container history-app">
     <div class="history-shell">
         <div class="history-header">
-            <div class="history-counter">{{ history_records | length }} rekordów</div>
+            <div id="historyCounter" class="history-counter">{{ history_records | length }}/{{ history_records | length }} rekordów</div>
             <div class="history-header-tools">
                 <div class="history-top-pagination">
                     <div id="historyPageInfoTop" class="history-page-info">Strona 1 z 1</div>
@@ -1019,8 +1052,10 @@
                                         <span>{{ h.godzina or "--:--" }}</span>
                                     </div>
                                 </div>
-
-                                <div class="history-card-summary">{{ result_summary(h) }}</div>
+                                <div class="history-card-bottom">
+                                    <div class="history-card-summary">{{ result_summary(h) }}</div>
+                                    <span class="history-card-index">#{{ loop.index }}</span>
+                                </div>
                             </button>
                             {% endfor %}
                         </div>
@@ -1064,6 +1099,7 @@ const moduleFilters = document.querySelectorAll(".history-filter-btn");
 const sortSelect = document.getElementById("historySortSelect");
 const historyList = document.getElementById("historyList");
 const historyCards = Array.from(document.querySelectorAll(".history-card"));
+const historyCounter = document.getElementById("historyCounter");
 const historyListEmpty = document.getElementById("historyListEmpty");
 const historyDetailPanel = document.getElementById("historyDetailPanel");
 const historyVisibleCount = document.getElementById("historyVisibleCount");
@@ -1491,6 +1527,7 @@ function updatePagination(totalVisible) {
 function applyFilters() {
     const sortedCards = sortCards();
     const filteredCards = [];
+    const totalRecordsCount = historyCards.length;
 
     sortedCards.forEach((card) => {
         const matchesModule = historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter;
@@ -1502,6 +1539,9 @@ function applyFilters() {
     });
 
     const totalMatchingCount = filteredCards.length;
+    if (historyCounter) {
+        historyCounter.textContent = `${totalMatchingCount}/${totalRecordsCount} rekordów`;
+    }
     const totalPages = updatePagination(totalMatchingCount);
     const startIndex = (historyState.currentPage - 1) * historyState.pageSize;
     const endIndex = startIndex + historyState.pageSize;
@@ -1509,6 +1549,12 @@ function applyFilters() {
 
     filteredCards.forEach((card, index) => {
         const isVisibleOnPage = index >= startIndex && index < endIndex;
+        const indexLabel = card.querySelector(".history-card-index");
+
+        if (indexLabel) {
+            indexLabel.textContent = `#${index + 1}`;
+        }
+
         card.style.display = isVisibleOnPage ? "flex" : "none";
 
         if (isVisibleOnPage) {
