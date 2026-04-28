@@ -1095,6 +1095,8 @@ const historyState = {
     pageSize: 10
 };
 
+const HISTORY_STATE_KEY = "historyViewState";
+
 const moduleFilters = document.querySelectorAll(".history-filter-btn");
 const sortSelect = document.getElementById("historySortSelect");
 const historyList = document.getElementById("historyList");
@@ -1105,6 +1107,52 @@ const historyDetailPanel = document.getElementById("historyDetailPanel");
 const historyVisibleCount = document.getElementById("historyVisibleCount");
 const historyPageInfos = Array.from(document.querySelectorAll(".history-page-info"));
 const historyPaginationControls = Array.from(document.querySelectorAll(".history-page-control"));
+
+function isReloadNavigation() {
+    const navEntry = performance.getEntriesByType("navigation")[0];
+    return navEntry ? navEntry.type === "reload" : false;
+}
+
+function saveHistoryState() {
+    sessionStorage.setItem(HISTORY_STATE_KEY, JSON.stringify({
+        activeFilter: historyState.activeFilter,
+        activeSort: historyState.activeSort,
+        activeRecordId: historyState.activeRecordId,
+        currentPage: historyState.currentPage
+    }));
+}
+
+function restoreHistoryState() {
+    if (!isReloadNavigation()) return;
+
+    const rawState = sessionStorage.getItem(HISTORY_STATE_KEY);
+    if (!rawState) return;
+
+    try {
+        const state = JSON.parse(rawState);
+        const validFilters = new Set(Array.from(moduleFilters).map((button) => button.dataset.filter));
+        const validSorts = new Set(Array.from(sortSelect.options).map((option) => option.value));
+
+        historyState.activeFilter = validFilters.has(state.activeFilter) ? state.activeFilter : "all";
+        historyState.activeSort = validSorts.has(state.activeSort) ? state.activeSort : "newest";
+        historyState.activeRecordId = state.activeRecordId ? String(state.activeRecordId) : null;
+        historyState.currentPage = Number.isFinite(Number(state.currentPage)) && Number(state.currentPage) > 0
+            ? Number(state.currentPage)
+            : 1;
+    } catch (error) {
+        sessionStorage.removeItem(HISTORY_STATE_KEY);
+    }
+}
+
+function syncHistoryControls() {
+    sortSelect.value = historyState.activeSort;
+
+    moduleFilters.forEach((button) => {
+        const active = button.dataset.filter === historyState.activeFilter;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+}
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -1571,11 +1619,13 @@ function applyFilters() {
         historyState.activeRecordId = null;
         syncActiveCard();
         renderDetail(null);
+        saveHistoryState();
         return;
     }
 
     syncActiveCard();
     renderDetail(historyState.activeRecordId);
+    saveHistoryState();
 }
 
 moduleFilters.forEach((button) => {
@@ -1628,9 +1678,12 @@ historyCards.forEach((card) => {
         historyState.activeRecordId = card.dataset.recordId;
         syncActiveCard();
         renderDetail(historyState.activeRecordId);
+        saveHistoryState();
     });
 });
 
+restoreHistoryState();
+syncHistoryControls();
 applyFilters();
 </script>
 

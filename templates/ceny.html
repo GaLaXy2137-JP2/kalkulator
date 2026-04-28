@@ -50,13 +50,20 @@
 .ceny-app .calc-panel {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
     min-width: 0;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 18px;
+    border-radius: 20px;
     background: #ffffff;
     box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.ceny-app .calc-panel-input,
+.ceny-app .calc-column-center > .calc-panel,
+.ceny-app .calc-column-results > .calc-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
 }
 
 .ceny-app .calc-panel-highlight {
@@ -91,13 +98,13 @@
 }
 
 .ceny-app .calc-section {
-    padding: 14px;
+    padding: 16px;
     border: 1px solid #edf2f7;
     border-radius: 16px;
     background: #f8fafc;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .ceny-app .calc-section-heading {
@@ -146,38 +153,45 @@
 
 .ceny-app .calc-input-wrap {
     position: relative;
+    overflow: hidden;
+    border-radius: 12px;
 }
 
 .ceny-app .calc-input-wrap .search_box {
     width: 100%;
-    padding-right: 36px !important;
+    padding-right: 34px !important;
     box-sizing: border-box;
 }
 
 .ceny-app .calc-clear-input {
     position: absolute;
-    right: 8px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    width: 22px;
-    height: 22px;
-    border: none;
-    border-radius: 999px;
-    background: transparent;
-    color: #94a3b8;
-    font-size: 16px;
-    line-height: 1;
+    width: 20px !important;
+    min-width: 20px;
+    min-height: 20px !important;
+    height: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 999px !important;
+    background: #e8eef8 !important;
+    color: #1e3a8a !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 20px;
+    box-shadow: none !important;
     cursor: pointer;
-    padding: 0;
+    z-index: 2;
 }
 
 .ceny-app .calc-clear-input:hover {
-    background: #e2e8f0;
-    color: #0f172a;
-}
-
-.ceny-app .calc-clear-input[hidden] {
-    display: none;
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+    transform: translateY(-50%) !important;
 }
 
 .ceny-app .lista {
@@ -255,9 +269,9 @@
     left: var(--seg-pad);
     width: calc((100% - (var(--seg-pad) * 2)) / 3);
     border-radius: 18px;
-    background: linear-gradient(180deg, #f9fffb 0%, #ddf8e4 100%);
-    border: 1px solid rgba(22, 163, 74, 0.22);
-    box-shadow: 0 10px 22px rgba(22, 163, 74, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    background: linear-gradient(180deg, #f2fbf4 0%, #dcefe2 100%);
+    border: 1px solid rgba(34, 197, 94, 0.18);
+    box-shadow: 0 10px 22px rgba(34, 197, 94, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     transform: translateX(0%);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     z-index: 0;
@@ -479,23 +493,23 @@
 
 .ceny-app .ceny-study-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 8px;
 }
 
 .ceny-app .ceny-study-row {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 34px;
-    padding: 8px 10px;
+    min-height: 42px;
+    padding: 10px 12px;
     border-radius: 12px;
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     color: #0f172a;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.35;
     text-align: center;
     cursor: pointer;
     box-shadow: none;
@@ -731,12 +745,35 @@
 }
 
 @media (min-width: 1100px) {
+    .ceny-app {
+        min-height: calc(100vh - 96px);
+    }
+
+    .ceny-app .calc-shell {
+        min-height: 100%;
+    }
+
     .ceny-app .calc-form-card {
         display: grid;
-        grid-template-columns: minmax(320px, 0.96fr) minmax(360px, 1.08fr) minmax(320px, 0.92fr);
+        grid-template-columns: minmax(350px, 1fr) minmax(430px, 1.22fr) minmax(300px, 0.82fr);
         gap: 14px;
         align-items: stretch;
+        min-height: calc(100vh - 154px);
         width: 100%;
+    }
+
+    .ceny-app .calc-column {
+        min-height: 100%;
+        align-self: stretch;
+    }
+
+    .ceny-app .calc-panel {
+        min-height: 100%;
+    }
+
+    .ceny-app .calc-panel-stack,
+    .ceny-app .ceny-summary-card {
+        min-height: 100%;
     }
 }
 
@@ -789,7 +826,7 @@
 .ceny-app .calc-result-card,
 .ceny-app .ceny-center-placeholder,
 .ceny-app .calc-result-placeholder {
-    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--green-soft) 36%, var(--bg-elevated) 64%) 100%) !important;
+    background: linear-gradient(180deg, var(--bg-elevated) 0%, color-mix(in srgb, var(--bg-muted) 58%, var(--bg-elevated) 42%) 100%) !important;
 }
 
 .ceny-app .calc-panel-title,
@@ -811,7 +848,6 @@
 .ceny-app .ceny-study-count,
 .ceny-app .ceny-empty-list,
 .ceny-app .calc-info-card h3,
-.ceny-app .calc-clear-input,
 .ceny-app .ceny-final-label {
     color: var(--text-muted) !important;
 }
@@ -824,7 +860,8 @@
 .ceny-app .hil_switch button,
 .ceny-app .ceny-section-toggle,
 .ceny-app .btn-neutral,
-.ceny-app .calc-clear-input {
+.ceny-app .calc-clear-input,
+.ceny-app .btn-secondary {
     background: var(--bg-elevated) !important;
     color: var(--text) !important;
     border: 1px solid var(--border) !important;
@@ -833,7 +870,6 @@
 .ceny-app .hil_switch button.active,
 .ceny-app .ceny-profile-meta,
 .ceny-app .ceny-study-row.active,
-.ceny-app .btn-secondary,
 .ceny-app .calc-result-eyebrow {
     background: var(--green-soft) !important;
     color: var(--green) !important;
@@ -850,27 +886,42 @@
     background: var(--green-strong) !important;
 }
 
+.ceny-app .btn-secondary,
+.ceny-app .calc-clear-input {
+    color: var(--green-strong) !important;
+    border-color: var(--green-border) !important;
+}
+
+.ceny-app .calc-clear-input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .ceny-app .hil_switch button:hover,
 .ceny-app .ceny-section-toggle:hover,
 .ceny-app .ceny-study-row:hover,
 .ceny-app .lista div:hover,
 .ceny-app .btn-neutral:hover,
-.ceny-app .calc-clear-input:hover {
+.ceny-app .btn-secondary:hover,
+.ceny-app .calc-clear-input:hover,
+.ceny-app .calc-clear-input:focus {
     background: var(--green-soft) !important;
     color: var(--green) !important;
     border-color: var(--green-border) !important;
 }
 
 .ceny-app #morfologia_switch {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--bg-muted) 88%, #eef3f8 12%) 0%, color-mix(in srgb, var(--bg-muted) 94%, #e4ebf3 6%) 100%) !important;
-    border: 1px solid var(--border) !important;
-    box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-soft) 88%, transparent 12%) !important;
     border-radius: 22px;
 }
 
 .ceny-app #morfologia_switch::before {
-    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 78%, var(--green-soft) 22%) 0%, color-mix(in srgb, var(--green-soft) 74%, #dcfce7 26%) 100%) !important;
-    border-color: color-mix(in srgb, var(--green-border) 82%, rgba(15, 23, 42, 0.08) 18%) !important;
+    background: var(--green-soft) !important;
+    border-color: var(--green-border) !important;
+    box-shadow: 0 8px 18px rgba(2, 6, 23, 0.12) !important;
 }
 
 .ceny-app #morfologia_switch button,
@@ -894,8 +945,38 @@
     box-shadow: none !important;
 }
 
+[data-theme="dark"] .ceny-app #morfologia_switch {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-soft) !important;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.24) !important;
+}
+
+[data-theme="dark"] .ceny-app #morfologia_switch::before {
+    background: var(--green-soft) !important;
+    border-color: var(--green-border) !important;
+    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.22) !important;
+}
+
+[data-theme="dark"] .ceny-app #morfologia_switch button,
+[data-theme="dark"] .ceny-app #morfologia_switch button:hover {
+    color: #d5dfef !important;
+}
+
+[data-theme="dark"] .ceny-app #morfologia_switch button:not(.active),
+[data-theme="dark"] .ceny-app #morfologia_switch button:not(.active):hover {
+    color: #c7d2e3 !important;
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .ceny-app #morfologia_switch button.active,
+[data-theme="dark"] .ceny-app #morfologia_switch button.active:hover {
+    color: var(--green) !important;
+    text-shadow: none !important;
+    font-weight: 900;
+}
+
 .ceny-app .ceny-final-box {
-    background: color-mix(in srgb, var(--green) 18%, var(--bg-muted) 82%);
+    background: color-mix(in srgb, var(--bg-panel) 74%, var(--bg-muted) 26%);
     color: var(--text);
 }
 
@@ -938,7 +1019,7 @@
 <label for="profil_input">Wyszukaj profil</label>
 <div class="calc-input-wrap">
 <input type="text" id="profil_input" class="search_box" value="{{ wybrany_profil or '' }}" placeholder="Wpisz nazwę profilu..." autocomplete="off">
-<button type="button" id="profil_clear" class="calc-clear-input" aria-label="Wyczyść profil">&times;</button>
+<button type="button" id="profil_clear" class="calc-clear-input" data-target="profil_input" aria-label="Wyczyść profil">&times;</button>
 </div>
 <div id="profil_lista" class="lista" hidden></div>
 </div>
@@ -1152,8 +1233,46 @@
     const saveBtn = document.getElementById("save_btn")
     const saveBanner = document.getElementById("save_banner")
 
+    const PRICE_STATE_KEY = "pricePageState"
     const MORFOLOGIA_PARAM_NAMES = ["Morfologia", "Morfologia rozszerzona"]
     let selectedCheckboxParams = new Set(initialWykonane)
+
+    function isReloadNavigation() {
+        const navEntry = performance.getEntriesByType("navigation")[0]
+        return navEntry ? navEntry.type === "reload" : false
+    }
+
+    function getCurrentPriceState() {
+        return {
+            profilInput: profilInput.value.trim(),
+            profil: profilHidden.value.trim(),
+            morfologia: morfologiaHidden.value || "brak",
+            wykonane: [...selectedCheckboxParams]
+        }
+    }
+
+    function savePriceState() {
+        sessionStorage.setItem(PRICE_STATE_KEY, JSON.stringify(getCurrentPriceState()))
+    }
+
+    function restorePriceState() {
+        if (!isReloadNavigation()) return false
+
+        const rawState = sessionStorage.getItem(PRICE_STATE_KEY)
+        if (!rawState) return false
+
+        try {
+            const state = JSON.parse(rawState)
+            profilInput.value = state.profilInput || state.profil || ""
+            profilHidden.value = state.profil || ""
+            morfologiaHidden.value = state.morfologia || "brak"
+            selectedCheckboxParams = new Set(Array.isArray(state.wykonane) ? state.wykonane : [])
+            return true
+        } catch (error) {
+            sessionStorage.removeItem(PRICE_STATE_KEY)
+            return false
+        }
+    }
 
     function escapeHtml(value) {
         return String(value)
@@ -1364,6 +1483,7 @@
         saveBanner.hidden = true
         renderStudyGroups()
         updatePreview()
+        savePriceState()
     }
 
     function setProfile(profileName) {
@@ -1384,6 +1504,7 @@
         renderStudyGroups()
         updatePreview()
         toggleClearButtons()
+        savePriceState()
     }
 
     function renderProfileSuggestions(filteredProfiles) {
@@ -1501,7 +1622,7 @@
     }
 
     function toggleClearButtons() {
-        profilClear.hidden = !profilInput.value
+        profilClear.style.display = profilInput.value.trim() ? "inline-flex" : "none"
     }
 
     function clearProfile() {
@@ -1525,6 +1646,7 @@
         renderProfileSuggestions(matches)
         toggleClearButtons()
         saveBanner.hidden = true
+        savePriceState()
     })
 
     profilInput.addEventListener("keydown", event => {
@@ -1548,6 +1670,7 @@
             }
             profilLista.hidden = true
             toggleClearButtons()
+            savePriceState()
         }, 120)
     })
 
@@ -1560,6 +1683,7 @@
         profilInput.value = ""
         profilHidden.value = ""
         profilLista.hidden = true
+        savePriceState()
     })
 
     morfologiaSwitch.addEventListener("click", event => {
@@ -1572,6 +1696,7 @@
         updateMorfologiaButtons()
         renderStudyGroups()
         updatePreview()
+        savePriceState()
     })
 
     studyGroups.addEventListener("click", event => {
@@ -1594,7 +1719,13 @@
         saveBanner.hidden = true
         renderStudyGroups()
         updatePreview()
+        savePriceState()
     })
+
+    const priceForm = document.querySelector(".calc-shell")
+    if (priceForm) {
+        priceForm.addEventListener("submit", savePriceState)
+    }
 
     copyPriceBtn.addEventListener("click", async () => {
         const value = finalPrice.textContent.trim()
@@ -1620,15 +1751,32 @@
         }
     })
 
-    profilClear.hidden = true
+    const restoredPriceState = restorePriceState()
+
+    profilClear.style.display = "none"
     scheduleSaveBannerHide()
-    setProfile(initialProfile)
-    morfologiaHidden.value = initialMorfologia
-    updateMorfologiaButtons()
-    renderStudyGroups()
-    syncQuickParamInput()
-    updatePreview()
-    toggleClearButtons()
+
+    if (restoredPriceState) {
+        if (getSelectedProfile()) {
+            setProfile(getSelectedProfile())
+        } else {
+            renderProfileMeta()
+            updateMorfologiaButtons()
+            renderStudyGroups()
+            updatePreview()
+            toggleClearButtons()
+            savePriceState()
+        }
+    } else {
+        setProfile(initialProfile)
+        morfologiaHidden.value = initialMorfologia
+        updateMorfologiaButtons()
+        renderStudyGroups()
+        syncQuickParamInput()
+        updatePreview()
+        toggleClearButtons()
+        savePriceState()
+    }
 })();
 </script>
 

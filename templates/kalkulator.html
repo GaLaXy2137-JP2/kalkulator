@@ -9,6 +9,121 @@ const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
 const editMode = {{ edit_mode | default(false) | tojson | safe }}
+const CALC_STATE_KEY = "calcPageState"
+
+function isReloadNavigation(){
+const navEntry = performance.getEntriesByType("navigation")[0]
+return navEntry ? navEntry.type === "reload" : false
+}
+
+function getCurrentCalcState(){
+return {
+objetosc: document.getElementById("sample_volume")?.value || "",
+profil1: document.getElementById("profil1_input")?.value || "",
+profil2: document.getElementById("profil2_input")?.value || "",
+profil2Visible: Boolean(document.getElementById("profil2_input")?.value.trim()),
+parametryInput: document.getElementById("parametry_input")?.value || "",
+parametryBoxOpen: document.getElementById("parametry_box")?.style.display === "block",
+hemolysis: document.getElementById("hemolysis_hidden")?.value || "none",
+lipemia: document.getElementById("lipemia_hidden")?.value || "none",
+icterus: document.getElementById("icterus_hidden")?.value || "absent"
+}
+}
+
+function saveCalcState(){
+if(leftPanelLocked) return
+sessionStorage.setItem(CALC_STATE_KEY, JSON.stringify(getCurrentCalcState()))
+}
+
+function clearCalcState(){
+sessionStorage.removeItem(CALC_STATE_KEY)
+sessionStorage.removeItem("calcLeftPanelScroll")
+}
+
+function applyHilState(state){
+[
+    ["hemolysis_hidden", state.hemolysis || "none"],
+    ["lipemia_hidden", state.lipemia || "none"],
+    ["icterus_hidden", state.icterus || "absent"]
+].forEach(([hiddenId, value]) => {
+    const hiddenInput = document.getElementById(hiddenId)
+    if(!hiddenInput) return
+
+    hiddenInput.value = value
+
+    const group = document.querySelector(`.hil_switch[data-hidden-input="${hiddenId}"]`)
+    if(!group) return
+
+    group.querySelectorAll("button").forEach(button => {
+        button.classList.toggle("active", button.dataset.value === value)
+    })
+})
+}
+
+function restoreCalcState(){
+if(!isReloadNavigation()) return false
+
+const rawState = sessionStorage.getItem(CALC_STATE_KEY)
+if(!rawState) return false
+
+try {
+    const state = JSON.parse(rawState)
+
+    const volumeInput = document.getElementById("sample_volume")
+    const profil1Input = document.getElementById("profil1_input")
+    const profil2Input = document.getElementById("profil2_input")
+    const profil2Slot = document.getElementById("profil2_slot")
+    const profil2Box = document.getElementById("profil2_box")
+    const parametryInput = document.getElementById("parametry_input")
+    const parametryBox = document.getElementById("parametry_box")
+    const parametryButton = document.getElementById("btn_parametry")
+
+    if(volumeInput) volumeInput.value = state.objetosc || ""
+    if(profil1Input) profil1Input.value = state.profil1 || ""
+    if(profil2Input) profil2Input.value = state.profil2 || ""
+    if(parametryInput) parametryInput.value = state.parametryInput || ""
+
+    if(profil2Slot && profil2Box){
+        const showProfile2 = Boolean((state.profil2 || "").trim()) || Boolean(state.profil2Visible)
+        profil2Slot.style.display = showProfile2 ? "none" : "flex"
+        profil2Box.style.display = showProfile2 ? "flex" : "none"
+    }
+
+    if(parametryBox && parametryButton){
+        const showParametry = Boolean((state.parametryInput || "").trim()) || Boolean(state.parametryBoxOpen)
+        parametryBox.style.display = showParametry ? "block" : "none"
+        parametryButton.innerText = showParametry ? "Ukryj parametry" : "Wybierz parametry"
+        parametryButton.classList.toggle("hide", showParametry)
+    }
+
+    applyHilState(state)
+    return true
+} catch(error){
+    sessionStorage.removeItem(CALC_STATE_KEY)
+    return false
+}
+}
+
+function bindCalcStatePersistence(){
+    ["sample_volume", "profil1_input", "profil2_input"].forEach(inputId => {
+        const input = document.getElementById(inputId)
+        if(!input) return
+
+        input.addEventListener("input", saveCalcState)
+        input.addEventListener("change", saveCalcState)
+    })
+
+    const form = document.querySelector(".calc-shell")
+    if(form){
+        form.addEventListener("submit", saveCalcState)
+    }
+}
+
+function initCalcResetLinks(){
+document.querySelectorAll('.calc-reset-link[href="/"]').forEach(link => {
+    link.addEventListener("click", clearCalcState)
+})
+}
 
 
 // =========================
@@ -47,6 +162,7 @@ document.getElementById(inputId).value = p
 zamknijListe(listaId)
 updateClearButton(inputId)
 renderParametry()
+saveCalcState()
 }
 
 lista.appendChild(div)
@@ -96,6 +212,7 @@ document.getElementById("profil2_box").style.display="flex"
 document.getElementById("profil2_input").focus()
 zamknijWszystkieListy()
 updateClearButton("profil2_input")
+saveCalcState()
 }
 
 function usunProfil2(){
@@ -107,6 +224,7 @@ document.getElementById("profil2_box").style.display="none"
 document.getElementById("profil2_slot").style.display="flex"
 updateClearButton("profil2_input")
 renderParametry()
+saveCalcState()
 }
 
 function updateClearButton(inputId){
@@ -135,6 +253,7 @@ lista.dataset.open = "false"
 
 updateClearButton(inputId)
 renderParametry()
+saveCalcState()
 }
 
 function initClearButtons(){
@@ -239,6 +358,8 @@ function toggleParametryBox(){
         renderParametry()
     }
 
+    saveCalcState()
+
 }
 
 // =========================
@@ -267,6 +388,7 @@ function toggleParametr(p){
     }
 
     input.value = current.join(", ")
+    saveCalcState()
 }
 
 
@@ -345,6 +467,7 @@ function initHilSwitches(){
 
                 group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
                 this.classList.add("active")
+                saveCalcState()
             })
         })
     })
@@ -353,6 +476,19 @@ function initHilSwitches(){
 
 // START
 document.addEventListener("DOMContentLoaded", function(){
+    restoreCalcState()
+
+    const parametryInput = document.getElementById("parametry_input")
+    if(parametryWybrane.length > 0 && parametryInput && !parametryInput.value.trim()){
+        const box = document.getElementById("parametry_box")
+        const btn = document.getElementById("btn_parametry")
+
+        parametryInput.value = parametryWybrane.join(", ")
+        box.style.display = "block"
+        btn.innerText = "Ukryj parametry"
+        btn.classList.add("hide")
+    }
+
     renderParametry()
     initHilSwitches()
     initClearButtons()
@@ -360,6 +496,9 @@ document.addEventListener("DOMContentLoaded", function(){
     initProfileDropdowns()
     initLeftPanelScrollMemory()
     initSubmitButton()
+    bindCalcStatePersistence()
+    initCalcResetLinks()
+    saveCalcState()
 })
 
 
@@ -382,26 +521,6 @@ btn.innerText = "Kopiuj komunikat do CRM"
 
 }
 
-document.addEventListener("DOMContentLoaded", function(){
-
-    if(parametryWybrane.length > 0){
-
-        const input = document.getElementById("parametry_input")
-        input.value = parametryWybrane.join(", ")
-
-        const box = document.getElementById("parametry_box")
-        const btn = document.getElementById("btn_parametry")
-
-        box.style.display = "block"
-
-        // 🔥 TO DODAJ
-        btn.innerText = "Ukryj parametry"
-        btn.classList.add("hide")
-
-        renderParametry()
-    }
-
-})
 </script>
 
 {% set show_crm_panel = (not wynik) or (wynik and not wynik.komunikat) %}

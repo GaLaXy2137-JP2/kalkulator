@@ -90,6 +90,123 @@ const parametryList = {{ parametry_lista | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
 const editMode = {{ edit_mode | default(false) | tojson | safe }}
+const DILUTION_STATE_KEY = "dilutionPageState"
+
+function isReloadNavigation(){
+const navEntry = performance.getEntriesByType("navigation")[0]
+return navEntry ? navEntry.type === "reload" : false
+}
+
+function getCurrentDilutionState(){
+return {
+objetosc: document.getElementById("sample_volume")?.value || "",
+profil1: document.getElementById("profil1_input")?.value || "",
+profil2: document.getElementById("profil2_input")?.value || "",
+profil2Visible: Boolean(document.getElementById("profil2_input")?.value.trim()),
+parametryInput: document.getElementById("parametry_input")?.value || "",
+parametryBoxOpen: document.getElementById("parametry_box")?.style.display === "block",
+hemolysis: document.getElementById("hemolysis_hidden")?.value || "none",
+lipemia: document.getElementById("lipemia_hidden")?.value || "none",
+icterus: document.getElementById("icterus_hidden")?.value || "absent"
+}
+}
+
+function saveDilutionState(){
+if(leftPanelLocked) return
+sessionStorage.setItem(DILUTION_STATE_KEY, JSON.stringify(getCurrentDilutionState()))
+}
+
+function clearDilutionState(){
+sessionStorage.removeItem(DILUTION_STATE_KEY)
+sessionStorage.removeItem("dilutionLeftPanelScroll")
+}
+
+function applyDilutionHilState(state){
+[
+    ["hemolysis_hidden", state.hemolysis || "none"],
+    ["lipemia_hidden", state.lipemia || "none"],
+    ["icterus_hidden", state.icterus || "absent"]
+].forEach(([hiddenId, value]) => {
+    const hiddenInput = document.getElementById(hiddenId)
+    if(!hiddenInput) return
+
+    hiddenInput.value = value
+
+    const group = document.querySelector(`.hil_switch[data-hidden-input="${hiddenId}"]`)
+    if(!group) return
+
+    group.querySelectorAll("button").forEach(button => {
+        button.classList.toggle("active", button.dataset.value === value)
+    })
+})
+}
+
+function restoreDilutionState(){
+if(!isReloadNavigation()) return false
+
+const rawState = sessionStorage.getItem(DILUTION_STATE_KEY)
+if(!rawState) return false
+
+try {
+    const state = JSON.parse(rawState)
+
+    const volumeInput = document.getElementById("sample_volume")
+    const profil1Input = document.getElementById("profil1_input")
+    const profil2Input = document.getElementById("profil2_input")
+    const profil2Slot = document.getElementById("profil2_slot")
+    const profil2Box = document.getElementById("profil2_box")
+    const parametryInput = document.getElementById("parametry_input")
+    const parametryBox = document.getElementById("parametry_box")
+    const parametryButton = document.getElementById("btn_parametry")
+
+    if(volumeInput) volumeInput.value = state.objetosc || ""
+    if(profil1Input) profil1Input.value = state.profil1 || ""
+    if(profil2Input) profil2Input.value = state.profil2 || ""
+    if(parametryInput) parametryInput.value = state.parametryInput || ""
+
+    if(profil2Slot && profil2Box){
+        const showProfile2 = Boolean((state.profil2 || "").trim()) || Boolean(state.profil2Visible)
+        profil2Slot.hidden = showProfile2
+        profil2Slot.style.display = showProfile2 ? "none" : "flex"
+        profil2Box.hidden = !showProfile2
+        profil2Box.style.display = showProfile2 ? "flex" : "none"
+    }
+
+    if(parametryBox && parametryButton){
+        const showParametry = Boolean((state.parametryInput || "").trim()) || Boolean(state.parametryBoxOpen)
+        parametryBox.style.display = showParametry ? "block" : "none"
+        parametryButton.innerText = showParametry ? "Ukryj parametry" : "Wybierz parametry"
+        parametryButton.classList.toggle("hide", showParametry)
+    }
+
+    applyDilutionHilState(state)
+    return true
+} catch(error){
+    sessionStorage.removeItem(DILUTION_STATE_KEY)
+    return false
+}
+}
+
+function bindDilutionStatePersistence(){
+    ["sample_volume", "profil1_input", "profil2_input"].forEach(inputId => {
+        const input = document.getElementById(inputId)
+        if(!input) return
+
+        input.addEventListener("input", saveDilutionState)
+        input.addEventListener("change", saveDilutionState)
+    })
+
+    const form = document.querySelector(".calc-shell")
+    if(form){
+        form.addEventListener("submit", saveDilutionState)
+    }
+}
+
+function initDilutionResetLinks(){
+document.querySelectorAll('.calc-reset-link[href="/rozcienczenia"]').forEach(link => {
+    link.addEventListener("click", clearDilutionState)
+})
+}
 
 function zamknijListe(listaId){
 let lista = document.getElementById(listaId)
@@ -123,6 +240,7 @@ document.getElementById(inputId).value = p
 zamknijListe(listaId)
 updateClearButton(inputId)
 renderParametry()
+saveDilutionState()
 }
 
 lista.appendChild(div)
@@ -164,6 +282,7 @@ document.getElementById("profil2_box").style.display = "flex"
 document.getElementById("profil2_input").focus()
 zamknijWszystkieListy()
 updateClearButton("profil2_input")
+saveDilutionState()
 }
 
 function usunProfil2(){
@@ -177,6 +296,7 @@ document.getElementById("profil2_slot").hidden = false
 document.getElementById("profil2_slot").style.display = "flex"
 updateClearButton("profil2_input")
 renderParametry()
+saveDilutionState()
 }
 
 function updateClearButton(inputId){
@@ -205,6 +325,7 @@ lista.dataset.open = "false"
 
 updateClearButton(inputId)
 renderParametry()
+saveDilutionState()
 }
 
 function initClearButtons(){
@@ -260,6 +381,7 @@ btn.innerText = "Ukryj parametry"
 btn.classList.add("hide")
 renderParametry()
 }
+saveDilutionState()
 }
 
 function renderParametry(){
@@ -352,6 +474,7 @@ button.addEventListener("click", function(){
 hiddenInput.value = this.dataset.value
 group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
 this.classList.add("active")
+saveDilutionState()
 })
 })
 })
@@ -377,6 +500,7 @@ if(clickedBtn) clickedBtn.classList.add("active")
 }
 
 input.value = current.join(", ")
+saveDilutionState()
 }
 
 function initSubmitButton(){
@@ -393,16 +517,10 @@ button.classList.add("is-disabled")
 }
 
 document.addEventListener("DOMContentLoaded", function(){
-renderParametry()
-initHilSwitches()
-initClearButtons()
-initProfile2()
-initProfileDropdowns()
-initSubmitButton()
-initLeftPanelScrollMemory()
+restoreDilutionState()
 
-if(parametryWybrane.length > 0){
 const input = document.getElementById("parametry_input")
+if(parametryWybrane.length > 0 && input && !input.value.trim()){
 const box = document.getElementById("parametry_box")
 const btn = document.getElementById("btn_parametry")
 
@@ -410,8 +528,18 @@ input.value = parametryWybrane.join(", ")
 box.style.display = "block"
 btn.innerText = "Ukryj parametry"
 btn.classList.add("hide")
-renderParametry()
 }
+
+renderParametry()
+initHilSwitches()
+initClearButtons()
+initProfile2()
+initProfileDropdowns()
+initSubmitButton()
+initLeftPanelScrollMemory()
+bindDilutionStatePersistence()
+initDilutionResetLinks()
+saveDilutionState()
 })
 </script>
 
