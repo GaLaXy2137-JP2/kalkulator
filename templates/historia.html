@@ -19,6 +19,10 @@
 {{ h.profil1 or (h.wynik.profil if h.wynik and h.wynik.profil else "Parametry") }}
 {%- endmacro %}
 
+{% macro record_barcode(h) -%}
+{{ h.barcode or "" }}
+{%- endmacro %}
+
 {% macro result_summary(h) -%}
 {% if h.modul == "kalkulator" and h.wynik %}
     {% if h.wynik.komunikat %}
@@ -163,6 +167,27 @@ body {
     font-weight: 700;
 }
 
+.history-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.history-barcode-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
 .history-top-pagination {
     display: inline-flex;
     align-items: center;
@@ -274,6 +299,18 @@ body {
     transition: 0.18s ease;
 }
 
+.history-search-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #dbe4ef;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
 .history-filter-btn {
     width: auto;
     min-width: 0;
@@ -283,9 +320,16 @@ body {
 }
 
 .history-filter-btn:hover,
-.history-sort-select:hover {
+.history-sort-select:hover,
+.history-search-input:hover,
+.history-search-input:focus {
     border-color: #93c5fd;
     background: #f8fbff;
+    outline: none;
+}
+
+.history-search-input:focus {
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .history-filter-btn.is-active {
@@ -942,7 +986,8 @@ body {
 [data-theme="dark"] .history-app .history-detail-row strong,
 [data-theme="dark"] .history-app .calc-panel-title,
 [data-theme="dark"] .history-app .history-page-btn,
-[data-theme="dark"] .history-app .history-sort-select {
+[data-theme="dark"] .history-app .history-sort-select,
+[data-theme="dark"] .history-app .history-search-input {
     color: var(--text) !important;
 }
 
@@ -971,6 +1016,18 @@ body {
 
 [data-theme="dark"] .history-app .history-list-empty {
     border-style: dashed !important;
+}
+
+[data-theme="dark"] .history-app .history-search-input {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-muted) !important;
+}
+
+[data-theme="dark"] .history-app .history-search-input:hover,
+[data-theme="dark"] .history-app .history-search-input:focus {
+    background: color-mix(in srgb, var(--bg-elevated) 88%, var(--green-soft) 12%) !important;
+    border-color: var(--green-border) !important;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12) !important;
 }
 </style>
 
@@ -1017,6 +1074,11 @@ body {
                             </select>
                         </section>
 
+                        <section class="history-filter-group">
+                            <label class="history-filter-label" for="historyBarcodeSearch">Barcode</label>
+                            <input type="text" id="historyBarcodeSearch" class="history-search-input" placeholder="Zacznij wpisywać barcode..." autocomplete="off">
+                        </section>
+
                         <section class="history-summary-card">
                             <strong id="historyVisibleCount">Widoczne rekordy: {{ [history_records | length, 10] | min }}</strong>
                         </section>
@@ -1040,11 +1102,17 @@ body {
                                 class="history-card"
                                 data-record-id="{{ loop.index0 }}"
                                 data-module="{{ h.modul | lower }}"
+                                data-barcode="{{ record_barcode(h) | lower }}"
                                 data-sort-key="{{ h.data }}T{{ h.godzina or '00:00' }}"
                             >
                                 <div class="history-card-top">
                                     <div class="history-card-main">
-                                        <span class="history-module-badge {{ h.modul | lower }}">{{ module_label(h.modul | lower) }}</span>
+                                        <div class="history-card-badges">
+                                            <span class="history-module-badge {{ h.modul | lower }}">{{ module_label(h.modul | lower) }}</span>
+                                            {% if record_barcode(h) %}
+                                            <span class="history-barcode-badge">{{ record_barcode(h) }}</span>
+                                            {% endif %}
+                                        </div>
                                         <h3 class="history-card-title">{{ record_profile(h) }}</h3>
                                     </div>
                                     <div class="history-card-date">
@@ -1090,6 +1158,7 @@ const historyRecords = {{ history_records | tojson | safe }};
 const historyState = {
     activeFilter: "all",
     activeSort: "newest",
+    barcodeQuery: "",
     activeRecordId: null,
     currentPage: 1,
     pageSize: 10
@@ -1099,6 +1168,7 @@ const HISTORY_STATE_KEY = "historyViewState";
 
 const moduleFilters = document.querySelectorAll(".history-filter-btn");
 const sortSelect = document.getElementById("historySortSelect");
+const barcodeSearchInput = document.getElementById("historyBarcodeSearch");
 const historyList = document.getElementById("historyList");
 const historyCards = Array.from(document.querySelectorAll(".history-card"));
 const historyCounter = document.getElementById("historyCounter");
@@ -1117,6 +1187,7 @@ function saveHistoryState() {
     sessionStorage.setItem(HISTORY_STATE_KEY, JSON.stringify({
         activeFilter: historyState.activeFilter,
         activeSort: historyState.activeSort,
+        barcodeQuery: historyState.barcodeQuery,
         activeRecordId: historyState.activeRecordId,
         currentPage: historyState.currentPage
     }));
@@ -1135,6 +1206,7 @@ function restoreHistoryState() {
 
         historyState.activeFilter = validFilters.has(state.activeFilter) ? state.activeFilter : "all";
         historyState.activeSort = validSorts.has(state.activeSort) ? state.activeSort : "newest";
+        historyState.barcodeQuery = typeof state.barcodeQuery === "string" ? state.barcodeQuery : "";
         historyState.activeRecordId = state.activeRecordId ? String(state.activeRecordId) : null;
         historyState.currentPage = Number.isFinite(Number(state.currentPage)) && Number(state.currentPage) > 0
             ? Number(state.currentPage)
@@ -1146,6 +1218,10 @@ function restoreHistoryState() {
 
 function syncHistoryControls() {
     sortSelect.value = historyState.activeSort;
+
+    if (barcodeSearchInput) {
+        barcodeSearchInput.value = historyState.barcodeQuery;
+    }
 
     moduleFilters.forEach((button) => {
         const active = button.dataset.filter === historyState.activeFilter;
@@ -1394,6 +1470,9 @@ function getMetadataMarkup(record) {
 
     rows.push(`<div class="history-detail-row"><span>Data i godzina</span><strong>${escapeHtml(dateTime || "-")}</strong></div>`);
     rows.push(`<div class="history-detail-row"><span>Moduł</span><strong>${escapeHtml(getModuleMeta(record.modul).label)}</strong></div>`);
+    if (record.barcode) {
+        rows.push(`<div class="history-detail-row"><span>Barcode</span><strong>${escapeHtml(record.barcode)}</strong></div>`);
+    }
     rows.push(`<div class="history-detail-row"><span>Profil</span><strong>${escapeHtml(getRecordProfile(record))}</strong></div>`);
 
     if (record.profil2) {
@@ -1415,6 +1494,7 @@ function getMetadataMarkup(record) {
 function getReopenUrl(record) {
     if (record.modul === "kalkulator") {
         const params = new URLSearchParams({
+            barcode: record.barcode || "",
             objetosc: record.objetosc || "",
             profil1: record.profil1 || "",
             profil2: record.profil2 || "",
@@ -1576,10 +1656,13 @@ function applyFilters() {
     const sortedCards = sortCards();
     const filteredCards = [];
     const totalRecordsCount = historyCards.length;
+    const barcodeQuery = historyState.barcodeQuery.trim().toLowerCase();
 
     sortedCards.forEach((card) => {
         const matchesModule = historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter;
-        if (matchesModule) {
+        const matchesBarcode = !barcodeQuery || (card.dataset.barcode || "").includes(barcodeQuery);
+
+        if (matchesModule && matchesBarcode) {
             filteredCards.push(card);
         }
 
@@ -1649,9 +1732,22 @@ sortSelect.addEventListener("change", (event) => {
     applyFilters();
 });
 
+if (barcodeSearchInput) {
+    barcodeSearchInput.addEventListener("input", (event) => {
+        historyState.barcodeQuery = event.target.value || "";
+        historyState.currentPage = 1;
+        applyFilters();
+    });
+}
+
 historyPaginationControls.forEach((button) => {
     button.addEventListener("click", () => {
-        const visibleCards = historyCards.filter((card) => historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter);
+        const barcodeQuery = historyState.barcodeQuery.trim().toLowerCase();
+        const visibleCards = historyCards.filter((card) => {
+            const matchesModule = historyState.activeFilter === "all" || card.dataset.module === historyState.activeFilter;
+            const matchesBarcode = !barcodeQuery || (card.dataset.barcode || "").includes(barcodeQuery);
+            return matchesModule && matchesBarcode;
+        });
         const totalPages = Math.max(1, Math.ceil(visibleCards.length / historyState.pageSize));
 
         if (button.dataset.direction === "prev") {

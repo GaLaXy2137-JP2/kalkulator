@@ -62,7 +62,7 @@ def mapuj_kolumny_hil(dostepne_kolumny):
     }
 
 
-def dolacz_hil_do_wyniku(wynik, hemolysis=None, lipemia=None, icterus=None):
+def dolacz_hil_do_wyniku(wynik, hemolysis=None, lipemia=None, icterus=None, barcode=None):
     if isinstance(wynik, dict):
         payload = dict(wynik)
     elif wynik is None:
@@ -75,11 +75,16 @@ def dolacz_hil_do_wyniku(wynik, hemolysis=None, lipemia=None, icterus=None):
         "lipemia": lipemia or "",
         "icterus": icterus or "",
     }
+
+    payload["_meta"] = {
+        "barcode": barcode or "",
+    }
     return payload
 
 
 def zbuduj_select_historii(dostepne_kolumny):
     hil_kolumny = mapuj_kolumny_hil(dostepne_kolumny)
+    barcode_select = "barcode" if "barcode" in dostepne_kolumny else "NULL AS barcode"
 
     select_hil = []
     for nazwa in ("hemolysis", "lipemia", "icterus"):
@@ -90,11 +95,11 @@ def zbuduj_select_historii(dostepne_kolumny):
             select_hil.append(f"NULL AS {nazwa}")
 
     return """
-        SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, {hil_select}
+        SELECT data, godzina, modul, objetosc, profil1, profil2, parametry, wynik, {barcode_select}, {hil_select}
         FROM historia
         ORDER BY data DESC, godzina DESC
         LIMIT 100
-    """.format(hil_select=", ".join(select_hil))
+    """.format(barcode_select=barcode_select, hil_select=", ".join(select_hil))
 
 
 def pobierz_biezacy_czas():
@@ -109,7 +114,7 @@ def pobierz_biezacy_czas():
 # ZAPIS HISTORII
 # =========================
 
-def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None, hemolysis=None, lipemia=None, icterus=None):
+def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None, morfologia=None, hemolysis=None, lipemia=None, icterus=None, barcode=None):
 
     conn = None
     cur = None
@@ -129,14 +134,20 @@ def zapisz_historia_db(modul, objetosc, profil1, profil2, parametry, wynik=None,
 
         dostepne_kolumny = pobierz_kolumny_historia(cur)
         hil_kolumny = mapuj_kolumny_hil(dostepne_kolumny)
+        barcode_column = "barcode" if "barcode" in dostepne_kolumny else None
 
         parametry_json = json.dumps(parametry) if parametry else json.dumps([])
         brakuje_kolumn_hil = any(kolumna is None for kolumna in hil_kolumny.values())
-        wynik_payload = dolacz_hil_do_wyniku(wynik, hemolysis, lipemia, icterus) if brakuje_kolumn_hil else (wynik if wynik else {})
+        wynik_wymaga_meta = brakuje_kolumn_hil or barcode_column is None
+        wynik_payload = dolacz_hil_do_wyniku(wynik, hemolysis, lipemia, icterus, barcode) if wynik_wymaga_meta else (wynik if wynik else {})
         wynik_json = json.dumps(wynik_payload)
 
         kolumny = ["data", "godzina", "modul", "objetosc", "profil1", "profil2", "parametry", "wynik"]
         wartosci = [data, godzina, modul, objetosc, profil1, profil2, parametry_json, wynik_json]
+
+        if barcode_column:
+            kolumny.append(barcode_column)
+            wartosci.append(barcode)
 
         wartosci_hil = {
             "hemolysis": hemolysis,

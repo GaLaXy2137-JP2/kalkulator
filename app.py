@@ -160,8 +160,11 @@ def normalize_json_value(value):
     return value
 
 
-def build_edit_query(base_path, objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus):
+def build_edit_query(base_path, objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus, barcode=None):
     query = {"edit": "1"}
+
+    if barcode:
+        query["barcode"] = barcode
 
     if objetosc not in (None, ""):
         query["objetosc"] = str(objetosc)
@@ -276,6 +279,7 @@ def policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis="none", lipe
 @app.get("/", response_class=HTMLResponse)
 def strona(request: Request):
 
+    barcode = request.query_params.get("barcode", "")
     objetosc = request.query_params.get("objetosc")
     profil1 = request.query_params.get("profil1")
     profil2 = request.query_params.get("profil2")
@@ -327,12 +331,14 @@ def strona(request: Request):
                 hil["hemolysis"],
                 hil["lipemia"],
                 hil["icterus"],
+                barcode,
             ),
             "request": request,
             "profile": lista_profili(),
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),
             "wynik": wynik,
+            "barcode": barcode,
             "objetosc": objetosc,
             "profil1": profil1,
             "profil2": profil2,
@@ -340,6 +346,7 @@ def strona(request: Request):
             "hemolysis": hil["hemolysis"],
             "lipemia": hil["lipemia"],
             "icterus": hil["icterus"],
+            "from_history": from_history,
             "left_panel_locked": left_panel_locked,
             "edit_mode": edit_mode,
         }
@@ -352,6 +359,7 @@ def strona(request: Request):
 @app.post("/", response_class=HTMLResponse)  
 def oblicz(  
     request: Request,  
+    barcode: str = Form(""),
     objetosc: int = Form(...),  
     profil1: str = Form(""),  
     profil2: str = Form(""),  
@@ -377,6 +385,7 @@ def oblicz(
         hemolysis,
         lipemia,
         icterus,
+        barcode,
     )
   
     zapisz_historia_db(
@@ -386,6 +395,7 @@ def oblicz(
     profil2,
     parametry_wybrane,
     wynik,
+    barcode=barcode,
     hemolysis=hemolysis,
     lipemia=lipemia,
     icterus=icterus,
@@ -401,6 +411,7 @@ def oblicz(
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),  
             "wynik": wynik,  
+            "barcode": barcode,
             "objetosc": objetosc,  
             "profil1": profil1,  
             "profil2": profil2, 
@@ -606,8 +617,10 @@ def historia(request: Request):
                     pass
 
                 hil_meta = {}
+                record_meta = {}
                 if isinstance(wynik_value, dict):
                     hil_meta = wynik_value.pop("_hil", {}) or {}
+                    record_meta = wynik_value.pop("_meta", {}) or {}
 
                 dane.append(normalize_json_value({
                     "data": str(r[0]),
@@ -618,9 +631,10 @@ def historia(request: Request):
                     "profil2": r[5],
                     "parametry": parametry_value if parametry_value is not None else [],
                     "wynik": wynik_value if wynik_value is not None else {},
-                    "hemolysis": r[8] if len(r) > 8 and r[8] is not None else hil_meta.get("hemolysis", ""),
-                    "lipemia": r[9] if len(r) > 9 and r[9] is not None else hil_meta.get("lipemia", ""),
-                    "icterus": r[10] if len(r) > 10 and r[10] is not None else hil_meta.get("icterus", ""),
+                    "barcode": r[8] if len(r) > 8 and r[8] is not None else record_meta.get("barcode", ""),
+                    "hemolysis": r[9] if len(r) > 9 and r[9] is not None else hil_meta.get("hemolysis", ""),
+                    "lipemia": r[10] if len(r) > 10 and r[10] is not None else hil_meta.get("lipemia", ""),
+                    "icterus": r[11] if len(r) > 11 and r[11] is not None else hil_meta.get("icterus", ""),
                 }))
 
             except Exception as row_error:
@@ -635,9 +649,10 @@ def historia(request: Request):
                     "profil2": r[5] if len(r) > 5 else "",
                     "parametry": r[6] if len(r) > 6 else [],
                     "wynik": r[7] if len(r) > 7 else {},
-                    "hemolysis": r[8] if len(r) > 8 and r[8] is not None else "",
-                    "lipemia": r[9] if len(r) > 9 and r[9] is not None else "",
-                    "icterus": r[10] if len(r) > 10 and r[10] is not None else "",
+                    "barcode": r[8] if len(r) > 8 and r[8] is not None else "",
+                    "hemolysis": r[9] if len(r) > 9 and r[9] is not None else "",
+                    "lipemia": r[10] if len(r) > 10 and r[10] is not None else "",
+                    "icterus": r[11] if len(r) > 11 and r[11] is not None else "",
                 }))
 
         return templates.TemplateResponse(
