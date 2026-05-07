@@ -5,7 +5,7 @@ import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from silnik.hil import get_adjusted_volume, get_hil_multiplier
+from silnik.hil import filter_available_params, get_adjusted_volume, get_hil_multiplier
 from app import policz
 
 
@@ -30,6 +30,15 @@ class HilNormalizationTests(unittest.TestCase):
 
         self.assertEqual(cholesterol["potrzebne_ul"], 59.1)
         self.assertEqual(triglycerides["potrzebne_ul"], 52.6)
+
+    def test_lipemia_blocks_crp_in_available_parameters(self):
+        self.assertEqual(filter_available_params(["CRP", "ALT"], lipemia="mild"), ["ALT"])
+        self.assertEqual(filter_available_params(["CRP"], lipemia="high"), [])
+
+    def test_lipemia_blocks_crp_in_calculation(self):
+        wynik = policz(80, "", "", ["CRP"], lipemia="mild")
+
+        self.assertEqual(wynik["komunikat"], "Brak wybranych parametrów")
 
 
 if __name__ == "__main__":

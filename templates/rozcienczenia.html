@@ -87,10 +87,40 @@ Rozcieńczenie z całej próbki:
 const profileList = {{ profile | tojson }}
 const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
+const hilParamBlockRules = {{ hil_param_block_rules | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
 const editMode = {{ edit_mode | default(false) | tojson | safe }}
 const DILUTION_STATE_KEY = "dilutionPageState"
+
+function normalizeParamName(name){
+return String(name || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+}
+
+function getCurrentHilSelection(){
+return {
+hemolysis: document.getElementById("hemolysis_hidden")?.value || "none",
+lipemia: document.getElementById("lipemia_hidden")?.value || "none",
+icterus: document.getElementById("icterus_hidden")?.value || "absent"
+}
+}
+
+function getBlockedParametry(){
+const currentHil = getCurrentHilSelection()
+const blocked = new Set()
+
+hilParamBlockRules.forEach(rule => {
+if(rule.values.includes(currentHil[rule.condition])){
+rule.params.forEach(param => blocked.add(param))
+}
+})
+
+return blocked
+}
+
+function isParamBlocked(paramName){
+return getBlockedParametry().has(normalizeParamName(paramName))
+}
 
 function isReloadNavigation(){
 const navEntry = performance.getEntriesByType("navigation")[0]
@@ -389,11 +419,12 @@ let container = document.getElementById("parametry_box")
 if(!container) return
 container.innerHTML = ""
 
-const aktywneParametry = getSelectedParametry()
+const aktywneParametry = sanitizeSelectedParametry()
 const parametryZProfili = getProfileParams()
 
 parametryList
 .filter(p => p !== "ACTH")
+.filter(p => !isParamBlocked(p))
 .filter(p => !parametryZProfili.has(p))
 .forEach(p => {
 let btn = document.createElement("button")
@@ -413,6 +444,24 @@ container.appendChild(btn)
 
 function getSelectedParametry(){
 const input = document.getElementById("parametry_input")
+
+if(!input){
+return parametryWybrane.slice()
+}
+
+return input.value.split(",").map(x => x.trim()).filter(Boolean)
+}
+
+function sanitizeSelectedParametry(){
+const input = document.getElementById("parametry_input")
+const filtered = getSelectedParametry().filter(p => !isParamBlocked(p))
+
+if(input){
+input.value = filtered.join(", ")
+}
+
+return filtered
+}
 
 
 function getLeftPanelStack(){
@@ -443,14 +492,7 @@ function initLeftPanelScrollMemory(){
     panel.addEventListener("scroll", zapiszScrollLewegoPanelu)
     przywrocScrollLewegoPanelu()
 }
-if(!input || !input.value.trim()){
-return parametryWybrane.slice()
-}
 
-return input.value.split(",").map(x => x.trim()).filter(Boolean)
-}
-
-    zapiszScrollLewegoPanelu()
 function getProfileParams(){
 const selectedProfiles = [
 document.getElementById("profil1_input")?.value.trim(),
@@ -458,7 +500,7 @@ document.getElementById("profil2_input")?.value.trim()
 ].filter(Boolean)
 
 return new Set(
-selectedProfiles.flatMap(name => profileParamMap[name] || [])
+selectedProfiles.flatMap(name => (profileParamMap[name] || []).filter(p => !isParamBlocked(p)))
 )
 }
 
@@ -474,6 +516,7 @@ button.addEventListener("click", function(){
 hiddenInput.value = this.dataset.value
 group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
 this.classList.add("active")
+renderParametry()
 saveDilutionState()
 })
 })

@@ -6,12 +6,42 @@
 const profileList = {{ profile | tojson }}
 const profileParamMap = {{ profile_param_map | tojson | safe }}
 const parametryList = {{ parametry_lista | tojson | safe }}
+const hilParamBlockRules = {{ hil_param_block_rules | tojson | safe }}
 const parametryWybrane = {{ parametry_wybrane | default([]) | tojson | safe }}
 const leftPanelLocked = {{ left_panel_locked | default(false) | tojson | safe }}
 const editMode = {{ edit_mode | default(false) | tojson | safe }}
 const fromHistory = {{ from_history | default(false) | tojson | safe }}
 const CALC_STATE_KEY = "calcPageState"
 let barcodeToastTimer = null
+
+function normalizeParamName(name){
+return String(name || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+}
+
+function getCurrentHilSelection(){
+return {
+hemolysis: document.getElementById("hemolysis_hidden")?.value || "none",
+lipemia: document.getElementById("lipemia_hidden")?.value || "none",
+icterus: document.getElementById("icterus_hidden")?.value || "absent"
+}
+}
+
+function getBlockedParametry(){
+const currentHil = getCurrentHilSelection()
+const blocked = new Set()
+
+hilParamBlockRules.forEach(rule => {
+if(rule.values.includes(currentHil[rule.condition])){
+rule.params.forEach(param => blocked.add(param))
+}
+})
+
+return blocked
+}
+
+function isParamBlocked(paramName){
+return getBlockedParametry().has(normalizeParamName(paramName))
+}
 
 function isReloadNavigation(){
 const navEntry = performance.getEntriesByType("navigation")[0]
@@ -450,12 +480,13 @@ function renderParametry(){
     let container = document.getElementById("parametry_box")
     container.innerHTML = ""
 
-    const aktywneParametry = getSelectedParametry()
+    const aktywneParametry = sanitizeSelectedParametry()
     const parametryZProfili = getProfileParams()
 
     const wykluczone = ["ACTH"]
     parametryList
         .filter(p => !wykluczone.includes(p))
+        .filter(p => !isParamBlocked(p))
         .filter(p => !parametryZProfili.has(p))
         .forEach(p => {
 
@@ -479,11 +510,23 @@ function getSelectedParametry(){
 
     const input = document.getElementById("parametry_input")
 
-    if(!input || !input.value.trim()){
+    if(!input){
         return parametryWybrane.slice()
     }
 
     return input.value.split(",").map(x => x.trim()).filter(Boolean)
+}
+
+function sanitizeSelectedParametry(){
+
+    const input = document.getElementById("parametry_input")
+    const filtered = getSelectedParametry().filter(p => !isParamBlocked(p))
+
+    if(input){
+        input.value = filtered.join(", ")
+    }
+
+    return filtered
 }
 
 function getProfileParams(){
@@ -494,7 +537,7 @@ function getProfileParams(){
     ].filter(Boolean)
 
     return new Set(
-        selectedProfiles.flatMap(name => profileParamMap[name] || [])
+        selectedProfiles.flatMap(name => (profileParamMap[name] || []).filter(p => !isParamBlocked(p)))
     )
 }
 
@@ -516,6 +559,7 @@ function initHilSwitches(){
 
                 group.querySelectorAll("button").forEach(btn => btn.classList.remove("active"))
                 this.classList.add("active")
+                renderParametry()
                 saveCalcState()
             })
         })

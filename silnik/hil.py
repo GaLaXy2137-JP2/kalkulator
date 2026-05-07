@@ -89,6 +89,14 @@ ICTERUS_SEVERITY = {
     "present": 1.0,
 }
 
+PARAM_BLOCK_RULES = (
+    {
+        "condition": "lipemia",
+        "values": ("mild", "high"),
+        "params": ("crp",),
+    },
+)
+
 MAX_HIL_MULTIPLIER = 1.35
 DEBUG_HIL = os.getenv("HIL_DEBUG", "1") == "1"
 FORCE_HIL_MULTIPLIER = os.getenv("HIL_FORCE_MULTIPLIER")
@@ -108,11 +116,56 @@ def normalize_param_name(name):
     return _normalize_param(name)
 
 
+def get_param_block_rules():
+    return [
+        {
+            "condition": rule["condition"],
+            "values": list(rule["values"]),
+            "params": list(rule["params"]),
+        }
+        for rule in PARAM_BLOCK_RULES
+    ]
+
+
 def _normalize_choice(value, default):
     if not value:
         return default
 
     return str(value).strip().lower()
+
+
+def get_blocked_param_names(hemolysis=None, lipemia=None, icterus=None):
+    current_conditions = {
+        "hemolysis": _normalize_choice(hemolysis, "none"),
+        "lipemia": _normalize_choice(lipemia, "none"),
+        "icterus": _normalize_choice(icterus, "absent"),
+    }
+    blocked = set()
+
+    for rule in PARAM_BLOCK_RULES:
+        if current_conditions.get(rule["condition"]) in rule["values"]:
+            blocked.update(rule["params"])
+
+    return blocked
+
+
+def is_param_blocked(param_name, hemolysis=None, lipemia=None, icterus=None):
+    return _normalize_param(param_name) in get_blocked_param_names(
+        hemolysis,
+        lipemia,
+        icterus,
+    )
+
+
+def filter_available_params(param_names, hemolysis=None, lipemia=None, icterus=None):
+    if not param_names:
+        return []
+
+    return [
+        param_name
+        for param_name in param_names
+        if not is_param_blocked(param_name, hemolysis, lipemia, icterus)
+    ]
 
 
 def _condition_multiplier(param_name, severity_value, mapping):

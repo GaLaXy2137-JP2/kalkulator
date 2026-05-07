@@ -40,6 +40,7 @@ from silnik.kalkulator import (
     licz_zakres_excel,  
     zbuduj_liste_parametrow  
 )  
+from silnik.hil import filter_available_params, get_param_block_rules
   
 from silnik.rozcienczenia import policz_rozcienczenia  
 app = FastAPI()  
@@ -114,6 +115,10 @@ def lista_profili():
   
 def lista_parametrow():  
     return sorted(parametry.keys())  
+
+
+def filtruj_parametry_hil(parametry_lista, hemolysis="none", lipemia="none", icterus="absent"):
+    return filter_available_params(parametry_lista, hemolysis, lipemia, icterus)
 
 
 def pobierz_hil_z_query(request: Request):
@@ -193,7 +198,7 @@ def build_edit_query(base_path, objetosc, profil1, profil2, parametry_wybrane, h
 # PARAMETRY Z PROFILI  
 # =========================  
   
-def parametry_z_profili(profil1, profil2):  
+def parametry_z_profili(profil1, profil2, hemolysis="none", lipemia="none", icterus="absent"):  
   
     lista = []  
   
@@ -203,7 +208,12 @@ def parametry_z_profili(profil1, profil2):
     if profil2 in profile:  
         lista += profile[profil2]  
   
-    return list(dict.fromkeys(lista))  
+    return filtruj_parametry_hil(
+        list(dict.fromkeys(lista)),
+        hemolysis,
+        lipemia,
+        icterus,
+    )  
   
 # =========================  
 # LOGIKA KALKULATORA  
@@ -211,12 +221,15 @@ def parametry_z_profili(profil1, profil2):
   
 def policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis="none", lipemia="none", icterus="absent"):  
   
+    parametry_wybrane = filtruj_parametry_hil(parametry_wybrane, hemolysis, lipemia, icterus)
+
     lista = zbuduj_liste_parametrow(  
         profil1,  
         profil2,  
         parametry_wybrane,  
         profile  
     )  
+    lista = filtruj_parametry_hil(lista, hemolysis, lipemia, icterus)
   
     if not lista:  
         return {  
@@ -296,6 +309,12 @@ def strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
+    parametry_wybrane = filtruj_parametry_hil(
+        parametry_wybrane,
+        hil["hemolysis"],
+        hil["lipemia"],
+        hil["icterus"],
+    )
     from_history = czy_z_historii(request)
     edit_mode = from_history or request.query_params.get("edit") == "1"
     left_panel_locked = False
@@ -337,6 +356,7 @@ def strona(request: Request):
             "profile": lista_profili(),
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),
+            "hil_param_block_rules": get_param_block_rules(),
             "wynik": wynik,
             "barcode": barcode,
             "objetosc": objetosc,
@@ -373,6 +393,7 @@ def oblicz(
         parametry_wybrane = [p.strip() for p in parametry_input.split(",")]  
     else:  
         parametry_wybrane = []  
+    parametry_wybrane = filtruj_parametry_hil(parametry_wybrane, hemolysis, lipemia, icterus)
   
     wynik = policz(objetosc, profil1, profil2, parametry_wybrane, hemolysis, lipemia, icterus)  
 
@@ -410,6 +431,7 @@ def oblicz(
             "profile": lista_profili(),  
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),  
+            "hil_param_block_rules": get_param_block_rules(),
             "wynik": wynik,  
             "barcode": barcode,
             "objetosc": objetosc,  
@@ -446,6 +468,12 @@ def rozcienczenia_strona(request: Request):
         parametry_wybrane = []
 
     hil = pobierz_hil_z_query(request)
+    parametry_wybrane = filtruj_parametry_hil(
+        parametry_wybrane,
+        hil["hemolysis"],
+        hil["lipemia"],
+        hil["icterus"],
+    )
     from_history = czy_z_historii(request)
     edit_mode = from_history or request.query_params.get("edit") == "1"
     left_panel_locked = False
@@ -457,7 +485,13 @@ def rozcienczenia_strona(request: Request):
             objetosc_int = int(objetosc)
 
             lista = list(dict.fromkeys(
-                parametry_z_profili(profil1, profil2) + parametry_wybrane
+                parametry_z_profili(
+                    profil1,
+                    profil2,
+                    hil["hemolysis"],
+                    hil["lipemia"],
+                    hil["icterus"],
+                ) + parametry_wybrane
             ))
 
             wynik = policz_rozcienczenia(
@@ -489,6 +523,7 @@ def rozcienczenia_strona(request: Request):
             "profile": lista_profili(),
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),
+            "hil_param_block_rules": get_param_block_rules(),
             "wynik": wynik,
             "objetosc": objetosc,
             "profil1": profil1,
@@ -522,10 +557,11 @@ def oblicz_rozcienczenia(
         parametry_wybrane = [p.strip() for p in parametry_input.split(",")]
     else:
         parametry_wybrane = []
+    parametry_wybrane = filtruj_parametry_hil(parametry_wybrane, hemolysis, lipemia, icterus)
 
     # 🔥 połączenie profili + klikniętych parametrów
     lista = list(dict.fromkeys(
-        parametry_z_profili(profil1, profil2) + parametry_wybrane
+        parametry_z_profili(profil1, profil2, hemolysis, lipemia, icterus) + parametry_wybrane
     ))
 
     wynik = policz_rozcienczenia(
@@ -569,6 +605,7 @@ def oblicz_rozcienczenia(
             "profile": lista_profili(),
             "profile_param_map": profile,
             "parametry_lista": lista_parametrow(),  # 🔥 popraw też to
+            "hil_param_block_rules": get_param_block_rules(),
             "wynik": wynik,
             "objetosc": objetosc,
             "profil1": profil1,
