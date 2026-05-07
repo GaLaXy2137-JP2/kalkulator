@@ -605,7 +605,6 @@ padding:0 16px;
 
 <nav class="sidebar_nav" aria-label="Moduły">
 <a href="/" class="{% if request.url.path == '/' %}active{% endif %}"><span class="sidebar_link_label">Kalkulator</span><span class="sidebar_link_badge">01</span></a>
-<a href="/rozcienczenia" class="{% if request.url.path.startswith('/rozcienczenia') %}active{% endif %}"><span class="sidebar_link_label">Rozcieńczenia</span><span class="sidebar_link_badge">02</span></a>
 <a href="/ceny" class="{% if request.url.path.startswith('/ceny') %}active{% endif %}"><span class="sidebar_link_label">Ceny</span><span class="sidebar_link_badge">03</span></a>
 <a href="/historia" class="{% if request.url.path.startswith('/historia') %}active{% endif %}"><span class="sidebar_link_label">Historia</span><span class="sidebar_link_badge">04</span></a>
 </nav>
