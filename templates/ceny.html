@@ -1318,6 +1318,22 @@
         return null
     }
 
+    function isFluidProfile(profileName) {
+        return profileName === "Badanie płynu z jamy ciała" || profileName === "Badanie płynu z jamy ciała rozszerzone"
+    }
+
+    function formatStudyLabel(param, profileName) {
+        if (isFluidProfile(profileName)) {
+            return param.replace(/^p-/i, "")
+        }
+
+        return param
+    }
+
+    function getVisiblePerformedParams(params, profileName) {
+        return params.map(param => formatStudyLabel(param, profileName))
+    }
+
     function clearMorphologySelections() {
         MORFOLOGIA_PARAM_NAMES.forEach(param => selectedCheckboxParams.delete(param))
     }
@@ -1379,11 +1395,14 @@
             return 0
         }
 
+        const profileName = getSelectedProfile()
+
         container.innerHTML = params.map(param => {
             const activeClass = checkedParams.has(param) ? " active" : ""
+            const displayLabel = formatStudyLabel(param, profileName)
 
             return `
-                <button type="button" class="ceny-study-row${activeClass}" data-param="${escapeHtml(param)}">${escapeHtml(param)}</button>
+                <button type="button" class="ceny-study-row${activeClass}" data-param="${escapeHtml(param)}">${escapeHtml(displayLabel)}</button>
             `
         }).join("")
 
@@ -1583,6 +1602,7 @@
     function updatePreview() {
         const computation = buildComputation()
         const hasProfile = Boolean(computation.profileName)
+        const visiblePerformedParams = getVisiblePerformedParams(computation.performedParams, computation.profileName)
 
         wykonaneJsonInput.value = JSON.stringify(computation.performedParams)
 
@@ -1593,6 +1613,8 @@
         statIlosc.textContent = String(computation.totalCount)
         statWykonano.textContent = String(computation.doneCount)
         statProcent.textContent = formatPercent(computation.percent)
+
+        copyPriceBtn.dataset.performedParams = JSON.stringify(visiblePerformedParams)
 
         summaryTitle.textContent = `Cena końcowa: ${formatPrice(computation.final)}`
         finalPrice.textContent = formatPrice(computation.final)

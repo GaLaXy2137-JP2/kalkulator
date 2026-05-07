@@ -1243,6 +1243,18 @@ function toArray(value) {
     return Array.isArray(value) ? value.filter(Boolean) : [];
 }
 
+function isFluidProfileName(profileName) {
+    return profileName === "Badanie płynu z jamy ciała" || profileName === "Badanie płynu z jamy ciała rozszerzone";
+}
+
+function formatFluidParamLabel(param, profileName) {
+    if (isFluidProfileName(profileName)) {
+        return String(param || "").replace(/^p-/i, "");
+    }
+
+    return param;
+}
+
 function getModuleMeta(moduleName) {
     if (moduleName === "kalkulator") {
         return { label: "🧪 Kalkulator", className: "kalkulator" };
@@ -1454,13 +1466,14 @@ function getHilMarkup(record) {
 
 function getParamsMarkup(record) {
     const params = toArray(record.parametry);
+    const profileName = record.profil1 || record.wynik?.profil || "";
 
     if (!params.length) {
         return '<span class="history-tag">Brak dodatkowych parametrów</span>';
     }
 
     return params
-        .map((param) => `<span class="history-tag">${escapeHtml(param)}</span>`)
+        .map((param) => `<span class="history-tag">${escapeHtml(formatFluidParamLabel(param, profileName))}</span>`)
         .join("");
 }
 
